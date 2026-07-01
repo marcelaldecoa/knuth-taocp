@@ -1,0 +1,9 @@
+[package]
+name = "grader"
+version = "0.1.0"
+edition = "2021"
+description = "Staged grader for the TAOCP-in-Rust course (run via ./grade)"
+
+[[bin]]
+name = "grader"
+path = "src/main.rs"

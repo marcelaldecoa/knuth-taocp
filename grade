@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Grade wrapper — builds and runs the course grader.
+#   ./grade            progress overview
+#   ./grade 1          grade module 01
+#   ./grade verify     course self-check
+set -euo pipefail
+cd "$(dirname "$0")"
+exec cargo run -q -p grader -- "$@"

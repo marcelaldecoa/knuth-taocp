@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = ["grader", "reference", "labs/*"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+
+[profile.dev]
+# Labs run property tests over many inputs; a little optimization keeps
+# grading fast without losing debug assertions.
+opt-level = 1
+
+[profile.test]
+opt-level = 1
