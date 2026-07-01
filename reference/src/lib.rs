@@ -1,0 +1,20 @@
+//! Reference implementations for the TAOCP-in-Rust course.
+//!
+//! One module per course module. Each algorithm keeps Knuth's step labels
+//! (E1, E2, ...) as comments in a step-faithful implementation; idiomatic
+//! variants may follow. Unit tests reproduce worked examples from the text.
+//!
+//! Students: don't read these until you've earned the stage. `./grade` never
+//! needs you to open this crate — it exists so the course can prove its own
+//! test suites are satisfiable (`./grade verify`).
+
+pub mod m01_algorithms;
+pub mod m02_math;
+pub mod m03_structures;
+pub mod m04_random;
+pub mod m05_arithmetic;
+pub mod m06_sorting;
+pub mod m07_searching;
+pub mod m08_generation;
+pub mod m09_backtrack;
+pub mod m10_sat;
