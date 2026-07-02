@@ -550,6 +550,122 @@ pub const MODULES: &[Module] = &[
             },
         ],
     },
+    Module {
+        id: "19",
+        dir: "module-19-float",
+        lab_crate: "lab-19-float",
+        title: "Floating-Point Arithmetic",
+        source: "Vol. 2, §4.2",
+        stages: &[
+            Stage {
+                test_target: "stage_01_representation",
+                title: "Representation: pack, unpack, normalize",
+                algorithm: "§4.2.1",
+            },
+            Stage {
+                test_target: "stage_02_add_sub",
+                title: "Addition and subtraction with rounding",
+                algorithm: "Algorithm 4.2.1A",
+            },
+            Stage {
+                test_target: "stage_03_mul_div",
+                title: "Multiplication and division",
+                algorithm: "Algorithm 4.2.1M",
+            },
+            Stage {
+                test_target: "stage_04_error_analysis",
+                title: "Error analysis: ulps and compensated summation",
+                algorithm: "§4.2.2",
+            },
+        ],
+    },
+    Module {
+        id: "20",
+        dir: "module-20-networks",
+        lab_crate: "lab-20-networks",
+        title: "Optimum Sorting and Sorting Networks",
+        source: "Vol. 3, §5.3",
+        stages: &[
+            Stage {
+                test_target: "stage_01_decision_trees",
+                title: "Comparison lower bounds by decision trees",
+                algorithm: "§5.3.1",
+            },
+            Stage {
+                test_target: "stage_02_merge_insertion",
+                title: "Merge insertion (Ford–Johnson)",
+                algorithm: "Algorithm 5.3.1M",
+            },
+            Stage {
+                test_target: "stage_03_networks",
+                title: "Sorting networks: Batcher's odd-even merge",
+                algorithm: "Algorithm 5.3.4M",
+            },
+            Stage {
+                test_target: "stage_04_zero_one",
+                title: "The zero-one principle and bitonic sorting",
+                algorithm: "Theorem 5.3.4Z",
+            },
+        ],
+    },
+    Module {
+        id: "21",
+        dir: "module-21-boolean",
+        lab_crate: "lab-21-boolean",
+        title: "Boolean Functions and Optimal Evaluation",
+        source: "Vol. 4A, §7.1.1–7.1.2",
+        stages: &[
+            Stage {
+                test_target: "stage_01_truth_tables",
+                title: "Truth tables and normal forms",
+                algorithm: "§7.1.1",
+            },
+            Stage {
+                test_target: "stage_02_boolean_chains",
+                title: "Boolean chains and combinational cost",
+                algorithm: "§7.1.2",
+            },
+            Stage {
+                test_target: "stage_03_median_threshold",
+                title: "Median, threshold, and symmetric functions",
+                algorithm: "§7.1.1",
+            },
+            Stage {
+                test_target: "stage_04_optimal_chains",
+                title: "Optimum chains for small functions",
+                algorithm: "§7.1.2",
+            },
+        ],
+    },
+    Module {
+        id: "22",
+        dir: "module-22-hamilton",
+        lab_crate: "lab-22-hamilton",
+        title: "Hamiltonian Paths and Constraint Satisfaction",
+        source: "Toward Vol. 4C, §7.2.2.4 (pre-fascicles)",
+        stages: &[
+            Stage {
+                test_target: "stage_01_backtrack",
+                title: "Hamiltonian paths by backtracking",
+                algorithm: "§7.2.2.4",
+            },
+            Stage {
+                test_target: "stage_02_warnsdorff",
+                title: "Warnsdorff's heuristic: the knight's tour",
+                algorithm: "§7.2.2.4",
+            },
+            Stage {
+                test_target: "stage_03_gray_cycles",
+                title: "Hamiltonian cycles on the hypercube are Gray codes",
+                algorithm: "§7.2.1.1 ↔ §7.2.2.4",
+            },
+            Stage {
+                test_target: "stage_04_held_karp",
+                title: "Held–Karp: shortest Hamiltonian path by bitmask DP",
+                algorithm: "§7.2.2.4 (dynamic programming)",
+            },
+        ],
+    },
 ];
 
 const MODULE_10: Module = Module {

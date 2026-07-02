@@ -5,7 +5,7 @@ doubt, copy its shape.
 
 ## The contract
 
-Each module `NN` with directory `module-NN-<slug>` ships four things:
+Each module `NN` with directory `module-NN-<slug>` ships six things:
 
 1. **Lesson** — `course/module-NN-<slug>/README.md`. Self-contained theory:
    a student *without* the books must be able to complete the module from the
@@ -37,6 +37,26 @@ Each module `NN` with directory `module-NN-<slug>` ships four things:
      `grader/src/manifest.rs`. Tests import the lab crate by its package
      name (e.g. `use lab_06_sorting::*;`).
    - `src/lib.rs` and `Cargo.toml` are pre-generated plumbing — don't touch.
+5. **Hints** — `course/module-NN-<slug>/hints.md`. Graduated hints the grader
+   surfaces via `./grade N --stage K --hint J`. One `## Stage K: <title>`
+   heading per stage, then a numbered list of 3 hints in increasing
+   specificity: (1) a conceptual nudge / which theorem to reach for,
+   (2) the approach or data structure, (3) concrete pseudocode or the key
+   line — never the full solution. Parser: `## Stage <k>` headers, then
+   lines matching `^<n>.` are the hints in order.
+6. **Walkthrough** — `course/module-NN-<slug>/WALKTHROUGH.md`. Read *after* a
+   stage is green: a design commentary on the reference implementation —
+   why it's shaped that way, the invariant that makes it correct, the
+   idioms worth stealing, and how it differs from a naive version. Prose,
+   one short section per stage. This is the "compare with Knuth's answer"
+   step made explicit; it must not be needed to pass, only to deepen.
+
+Optionally, flagship modules (those whose analysis predicts a growth curve —
+sorting, searching, arithmetic, external sorting) add
+`labs/module-NN-<slug>/examples/bench.rs`: a std-only `fn main()` that times
+the public API at growing n and prints an `n | time | ratio` table, so
+`./grade bench N` can show the asymptotics the lesson derives. Use
+`std::time::Instant` only; no external crates.
 
 ## The invariants (checked by `./grade verify`)
 
@@ -49,6 +69,18 @@ Each module `NN` with directory `module-NN-<slug>` ships four things:
 - `cargo test -p taocp-reference mNN` is green.
 - Stage tests run in ≲ 30 seconds each on a laptop (profiles already set
   `opt-level = 1` for tests).
+
+Mutation testing (do the suites actually *bite*?) is not part of the fast CI
+gate — it's slow. Run it on demand from the Actions tab (the "mutation
+testing" workflow), or locally against a single module while developing:
+
+```bash
+cargo install cargo-mutants
+cargo mutants --package taocp-reference --file '*m06*' -- --workspace --features solutions
+```
+
+A surviving mutant means a seeded bug in that reference module slipped past
+every stage test — strengthen the test until it dies.
 
 ## Test design (this is a grading system, make it bite)
 

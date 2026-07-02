@@ -7,3 +7,6 @@ description = "Staged grader for the TAOCP-in-Rust course (run via ./grade)"
 [[bin]]
 name = "grader"
 path = "src/main.rs"
+
+[features]
+solutions = []

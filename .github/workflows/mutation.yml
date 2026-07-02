@@ -1,0 +1,56 @@
+name: mutation testing
+
+# Mutation testing proves the stage suites actually *bite*: cargo-mutants
+# seeds bugs into the reference implementations and checks that some stage
+# test catches each one. A surviving mutant is a hole in a test suite.
+#
+# This is deliberately NOT on push/pull_request: with 22 reference modules it
+# generates hundreds of mutants, each re-running the workspace tests, so a
+# full sweep takes far too long to gate every commit. Run it on demand from
+# the Actions tab, or let the weekly schedule report drift. Both are bounded
+# by hard timeouts so a mutated infinite loop can never hang the runner.
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Which reference module(s) to mutate (regex for --file), blank = all"
+        required: false
+        default: ""
+  schedule:
+    # Mondays 06:00 UTC.
+    - cron: "0 6 * * 1"
+
+jobs:
+  mutants:
+    name: seed bugs, confirm the suites catch them
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - name: Cache cargo-mutants
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-mutants
+          key: cargo-mutants-bin
+      - name: Install cargo-mutants
+        run: cargo install cargo-mutants --locked || true
+      - name: Mutate the reference; run lab suites (with solutions) against it
+        # Only mutate taocp-reference. Forwarded args run the whole workspace's
+        # tests with --features solutions, so the lab suites exercise the
+        # mutated reference. --timeout caps any single mutant (e.g. one that
+        # turns a loop condition into an infinite loop).
+        run: >
+          cargo mutants --no-shuffle -j 2 --timeout 120
+          --package taocp-reference
+          ${{ github.event.inputs.package && format('--file {0}', github.event.inputs.package) || '' }}
+          -- --workspace --features solutions
+      - name: Upload mutants report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutants-report
+          path: mutants.out/
+          if-no-files-found: ignore

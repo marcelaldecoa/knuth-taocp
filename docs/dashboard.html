@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAOCP in Rust — course map</title>
+<style>
+  :root {
+    --ink: #211b17;
+    --ink-soft: #4b4137;
+    --paper: #ebe6db;
+    --plate: #f6f2ea;
+    --plate-edge: #ddd4c4;
+    --oxblood: #7c1d24;
+    --oxblood-deep: #5e141a;
+    --gold: #a67c2e;
+    --done: #3f6b45;
+    --muted: #8a8072;
+    --serif: "Palatino Linotype", Palatino, "Book Antiqua", "URW Palladio L", Georgia, serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    /* faint laid-paper texture from two hairline gradients */
+    background-image:
+      repeating-linear-gradient(90deg, rgba(124,29,36,0.015) 0 1px, transparent 1px 42px);
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: clamp(1.25rem, 4vw, 3rem); }
+
+  /* ---- masthead ---- */
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.4rem; margin-bottom: 2.2rem; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--oxblood);
+    margin: 0 0 0.6rem;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(1.9rem, 5.2vw, 3.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 0.5rem;
+  }
+  h1 em { font-style: italic; color: var(--oxblood); }
+  .lede {
+    font-family: var(--serif);
+    font-size: clamp(1rem, 2.1vw, 1.18rem);
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  /* ---- progress meter ---- */
+  .meter { margin-top: 1.5rem; display: grid; gap: 0.6rem; }
+  .meter-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .meter-count { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.9rem; color: var(--ink-soft); }
+  .meter-count b { color: var(--ink); font-size: 1.05rem; }
+  .bar {
+    height: 12px; background: #ded5c6; border: 1px solid var(--plate-edge);
+    border-radius: 999px; overflow: hidden;
+  }
+  .bar > span {
+    display: block; height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--oxblood), var(--gold));
+    transition: width 0.5s ease;
+  }
+  .meter-actions { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+  .linkbtn {
+    font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em;
+    color: var(--oxblood); background: none; border: none; cursor: pointer;
+    padding: 0; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .linkbtn:hover { color: var(--oxblood-deep); }
+  .hint {
+    font-family: var(--sans); font-size: 0.8rem; color: var(--muted);
+  }
+
+  /* ---- shelves ---- */
+  .shelf { margin: 2.4rem 0; }
+  .shelf-label {
+    display: flex; align-items: baseline; gap: 0.8rem; margin-bottom: 1rem;
+    border-bottom: 1px solid var(--plate-edge); padding-bottom: 0.4rem;
+  }
+  .shelf-vol {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--oxblood); font-weight: 600;
+  }
+  .shelf-name { font-family: var(--serif); font-style: italic; color: var(--ink-soft); font-size: 1.02rem; }
+  .shelf-stat { margin-left: auto; font-family: var(--mono); font-size: 0.74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+
+  .card {
+    background: var(--plate);
+    border: 1px solid var(--plate-edge);
+    border-left: 3px solid var(--oxblood);
+    border-radius: 3px;
+    padding: 1rem 1.05rem 0.85rem;
+    display: flex; flex-direction: column; gap: 0.55rem;
+  }
+  .card.done { border-left-color: var(--done); }
+  .card-top { display: flex; align-items: flex-start; gap: 0.7rem; }
+  .modnum {
+    font-family: var(--mono); font-size: 0.78rem; font-weight: 600;
+    color: #fff; background: var(--oxblood);
+    padding: 0.12rem 0.42rem; border-radius: 3px; flex: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .card.done .modnum { background: var(--done); }
+  .card-head { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+  .card-title { font-family: var(--serif); font-weight: 600; font-size: 1.06rem; line-height: 1.15; }
+  .card-src { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+  .ring { margin-left: auto; flex: none; }
+
+  .pips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.15rem; }
+  .pip {
+    font-family: var(--mono); font-size: 0.68rem; font-variant-numeric: tabular-nums;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: #efe8db; border: 1px solid var(--plate-edge); color: var(--ink-soft);
+    border-radius: 3px; padding: 0.2rem 0.42rem; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    text-align: left;
+  }
+  .pip:hover { border-color: var(--oxblood); }
+  .pip[aria-pressed="true"] {
+    background: var(--done); border-color: var(--done); color: #fff;
+  }
+  .pip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex: none; }
+  .pip[aria-pressed="true"] .dot { background: #fff; }
+  .pip:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }
+
+  .stagelist { margin: 0.1rem 0 0; padding: 0; list-style: none; display: none; }
+  .stagelist.open { display: block; }
+  .stagelist li {
+    font-size: 0.82rem; color: var(--ink-soft); padding: 0.18rem 0 0.18rem 1.4rem;
+    position: relative; border-top: 1px dotted var(--plate-edge);
+  }
+  .stagelist li::before {
+    content: attr(data-n); position: absolute; left: 0; top: 0.18rem;
+    font-family: var(--mono); font-size: 0.7rem; color: var(--muted);
+  }
+  .stagelist li.on { color: var(--done); text-decoration: line-through; text-decoration-color: rgba(63,107,69,0.5); }
+  .expand {
+    align-self: flex-start; margin-top: 0.1rem;
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.05em;
+    color: var(--muted); background: none; border: none; cursor: pointer; padding: 0;
+    text-transform: uppercase;
+  }
+  .expand:hover { color: var(--oxblood); }
+
+  /* ---- toolkit ---- */
+  .panel {
+    margin-top: 3rem; background: var(--plate); border: 1px solid var(--plate-edge);
+    border-radius: 4px; padding: clamp(1.1rem, 3vw, 1.8rem);
+  }
+  .panel h2 { font-family: var(--serif); font-size: 1.5rem; margin: 0 0 0.3rem; }
+  .panel p.sub { margin: 0 0 1.1rem; color: var(--ink-soft); max-width: 62ch; }
+  .tk-scroll { overflow-x: auto; }
+  table.tk { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 520px; }
+  table.tk th, table.tk td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--plate-edge); vertical-align: top; }
+  table.tk th { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--oxblood); }
+  table.tk td.tech { font-family: var(--serif); font-weight: 600; font-size: 0.95rem; white-space: nowrap; }
+  table.tk td.mods { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+
+  /* ---- usage strip ---- */
+  .usage {
+    margin-top: 2.4rem; border-top: 2px solid var(--ink); padding-top: 1.4rem;
+    display: grid; gap: 0.9rem;
+  }
+  .usage h2 { font-family: var(--serif); font-size: 1.2rem; margin: 0; }
+  .cmds { display: grid; gap: 0.4rem; }
+  .cmd {
+    font-family: var(--mono); font-size: 0.82rem;
+    display: grid; grid-template-columns: minmax(0,16rem) 1fr; gap: 0.8rem; align-items: baseline;
+  }
+  .cmd code { color: var(--oxblood-deep); background: #efe8db; padding: 0.1rem 0.4rem; border-radius: 3px; white-space: nowrap; }
+  .cmd span { color: var(--ink-soft); font-family: var(--sans); font-size: 0.84rem; }
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: 0.8rem; }
+  footer .check { font-family: var(--mono); color: var(--oxblood); }
+  a { color: var(--oxblood); }
+
+  @media (max-width: 560px) {
+    .cmd { grid-template-columns: 1fr; gap: 0.15rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">A hands-on course in Rust</p>
+    <h1>The Art of Computer&nbsp;Programming, <em>implemented</em></h1>
+    <p class="lede">Knuth's essence, stage by stage — you write every algorithm yourself, guided by
+      lessons that carry the mathematics. This is your map and your tracker; ticking a stage saves to this browser.</p>
+    <div class="meter">
+      <div class="meter-head">
+        <div class="meter-count"><b id="doneCount">0</b> / <span id="totalCount">0</span> stages complete
+          &nbsp;·&nbsp; <span id="modDone">0</span> / <span id="modTotal">0</span> modules finished</div>
+        <div class="meter-actions">
+          <span class="hint">progress saved locally</span>
+          <button class="linkbtn" id="resetBtn" type="button">reset tracker</button>
+        </div>
+      </div>
+      <div class="bar"><span id="barFill"></span></div>
+    </div>
+  </header>
+
+  <main id="shelves"></main>
+
+  <section class="panel" aria-labelledby="tk-h">
+    <h2 id="tk-h">The toolkit you build</h2>
+    <p class="sub">The course's real syllabus isn't the algorithms — it's the reasoning. Each proof technique
+      recurs across modules; seen three times, it becomes yours.</p>
+    <div class="tk-scroll">
+      <table class="tk">
+        <thead><tr><th scope="col">Technique</th><th scope="col">Met in</th><th scope="col">Recurs across modules</th></tr></thead>
+        <tbody id="tkBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="usage">
+    <h2>Driving the course</h2>
+    <div class="cmds">
+      <div class="cmd"><code>./grade</code><span>see this map and your real progress in the terminal</span></div>
+      <div class="cmd"><code>./grade 6</code><span>grade Module 06 stage by stage; stops at the first failure</span></div>
+      <div class="cmd"><code>./grade 6 -s 3 --hint</code><span>stuck? a graduated nudge, gentlest first</span></div>
+      <div class="cmd"><code>./grade bench 6</code><span>watch a growth curve the lesson predicts</span></div>
+      <div class="cmd"><code>./grade verify</code><span>prove every stage is passable against the reference</span></div>
+      <div class="cmd"><code>./grade doctor</code><span>check your toolchain and workspace</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Progress here is a personal bookmark in your browser; <code>./grade</code> holds the authoritative record.
+      Reward for the first person to find a real bug: <span class="check">$2.56</span> — one hexadecimal dollar.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  // Course data mirrors grader/src/manifest.rs. Grouped by TAOCP volume.
+  var VOLUMES = [
+    { vol: "Volume 1", name: "Fundamental Algorithms", mods: [
+      { id: "01", title: "The Notion of an Algorithm", src: "§1.1",
+        stages: ["Euclid's algorithm, step by step","Avoiding trivial replacements","Extended Euclid: certifying the gcd","Counting divisions; Lamé's worst case"] },
+      { id: "02", title: "Mathematical Preliminaries", src: "§1.2",
+        stages: ["Sums in closed form","Binomial coefficients","Fibonacci numbers, fast","Harmonic numbers","Analysis of finding the maximum"] },
+      { id: "03", title: "Information Structures", src: "Ch. 2",
+        stages: ["Stacks and queues","Linked allocation with AVAIL","Topological sorting","Traversing binary trees","Threaded binary trees"] },
+      { id: "18", title: "MMIX: Knuth's Machine", src: "Fascicle 1",
+        stages: ["State, memory, loads & stores","Arithmetic and DIV","Comparisons, branches, loops","Euclid & FindMax on the metal"] }
+    ]},
+    { vol: "Volume 2", name: "Seminumerical Algorithms", mods: [
+      { id: "04", title: "Random Numbers", src: "Ch. 3",
+        stages: ["The linear congruential method","The chi-square test","Shuffling","Reservoir sampling"] },
+      { id: "05", title: "Arithmetic", src: "Ch. 4",
+        stages: ["Multiple-precision add & subtract","Classical multiplication","Karatsuba multiplication","The binary gcd","Probabilistic primality"] },
+      { id: "12", title: "The Spectral Test", src: "§3.3.4",
+        stages: ["The lattice of an LCG","The 2-D spectral test, exactly","Short dual vectors in 3-D","Figures of merit"] },
+      { id: "16", title: "The Spectral Test in Higher Dimensions", src: "§3.3.4, Alg. S",
+        stages: ["Dual lattice bases in dimension t","Reduction by unimodular maps","The certified exhaustive search","ν_t and μ_t for real generators"] },
+      { id: "19", title: "Floating-Point Arithmetic", src: "§4.2",
+        stages: ["Representation: pack, unpack, normalize","Addition & subtraction with rounding","Multiplication & division","Error analysis & compensated sums"] }
+    ]},
+    { vol: "Volume 3", name: "Sorting and Searching", mods: [
+      { id: "06", title: "Sorting", src: "Ch. 5",
+        stages: ["Straight insertion; inversions","Shellsort","Quicksort","Heapsort","Natural merge sort","Radix sorting"] },
+      { id: "07", title: "Searching", src: "Ch. 6",
+        stages: ["Binary search","Binary search trees","Balanced trees (AVL)","Hashing with open addressing"] },
+      { id: "11", title: "Multiway Trees & Digital Searching", src: "§6.2.4, §6.3",
+        stages: ["B-tree search & insertion","B-tree invariants & height","Digital searching: tries","Patricia: compressed tries"] },
+      { id: "15", title: "External Sorting", src: "§5.4",
+        stages: ["Replacement selection","k-way merging (tree of losers)","Polyphase merge","The full pipeline, I/O accounted"] },
+      { id: "20", title: "Optimum Sorting & Networks", src: "§5.3",
+        stages: ["Comparison lower bounds","Merge insertion (Ford–Johnson)","Batcher's odd-even merge","The zero-one principle"] }
+    ]},
+    { vol: "Volume 4A", name: "Combinatorial Algorithms, Part 1", mods: [
+      { id: "08", title: "Combinatorial Generation", src: "§7.2.1",
+        stages: ["Gray binary code","Lexicographic permutations","Plain changes","Combinations","Integer partitions"] },
+      { id: "13", title: "Bitwise Tricks & BDDs", src: "§7.1.3–7.1.4",
+        stages: ["Ruler, sideways addition, Gosper","Building reduced ordered BDDs","Model counting & ordering","BDDs at work"] },
+      { id: "21", title: "Boolean Functions & Optimal Evaluation", src: "§7.1.1–7.1.2",
+        stages: ["Truth tables & normal forms","Boolean chains & cost","Median, threshold, symmetric","Optimum chains"] }
+    ]},
+    { vol: "Volume 4B", name: "Combinatorial Algorithms, Part 2", mods: [
+      { id: "09", title: "Backtracking & Dancing Links", src: "§7.2.2–.1",
+        stages: ["Basic backtrack: n queens","Backtracking with bitwise state","Exact cover via dancing links","Sudoku as exact cover"] },
+      { id: "10", title: "Satisfiability", src: "§7.2.2.2",
+        stages: ["CNF and DIMACS","Unit propagation","A DPLL solver","Encoding problems into SAT"] },
+      { id: "14", title: "Conflict-Driven Clause Learning", src: "§7.2.2.2, Alg. C",
+        stages: ["Two watched literals","The trail: decisions, levels","Conflict analysis (first UIP)","The complete CDCL solver"] },
+      { id: "17", title: "ZDDs & Exact Covering with Colors", src: "§7.1.4, §7.2.2.1",
+        stages: ["Zero-suppressed decision diagrams","The family algebra","Counting structures in graphs","Exact cover with colors"] }
+    ]},
+    { vol: "Toward Volume 4C", name: "Pre-fascicles", mods: [
+      { id: "22", title: "Hamiltonian Paths & Constraint Satisfaction", src: "§7.2.2.4",
+        stages: ["Hamiltonian paths by backtracking","Warnsdorff's knight's tour","Hypercube cycles are Gray codes","Held–Karp shortest path"] }
+    ]}
+  ];
+
+  var TOOLKIT = [
+    ["Invariant + termination", "01", "05 · 06 · 07 · 09 · 14"],
+    ["Mathematical induction", "02", "03 · 04 · 06 · 13"],
+    ["Double counting", "02", "06 · 08 · 13"],
+    ["Expectation & harmonic sums", "02", "06 · 07"],
+    ["Extremal witness", "01", "06 · 07 · 13 · 20"],
+    ["Information-theoretic bound", "06", "07 · 20"],
+    ["Honest probabilistic analysis", "04", "05 · 12 · 16 · 19"],
+    ["Lattice / number-theoretic structure", "01", "04 · 05 · 12 · 16"],
+    ["Reduction between problems", "09", "10 · 14 · 17 · 22"],
+    ["Amortized / potential", "03", "07 · 14 · 15"],
+    ["Certification", "01", "10 · 14"]
+  ];
+
+  var KEY = "taocp:done:v1";
+  var done = loadDone();
+
+  function loadDone() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveDone() {
+    try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {}
+  }
+  function stageKey(id, i) { return id + ":" + i; }
+
+  // ---- render ----
+  var shelves = document.getElementById("shelves");
+  var totalStages = 0, totalMods = 0;
+
+  VOLUMES.forEach(function (V) {
+    var sec = el("section", "shelf");
+    var label = el("div", "shelf-label");
+    label.appendChild(elText("span", "shelf-vol", V.vol));
+    label.appendChild(elText("span", "shelf-name", V.name));
+    var stat = elText("span", "shelf-stat", "");
+    label.appendChild(stat);
+    sec.appendChild(label);
+
+    var grid = el("div", "grid");
+    var shelfStages = 0;
+    V.mods.forEach(function (M) {
+      totalMods++;
+      shelfStages += M.stages.length;
+      totalStages += M.stages.length;
+      grid.appendChild(makeCard(M, stat, V));
+    });
+    V._stat = stat; V._total = shelfStages;
+    sec.appendChild(grid);
+    shelves.appendChild(sec);
+  });
+
+  document.getElementById("totalCount").textContent = totalStages;
+  document.getElementById("modTotal").textContent = totalMods;
+
+  // toolkit table
+  var tk = document.getElementById("tkBody");
+  TOOLKIT.forEach(function (row) {
+    var tr = document.createElement("tr");
+    tr.appendChild(elText("td", "tech", row[0]));
+    tr.appendChild(elText("td", "mods", row[1]));
+    tr.appendChild(elText("td", "mods", row[2]));
+    tk.appendChild(tr);
+  });
+
+  function makeCard(M, shelfStat, V) {
+    var card = el("div", "card");
+    card.dataset.id = M.id;
+
+    var top = el("div", "card-top");
+    top.appendChild(elText("span", "modnum", M.id));
+    var head = el("div", "card-head");
+    head.appendChild(elText("span", "card-title", M.title));
+    head.appendChild(elText("span", "card-src", M.src));
+    top.appendChild(head);
+    var ring = makeRing();
+    ring.classList.add("ring");
+    top.appendChild(ring);
+    card.appendChild(top);
+
+    var pips = el("div", "pips");
+    var list = el("ul", "stagelist");
+    M.stages.forEach(function (title, i) {
+      var pressed = !!done[stageKey(M.id, i)];
+      var pip = document.createElement("button");
+      pip.className = "pip";
+      pip.type = "button";
+      pip.setAttribute("aria-pressed", pressed ? "true" : "false");
+      pip.title = title;
+      pip.appendChild(elSpan("dot"));
+      pip.appendChild(document.createTextNode(String(i + 1)));
+      pip.addEventListener("click", function () {
+        var now = pip.getAttribute("aria-pressed") !== "true";
+        pip.setAttribute("aria-pressed", now ? "true" : "false");
+        if (now) done[stageKey(M.id, i)] = 1; else delete done[stageKey(M.id, i)];
+        saveDone();
+        li.classList.toggle("on", now);
+        refreshCard(card, M, ring);
+        refreshShelf(V);
+        refreshGlobal();
+      });
+      pips.appendChild(pip);
+
+      var li = document.createElement("li");
+      li.setAttribute("data-n", (i + 1) + ".");
+      li.textContent = title;
+      if (pressed) li.classList.add("on");
+      list.appendChild(li);
+    });
+    card.appendChild(pips);
+
+    var expand = document.createElement("button");
+    expand.className = "expand";
+    expand.type = "button";
+    expand.textContent = "show stages ▾";
+    expand.addEventListener("click", function () {
+      var open = list.classList.toggle("open");
+      expand.textContent = open ? "hide stages ▴" : "show stages ▾";
+    });
+    card.appendChild(expand);
+    card.appendChild(list);
+
+    refreshCard(card, M, ring);
+    return card;
+  }
+
+  function refreshCard(card, M, ring) {
+    var d = 0;
+    M.stages.forEach(function (_, i) { if (done[stageKey(M.id, i)]) d++; });
+    var all = d === M.stages.length;
+    card.classList.toggle("done", all);
+    setRing(ring, d / M.stages.length);
+  }
+
+  function refreshShelf(V) {
+    var d = 0;
+    V.mods.forEach(function (M) {
+      M.stages.forEach(function (_, i) { if (done[stageKey(M.id, i)]) d++; });
+    });
+    V._stat.textContent = d + " / " + V._total;
+  }
+
+  function refreshGlobal() {
+    var d = 0, md = 0;
+    VOLUMES.forEach(function (V) {
+      V.mods.forEach(function (M) {
+        var c = 0;
+        M.stages.forEach(function (_, i) { if (done[stageKey(M.id, i)]) c++; });
+        d += c;
+        if (c === M.stages.length) md++;
+      });
+    });
+    document.getElementById("doneCount").textContent = d;
+    document.getElementById("modDone").textContent = md;
+    var pct = totalStages ? (d / totalStages * 100) : 0;
+    document.getElementById("barFill").style.width = pct.toFixed(1) + "%";
+  }
+
+  // small SVG progress ring
+  function makeRing() {
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "34"); svg.setAttribute("height", "34"); svg.setAttribute("viewBox", "0 0 34 34");
+    var bg = ringCircle("#ded5c6", 4);
+    var fg = ringCircle("#7c1d24", 4);
+    fg.setAttribute("stroke-linecap", "round");
+    fg.setAttribute("transform", "rotate(-90 17 17)");
+    var C = 2 * Math.PI * 14;
+    fg.setAttribute("stroke-dasharray", C.toFixed(2));
+    fg.setAttribute("stroke-dashoffset", C.toFixed(2));
+    fg.dataset.c = C;
+    svg.appendChild(bg); svg.appendChild(fg);
+    svg._fg = fg;
+    return svg;
+  }
+  function ringCircle(color, w) {
+    var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", "17"); c.setAttribute("cy", "17"); c.setAttribute("r", "14");
+    c.setAttribute("fill", "none"); c.setAttribute("stroke", color); c.setAttribute("stroke-width", w);
+    return c;
+  }
+  function setRing(svg, frac) {
+    var fg = svg._fg, C = parseFloat(fg.dataset.c);
+    fg.setAttribute("stroke-dashoffset", (C * (1 - frac)).toFixed(2));
+    fg.setAttribute("stroke", frac >= 1 ? "#3f6b45" : "#7c1d24");
+  }
+
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    if (!confirm("Clear your local progress tracker? (Your ./grade record is untouched.)")) return;
+    done = {}; saveDone();
+    document.querySelectorAll(".pip").forEach(function (p) { p.setAttribute("aria-pressed", "false"); });
+    document.querySelectorAll(".stagelist li").forEach(function (li) { li.classList.remove("on"); });
+    document.querySelectorAll(".card").forEach(function (c) { c.classList.remove("done"); });
+    document.querySelectorAll(".ring").forEach(function (r) { setRing(r, 0); });
+    VOLUMES.forEach(refreshShelf);
+    refreshGlobal();
+  });
+
+  VOLUMES.forEach(refreshShelf);
+  refreshGlobal();
+
+  // helpers
+  function el(tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; }
+  function elText(tag, cls, txt) { var e = el(tag, cls); e.textContent = txt; return e; }
+  function elSpan(cls) { return el("span", cls); }
+})();
+</script>
+</body>
+</html>

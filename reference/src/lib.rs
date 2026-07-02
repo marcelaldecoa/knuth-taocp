@@ -26,3 +26,7 @@ pub mod m15_external;
 pub mod m16_spectral_hd;
 pub mod m17_zdd_xcc;
 pub mod m18_mmix;
+pub mod m19_float;
+pub mod m20_networks;
+pub mod m21_boolean;
+pub mod m22_hamilton;

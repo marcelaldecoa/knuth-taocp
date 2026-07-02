@@ -1,6 +1,6 @@
 # Syllabus
 
-Eighteen modules, 78 stages. Each stage is one graded test suite
+Twenty-two modules, 94 stages. Each stage is one graded test suite
 (`labs/<module>/tests/stage_NN_*.rs`); `./grade <n>` runs them in order.
 Theory a stage needs is in its module's lesson, `course/<module>/README.md` —
 self-contained, book optional.
@@ -180,8 +180,44 @@ Stages: machine state, loads and stores · arithmetic with MMIX's exact
 semantics · branches and loops · Euclid and FindMax on the metal, with
 Knuth's υ/μ cost model.
 
+## Module 19 — Floating-Point Arithmetic (Vol. 2, §4.2)
+
+Numbers that only approximate — and how to bound the lie.
+
+Stages: representation and normalization · Algorithm 4.2.1A addition with
+round-to-even · multiplication and division · error analysis: the unit
+roundoff, why `+` isn't associative, and Kahan compensated summation.
+
+## Module 20 — Optimum Sorting and Sorting Networks (Vol. 3, §5.3)
+
+How few comparisons can possibly suffice — and how to sort without looking
+at the data.
+
+Stages: the ⌈lg n!⌉ decision-tree bound (and the S(12)=30 gap) · merge
+insertion (Ford–Johnson), comparison-optimal for small n · Batcher's
+odd-even merge network · the zero-one principle as a 2ⁿ-not-n! correctness
+certificate.
+
+## Module 21 — Boolean Functions and Optimal Evaluation (Vol. 4A, §7.1.1–7.1.2)
+
+The truth table as an integer, and the search for the cheapest circuit.
+
+Stages: truth tables and normal forms · Boolean chains and combinational
+cost · median, threshold, and symmetric functions (with Dedekind's monotone
+counting) · optimum chains for small functions.
+
+## Module 22 — Hamiltonian Paths and Constraint Satisfaction (toward Vol. 4C, §7.2.2.4)
+
+The finale, where NP-hardness meets everything you've built.
+
+Stages: Hamiltonian paths by backtracking (Petersen has none) · Warnsdorff's
+knight's tour, and where the heuristic blinks · hypercube cycles *are* Gray
+codes (Module 08 returns) · Held–Karp shortest path by bitmask DP (Module 13
+returns) — still the best known for general TSP.
+
 ## Where to go next (not yet modules — contributions welcome)
 
-Floating point done right (§4.2) · optimum sorting networks (§5.3) ·
-retrieval on secondary keys (§6.5) · BDD variable reordering · Hamiltonian
-paths toward Vol. 4C's pre-fascicles.
+Retrieval on secondary keys (§6.5) · BDD/ZDD variable reordering · optimum
+sorting networks beyond Batcher (the AKS network) · Toom–Cook and FFT
+multiplication (§4.3.3) · the spectral test in dimensions 7–8 · and Vol. 4C
+itself, as its pre-fascicles firm up.
