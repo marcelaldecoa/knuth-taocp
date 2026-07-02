@@ -58,6 +58,36 @@ the public API at growing n and prints an `n | time | ratio` table, so
 `./grade bench N` can show the asymptotics the lesson derives. Use
 `std::time::Instant` only; no external crates.
 
+## Scaffolding tiers (the guided-tour taper)
+
+The course is a guided tour that gradually becomes an open road: the *amount of
+help in the lab stub* decreases as the student gains footing. When authoring or
+revising a module's `src/lab.rs`, match its tier — this keeps the ramp smooth
+and intentional rather than accidental. What tier a module is in is fixed by its
+number, not by taste.
+
+- **Module 01 — full guided tour.** Every stub carries the algorithm in Knuth's
+  step form, a plain-English recipe for turning it into Rust, and links to the
+  exact `std`/Rust-book pages needed (`%`, `loop`, `assert!`, tuples, casts).
+  The student is never more than a paragraph from what to type. A module header
+  explains this and gives a short Rust primer.
+- **Modules 02–04 — structure and contract, find the Rust yourself.** Stubs
+  state the closed form / identity / recurrence / step-labelled algorithm and
+  the exact contract the tests check, plus a suggested data layout, but stop
+  naming the specific Rust method for each line. The header names the tier and
+  points at the relevant `std` docs; each stage carries a
+  `Stuck? ./grade N -s K --hint` pointer.
+- **Modules 05+ — algorithm and contract only.** Give the algorithm, the
+  invariant, and the contract, and trust the student to translate. By the
+  advanced tier (11–22) the lesson states the theorem and the reference is a
+  genuine "compare notes," not a crutch.
+
+Whatever the tier, the safety nets are **always** present for every stage: the
+self-contained lesson, three graduated hints, the reference solution, and the
+walkthrough. Lowering scaffolding means asking a little more of the student each
+time — never removing a net. The student-facing description of this taper lives
+in `docs/for-newcomers.md` (§5); keep the two in sync.
+
 ## The invariants (checked by `./grade verify`)
 
 - `cargo check -p <lab-crate>` passes with the raw stubs (no warnings about
@@ -67,6 +97,9 @@ the public API at growing n and prints an `n | time | ratio` table, so
   as `src/lab.rs`, because the lab crate re-exports the reference under that
   feature.
 - `cargo test -p taocp-reference mNN` is green.
+- Every relative Markdown link across the repo's `.md` files resolves to a file
+  that exists (`./grade verify` reports broken links before the test run) — the
+  course's promise of precise, self-contained cross-references, enforced.
 - Stage tests run in ≲ 30 seconds each on a laptop (profiles already set
   `opt-level = 1` for tests).
 

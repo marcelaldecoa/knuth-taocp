@@ -42,17 +42,19 @@ it depends on your shell:
 | Platform / shell | How to run it |
 |---|---|
 | macOS / Linux (bash, zsh) | `./grade 1` |
-| Windows — **Git Bash** (recommended) | `./grade 1` |
-| Windows — **WSL** | `./grade 1` |
-| Windows — PowerShell / cmd | `bash grade 1` &nbsp;*(needs Git Bash installed)* |
-| Anywhere, no bash at all | `cargo run -q -p grader -- 1` |
+| Windows — **PowerShell** | `.\grade.ps1 1` |
+| Windows — **cmd.exe** / double-click | `grade 1` |
+| Windows — Git Bash / WSL | `./grade 1` |
+| Anywhere, no wrapper | `cargo run -q -p grader -- 1` |
 
-> **Windows tip.** The smoothest experience is **Git Bash** (ships with
-> [Git for Windows](https://git-scm.com/download/win)) or **WSL**. In either,
-> `./grade` behaves exactly as the docs show. If you prefer PowerShell, the
-> `bash grade …` form works too, and the raw
-> `cargo run -q -p grader -- …` form always works with no bash at all — just
-> put your arguments after the `--`.
+> **Windows note.** The repo ships native wrappers so you don't need Git Bash:
+> `grade.ps1` for PowerShell and `grade.cmd` for cmd.exe. Both just forward
+> their arguments to the grader, so `.\grade.ps1 6 -s 3 --hint` works exactly
+> like `./grade 6 -s 3 --hint` elsewhere. (Git Bash and WSL still run the plain
+> `./grade` too.) If PowerShell blocks the script with an execution-policy
+> error, either run `cargo run -q -p grader -- 1` directly, or allow local
+> scripts for your user once with
+> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 The rest of this guide writes `./grade …`; substitute whichever form fits your
 shell.
@@ -164,8 +166,9 @@ they're for.
 
 - **`./grade: command not found` or `permission denied` (macOS/Linux).**
   Run it as `bash grade 1`, or `chmod +x grade` once.
-- **`./grade` does nothing useful on Windows PowerShell.** Use `bash grade 1`
-  (needs Git Bash) or the raw `cargo run -q -p grader -- 1`. See §2.
+- **`./grade` does nothing useful on Windows PowerShell.** Use the native
+  wrapper `.\grade.ps1 1` (or `grade 1` from cmd.exe), or the raw
+  `cargo run -q -p grader -- 1`. See §2.
 - **`cargo: command not found`.** The toolchain isn't on your PATH — restart
   your terminal after installing, or run `source "$HOME/.cargo/env"`
   (macOS/Linux). On Windows, open a fresh terminal after rustup finishes.

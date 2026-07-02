@@ -103,6 +103,12 @@ fn stage_key(module: &Module, test_target: &str) -> String {
     format!("{}/{}", module.lab_crate, test_target)
 }
 
+/// The reference solution file stem for a module: `module-01-algorithms`
+/// maps to `m01_algorithms` (i.e. `reference/src/m01_algorithms.rs`).
+fn reference_stem(module: &Module) -> String {
+    format!("m{}", module.dir.trim_start_matches("module-").replace('-', "_"))
+}
+
 /// Run one stage's test target. Returns (passed, captured output).
 fn run_stage(root: &PathBuf, module: &Module, test_target: &str, solutions: bool) -> (bool, String) {
     let mut cmd = Command::new("cargo");
@@ -315,6 +321,108 @@ fn next_hint(progress: &BTreeSet<String>) -> String {
     "all done — congratulations!".to_string()
 }
 
+/// Recursively collect files with the given extension, skipping build/VCS dirs.
+fn collect_files(dir: &std::path::Path, ext: &str, out: &mut Vec<PathBuf>) {
+    let entries = match fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let mut paths: Vec<PathBuf> = entries.flatten().map(|e| e.path()).collect();
+    paths.sort();
+    for path in paths {
+        if path.is_dir() {
+            let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            if matches!(name, "target" | ".git" | ".taocp" | "node_modules") {
+                continue;
+            }
+            collect_files(&path, ext, out);
+        } else if path.extension().and_then(|e| e.to_str()) == Some(ext) {
+            out.push(path);
+        }
+    }
+}
+
+/// Extract the targets of Markdown links `[text](target)` from `text`.
+fn markdown_link_targets(text: &str) -> Vec<String> {
+    let mut targets = Vec::new();
+    let mut i = 0;
+    while let Some(rel) = text[i..].find("](") {
+        let open = i + rel + 2; // index just past "]("
+        if let Some(close) = text[open..].find(')') {
+            let target = text[open..open + close].trim().to_string();
+            if !target.is_empty() {
+                targets.push(target);
+            }
+            i = open + close + 1;
+        } else {
+            break;
+        }
+    }
+    targets
+}
+
+/// Check that every *relative* Markdown link in the repo's `.md` files points
+/// at a file that exists. External (http, mailto) and pure-anchor links are
+/// skipped. Returns true when all links resolve. Keeps the course's promise of
+/// precise, self-contained cross-references honest as modules evolve.
+fn check_doc_links(root: &PathBuf, style: &Style) -> bool {
+    print!("  documentation links … ");
+    let _ = std::io::Write::flush(&mut std::io::stdout());
+    let mut files = Vec::new();
+    collect_files(root, "md", &mut files);
+    let mut broken: Vec<(PathBuf, String)> = Vec::new();
+    let mut checked = 0usize;
+    for file in &files {
+        let text = match fs::read_to_string(file) {
+            Ok(t) => t,
+            Err(_) => continue,
+        };
+        let base = file.parent().unwrap_or(root);
+        for target in markdown_link_targets(&text) {
+            // Skip external schemes and in-page anchors.
+            let lower = target.to_ascii_lowercase();
+            if lower.starts_with("http://")
+                || lower.starts_with("https://")
+                || lower.starts_with("mailto:")
+                || lower.starts_with("tel:")
+                || target.starts_with('#')
+            {
+                continue;
+            }
+            // Drop any #anchor or ?query suffix; check the file part.
+            let path_part = target.split(['#', '?']).next().unwrap_or(&target);
+            if path_part.is_empty() {
+                continue;
+            }
+            checked += 1;
+            let resolved = base.join(path_part);
+            if !resolved.exists() {
+                broken.push((file.clone(), target));
+            }
+        }
+    }
+    if broken.is_empty() {
+        println!(
+            "{} {}",
+            style.green("✓"),
+            style.dim(&format!("({} links in {} files)", checked, files.len()))
+        );
+        true
+    } else {
+        println!("{}", style.red("✗"));
+        for (file, target) in &broken {
+            let shown = file.strip_prefix(root).unwrap_or(file);
+            println!(
+                "    {} {} → {}",
+                style.red("broken:"),
+                style.dim(&shown.display().to_string()),
+                target
+            );
+        }
+        false
+    }
+}
+
 /// Course integrity check: every lab test must pass when the lab crate
 /// re-exports the reference solutions, and the reference crate's own unit
 /// tests (Knuth's worked examples) must pass too.
@@ -322,6 +430,8 @@ fn verify(root: &PathBuf, style: &Style, verbose: bool) -> bool {
     println!();
     println!("{}", style.bold("Course self-check: reference solutions vs. lab test suites"));
     let mut ok = true;
+
+    ok &= check_doc_links(root, style);
 
     print!("  reference unit tests … ");
     let out = Command::new("cargo")
@@ -728,6 +838,11 @@ fn main() -> ExitCode {
                         "  {} course/{}/WALKTHROUGH.md — how the reference is built",
                         style.dim("Deepen:"),
                         m.dir
+                    );
+                    println!(
+                        "  {} reference/src/{}.rs — Knuth's step-faithful solution, compare with yours",
+                        style.dim("Compare:"),
+                        reference_stem(m),
                     );
                     if only_stage.is_none() {
                         println!("  Next: {}", next_hint(&load_progress(&root)));

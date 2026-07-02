@@ -36,6 +36,28 @@
 
   /* ---- masthead ---- */
   .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.4rem; margin-bottom: 2.2rem; }
+  .startlinks {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 1.1rem;
+    margin: -1rem 0 2rem;
+    padding: 0.7rem 0.9rem;
+    background: var(--plate);
+    border: 1px solid var(--plate-edge);
+    border-left: 3px solid var(--oxblood);
+    border-radius: 3px;
+    font-size: 0.92rem;
+  }
+  .startlinks .sl-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--oxblood);
+  }
+  .startlinks a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--gold); }
+  .startlinks a:hover { color: var(--oxblood); border-bottom-color: var(--oxblood); }
   .eyebrow {
     font-family: var(--mono);
     font-size: 0.72rem;
@@ -221,6 +243,14 @@
       <div class="bar"><span id="barFill"></span></div>
     </div>
   </header>
+
+  <nav class="startlinks" aria-label="Getting started">
+    <span class="sl-label">New here?</span>
+    <a href="for-newcomers.md">Primer: new to Knuth &amp; TAOCP</a>
+    <a href="why-knuth-matters.md">Why these algorithms still run the world</a>
+    <a href="getting-started.md">Setup &amp; every command</a>
+    <a href="../SYLLABUS.md">Full syllabus</a>
+  </nav>
 
   <main id="shelves"></main>
 
