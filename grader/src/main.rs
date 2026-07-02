@@ -221,6 +221,12 @@ fn grade_module(
                 module.id.trim_start_matches('0'),
                 n
             );
+            println!(
+                "    {} ./grade {} --stage {} --hint",
+                style.yellow("Hint:"),
+                module.id.trim_start_matches('0'),
+                n
+            );
             if only_stage.is_none() {
                 // CodeCrafters behavior: later stages stay locked.
                 let remaining = total - n;
@@ -358,6 +364,247 @@ fn verify(root: &PathBuf, style: &Style, verbose: bool) -> bool {
     ok
 }
 
+/// Parse the graduated hints for one stage out of a module's `hints.md`.
+/// Returns the hints in order (hint 1 = gentlest). Format: a `## Stage <k>`
+/// heading, then lines beginning `<n>.` up to the next `##`.
+fn load_hints(root: &PathBuf, module: &Module, stage_1based: usize) -> Vec<String> {
+    let path = root.join("course").join(module.dir).join("hints.md");
+    let text = match fs::read_to_string(&path) {
+        Ok(t) => t,
+        Err(_) => return Vec::new(),
+    };
+    let mut in_stage = false;
+    let mut hints: Vec<String> = Vec::new();
+    let mut current = String::new();
+    let want = format!("## stage {}", stage_1based);
+    for line in text.lines() {
+        let lower = line.trim_start().to_ascii_lowercase();
+        if lower.starts_with("## ") {
+            // A new heading: entering our stage, or leaving it.
+            let entering = lower.starts_with(&want)
+                && lower[want.len()..]
+                    .chars()
+                    .next()
+                    .map(|c| !c.is_ascii_digit())
+                    .unwrap_or(true);
+            if in_stage && !current.trim().is_empty() {
+                hints.push(current.trim().to_string());
+                current.clear();
+            }
+            in_stage = entering;
+            continue;
+        }
+        if in_stage {
+            let t = line.trim_start();
+            // A new numbered item starts a new hint.
+            let starts_item = t
+                .split_once('.')
+                .map(|(n, _)| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()))
+                .unwrap_or(false);
+            if starts_item {
+                if !current.trim().is_empty() {
+                    hints.push(current.trim().to_string());
+                    current.clear();
+                }
+                // Drop the "N." prefix.
+                let rest = t.splitn(2, '.').nth(1).unwrap_or("").trim_start();
+                current.push_str(rest);
+            } else if !current.is_empty() {
+                current.push(' ');
+                current.push_str(t);
+            }
+        }
+    }
+    if in_stage && !current.trim().is_empty() {
+        hints.push(current.trim().to_string());
+    }
+    hints
+}
+
+/// Show hints for a module/stage. `which` is 1-based; None = show the first
+/// and say how many more exist.
+fn show_hints(root: &PathBuf, style: &Style, module: &Module, stage: usize, which: Option<usize>) -> ExitCode {
+    if stage == 0 || stage > module.stages.len() {
+        eprintln!("module {} has stages 1..={}", module.id, module.stages.len());
+        return ExitCode::FAILURE;
+    }
+    let s = &module.stages[stage - 1];
+    let hints = load_hints(root, module, stage);
+    println!();
+    println!(
+        "{} — stage {}: {}",
+        style.bold(&format!("Module {} hints", module.id)),
+        stage,
+        style.bold(s.title)
+    );
+    if hints.is_empty() {
+        println!("  {}", style.dim("(no hints written for this stage yet)"));
+        return ExitCode::SUCCESS;
+    }
+    let n = hints.len();
+    let show = which.unwrap_or(1).clamp(1, n);
+    for i in 0..show {
+        println!();
+        println!("  {} {}", style.yellow(&format!("Hint {}/{}:", i + 1, n)), hints[i]);
+    }
+    if show < n {
+        println!();
+        println!(
+            "  {}",
+            style.dim(&format!(
+                "Need more? ./grade {} --stage {} --hint {}",
+                module.id.trim_start_matches('0'),
+                stage,
+                show + 1
+            ))
+        );
+    } else {
+        println!();
+        println!(
+            "  {}",
+            style.dim("That's the last hint. After the stage is green, read the WALKTHROUGH.md.")
+        );
+    }
+    ExitCode::SUCCESS
+}
+
+/// `./grade doctor` — diagnose the environment and workspace.
+fn doctor(root: &PathBuf, style: &Style) -> ExitCode {
+    println!();
+    println!("{}", style.bold("Course doctor — checking your setup"));
+    let mut ok = true;
+    let mut check = |label: &str, good: bool, detail: &str| {
+        if good {
+            println!("  {} {}  {}", style.green("✓"), label, style.dim(detail));
+        } else {
+            ok = false;
+            println!("  {} {}  {}", style.red("✗"), label, detail);
+        }
+    };
+
+    // Toolchain.
+    let tool_ver = |bin: &str| {
+        Command::new(bin)
+            .arg("--version")
+            .output()
+            .ok()
+            .filter(|o| o.status.success())
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+    };
+    match tool_ver("cargo") {
+        Some(v) => check("cargo present", true, &v),
+        None => check("cargo present", false, "install Rust from https://rustup.rs"),
+    }
+    match tool_ver("rustc") {
+        Some(v) => check("rustc present", true, &v),
+        None => check("rustc present", false, "install Rust from https://rustup.rs"),
+    }
+
+    // Workspace compiles.
+    print!("  {} checking workspace compiles… ", style.dim("·"));
+    let _ = std::io::Write::flush(&mut std::io::stdout());
+    let build = Command::new("cargo")
+        .current_dir(root)
+        .args(["check", "-q", "--workspace"])
+        .env("CARGO_TERM_COLOR", "never")
+        .output();
+    println!("\r                                      \r");
+    match build {
+        Ok(o) if o.status.success() => check("workspace compiles", true, "all lab stubs build"),
+        Ok(o) => {
+            let err = String::from_utf8_lossy(&o.stderr);
+            let first = err.lines().find(|l| l.contains("error")).unwrap_or("see `cargo check`");
+            check("workspace compiles", false, first);
+        }
+        Err(e) => check("workspace compiles", false, &format!("could not run cargo: {e}")),
+    }
+
+    // Did the student accidentally edit plumbing?
+    let mut edited_plumbing = Vec::new();
+    for m in MODULES {
+        let lib = root.join("labs").join(m.dir).join("src").join("lib.rs");
+        if let Ok(t) = fs::read_to_string(&lib) {
+            if !t.contains("You never need to edit this file")
+                && !t.contains("you never need to edit this file")
+            {
+                edited_plumbing.push(m.dir);
+            }
+        }
+    }
+    check(
+        "lab plumbing intact",
+        edited_plumbing.is_empty(),
+        &if edited_plumbing.is_empty() {
+            "src/lib.rs untouched (as intended)".to_string()
+        } else {
+            format!("edited src/lib.rs in: {} — restore from git", edited_plumbing.join(", "))
+        },
+    );
+
+    // Progress file readable/writable.
+    let prog_dir = root.join(".taocp");
+    let writable = fs::create_dir_all(&prog_dir).is_ok();
+    check(
+        "progress dir writable",
+        writable,
+        &format!("{}", prog_dir.display()),
+    );
+
+    println!();
+    if ok {
+        println!("{}", style.green("doctor: everything looks healthy. Run ./grade to begin."));
+        ExitCode::SUCCESS
+    } else {
+        println!("{}", style.red("doctor: problems found above — fix them, then re-run ./grade doctor."));
+        ExitCode::FAILURE
+    }
+}
+
+/// `./grade bench <module>` — run a module's growth-curve benchmark, if it
+/// ships one (`labs/<dir>/examples/bench.rs`), against the reference impl.
+fn bench(root: &PathBuf, style: &Style, module: &Module) -> ExitCode {
+    let example = root.join("labs").join(module.dir).join("examples").join("bench.rs");
+    println!();
+    println!(
+        "{}",
+        style.bold(&format!("Benchmark — Module {}: {}", module.id, module.title))
+    );
+    if !example.exists() {
+        println!(
+            "  {}",
+            style.dim("This module has no bench (not every algorithm has a growth curve to plot).")
+        );
+        return ExitCode::SUCCESS;
+    }
+    println!(
+        "  {}",
+        style.dim("Timing the reference implementation; compare against the lesson's asymptotics.")
+    );
+    println!();
+    let status = Command::new("cargo")
+        .current_dir(root)
+        .args([
+            "run",
+            "-q",
+            "-p",
+            module.lab_crate,
+            "--example",
+            "bench",
+            "--features",
+            "solutions",
+            "--release",
+        ])
+        .env("CARGO_TERM_COLOR", "never")
+        .status();
+    match status {
+        Ok(s) if s.success() => ExitCode::SUCCESS,
+        _ => {
+            eprintln!("bench failed to run");
+            ExitCode::FAILURE
+        }
+    }
+}
+
 fn main() -> ExitCode {
     let root = repo_root();
     let style = Style::new();
@@ -365,6 +612,8 @@ fn main() -> ExitCode {
 
     let mut positional: Vec<String> = Vec::new();
     let mut only_stage: Option<usize> = None;
+    let mut hint: Option<usize> = None;
+    let mut hint_flag = false;
     let mut solutions = false;
     let mut verbose = false;
     let mut i = 0;
@@ -376,6 +625,14 @@ fn main() -> ExitCode {
                 if only_stage.is_none() {
                     eprintln!("--stage needs a number");
                     return ExitCode::FAILURE;
+                }
+            }
+            "--hint" => {
+                hint_flag = true;
+                // Optional number: `--hint` or `--hint 2`.
+                if let Some(v) = args.get(i + 1).and_then(|v| v.parse::<usize>().ok()) {
+                    hint = Some(v);
+                    i += 1;
                 }
             }
             "--solutions" => solutions = true,
@@ -412,6 +669,28 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         }
+        Some("doctor") => doctor(&root, &style),
+        Some("bench") => match positional.get(1).and_then(|q| find_module(q)) {
+            Some(m) => bench(&root, &style, m),
+            None => {
+                eprintln!("usage: ./grade bench <module>   e.g. ./grade bench 6");
+                ExitCode::FAILURE
+            }
+        },
+        Some("hint") | Some("hints") => {
+            // `./grade hint <module> <stage> [n]`
+            let m = positional.get(1).and_then(|q| find_module(q));
+            let st = positional.get(2).and_then(|v| v.parse::<usize>().ok());
+            match (m, st.or(only_stage)) {
+                (Some(m), Some(st)) => {
+                    show_hints(&root, &style, m, st, hint.or(positional.get(3).and_then(|v| v.parse().ok())))
+                }
+                _ => {
+                    eprintln!("usage: ./grade hint <module> <stage> [n]   e.g. ./grade hint 6 3");
+                    ExitCode::FAILURE
+                }
+            }
+        }
         Some("all") => {
             let mut all_ok = true;
             for m in MODULES {
@@ -431,6 +710,11 @@ fn main() -> ExitCode {
         }
         Some(query) => match find_module(query) {
             Some(m) => {
+                // `./grade 6 --stage 3 --hint` short-circuits to hints.
+                if hint_flag {
+                    let st = only_stage.unwrap_or(1);
+                    return show_hints(&root, &style, m, st, hint);
+                }
                 let (p, t) =
                     grade_module(&root, &style, m, only_stage, solutions, verbose, &mut progress);
                 let graded = if only_stage.is_some() { 1 } else { t };
@@ -439,6 +723,11 @@ fn main() -> ExitCode {
                     println!(
                         "{}",
                         style.green(&format!("Module {} — all graded stages pass.", m.id))
+                    );
+                    println!(
+                        "  {} course/{}/WALKTHROUGH.md — how the reference is built",
+                        style.dim("Deepen:"),
+                        m.dir
                     );
                     if only_stage.is_none() {
                         println!("  Next: {}", next_hint(&load_progress(&root)));
@@ -468,12 +757,22 @@ USAGE:
     ./grade all                grade every module
     ./grade verify             self-check: run all lab tests against the
                                built-in reference solutions
+    ./grade hint <m> <stage>   show a graduated hint (add a number for the next)
+    ./grade bench <module>     run a module's growth-curve benchmark
+    ./grade doctor             diagnose your toolchain and workspace
     ./grade reset              clear recorded progress
 
 FLAGS:
     --stage, -s <n>    run only stage n of the chosen module
+    --hint [n]         show hint n for the chosen stage (with -s), gentlest first
     --solutions        run lab tests against the reference solutions
     --verbose, -v      show full cargo output on failure
+
+EXAMPLES:
+    ./grade 6                  start Module 06 (sorting)
+    ./grade 6 -s 3 --hint      stuck on stage 3? get a nudge
+    ./grade 6 -s 3 --hint 2    the next, more specific hint
+    ./grade bench 6            watch the sorts' growth curves
 "
     );
 }
