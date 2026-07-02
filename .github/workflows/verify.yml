@@ -26,27 +26,3 @@ jobs:
         run: cargo test -p taocp-reference
       - name: Course self-check (all lab suites vs reference solutions)
         run: cargo run -q -p grader -- verify
-
-  # Prove the graders actually bite: cargo-mutants seeds bugs into the
-  # reference implementations and checks that some stage test catches each
-  # one. A surviving mutant is a hole in a test suite. Informational for now
-  # (continue-on-error) so it reports without gating merges.
-  mutation:
-    name: mutation testing (test suites bite)
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Rust
-        run: rustup toolchain install stable --profile minimal && rustup default stable
-      - name: Install cargo-mutants
-        run: cargo install cargo-mutants --locked
-      - name: Mutate the reference, run the lab suites against it
-        # Only mutate the reference crate; run the whole workspace's tests with
-        # --features solutions so the lab suites exercise the (mutated)
-        # reference. A surviving mutant = a stage test that failed to notice a
-        # seeded bug.
-        run: >
-          cargo mutants --no-shuffle -j 2
-          --package taocp-reference
-          -- --workspace --features solutions

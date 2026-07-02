@@ -70,6 +70,18 @@ the public API at growing n and prints an `n | time | ratio` table, so
 - Stage tests run in ≲ 30 seconds each on a laptop (profiles already set
   `opt-level = 1` for tests).
 
+Mutation testing (do the suites actually *bite*?) is not part of the fast CI
+gate — it's slow. Run it on demand from the Actions tab (the "mutation
+testing" workflow), or locally against a single module while developing:
+
+```bash
+cargo install cargo-mutants
+cargo mutants --package taocp-reference --file '*m06*' -- --workspace --features solutions
+```
+
+A surviving mutant means a seeded bug in that reference module slipped past
+every stage test — strengthen the test until it dies.
+
 ## Test design (this is a grading system, make it bite)
 
 - Anchor with **worked examples from the text** — Knuth's tables and traces
