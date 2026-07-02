@@ -5,8 +5,10 @@
 //! mod m lie on a lattice; the spectral test measures the coarsest family
 //! of parallel hyperplanes covering that lattice. The key quantity is
 //!
-//!     nu_t^2 = min { u1^2 + ... + ut^2 :
-//!                    u1 + a·u2 + ... + a^{t-1}·ut ≡ 0 (mod m), u ≠ 0 },
+//! ```text
+//! nu_t^2 = min { u1^2 + ... + ut^2 :
+//!                u1 + a·u2 + ... + a^{t-1}·ut ≡ 0 (mod m), u ≠ 0 },
+//! ```
 //!
 //! the squared length of the shortest nonzero vector of the *dual* lattice.
 //! The maximum distance between adjacent covering hyperplanes is m/nu_t, so
