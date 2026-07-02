@@ -1,5 +1,11 @@
 //! Module 09 — Backtracking and Dancing Links (TAOCP Vol. 4B, §7.2.2–7.2.2.1).
 //!
+//! **Scaffolding tier — Module 05 and up:** the stub states the algorithm and
+//! the contract and trusts you to translate it to Rust; the guided-tour aids of
+//! Modules 01–04 are gone by design. The nets remain for every stage — the
+//! lesson, three graduated hints (`--hint`), the reference, and the walkthrough.
+//! (The taper is described in docs/for-newcomers.md §5.)
+//!
 //! YOUR WORKSPACE. Replace each `todo!()`. Run `./grade 9`. The lesson is in
 //! course/module-09-backtrack/README.md.
 

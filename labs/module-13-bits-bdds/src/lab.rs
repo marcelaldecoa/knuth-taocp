@@ -1,6 +1,12 @@
 //! Module 13 — Bitwise Tricks and Binary Decision Diagrams
 //! (TAOCP Vol. 4A, §7.1.3–7.1.4).
 //!
+//! **Scaffolding tier — Module 05 and up:** the stub states the algorithm and
+//! the contract and trusts you to translate it to Rust; the guided-tour aids of
+//! Modules 01–04 are gone by design. The nets remain for every stage — the
+//! lesson, three graduated hints (`--hint`), the reference, and the walkthrough.
+//! (The taper is described in docs/for-newcomers.md §5.)
+//!
 //! YOUR WORKSPACE. Replace each `todo!()` with an implementation, then run
 //! `./grade 13` from the repository root. The lesson in
 //! `course/module-13-bits-bdds/README.md` develops all the theory you need.

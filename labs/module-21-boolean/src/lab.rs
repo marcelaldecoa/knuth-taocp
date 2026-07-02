@@ -1,6 +1,12 @@
 //! Module 21 — Boolean Functions and Optimal Evaluation.
 //! Source: TAOCP Vol. 4A, §7.1.1 (Boolean basics) and §7.1.2 (Boolean chains).
 //!
+//! **Scaffolding tier — Module 05 and up:** the stub states the algorithm and
+//! the contract and trusts you to translate it to Rust; the guided-tour aids of
+//! Modules 01–04 are gone by design. The nets remain for every stage — the
+//! lesson, three graduated hints (`--hint`), the reference, and the walkthrough.
+//! (The taper is described in docs/for-newcomers.md §5.)
+//!
 //! YOUR WORKSPACE. Replace each `todo!()` with an implementation, then run
 //! `./grade 21`. Work the stages in order; the lesson
 //! (`course/module-21-boolean/README.md`) walks you through the theory.

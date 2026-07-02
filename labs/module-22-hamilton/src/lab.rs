@@ -1,6 +1,12 @@
 //! Module 22 — Hamiltonian Paths and Constraint Satisfaction.
 //! Source: toward TAOCP Vol. 4C, §7.2.2.4 (pre-fascicles).
 //!
+//! **Scaffolding tier — Module 05 and up:** the stub states the algorithm and
+//! the contract and trusts you to translate it to Rust; the guided-tour aids of
+//! Modules 01–04 are gone by design. The nets remain for every stage — the
+//! lesson, three graduated hints (`--hint`), the reference, and the walkthrough.
+//! (The taper is described in docs/for-newcomers.md §5.)
+//!
 //! YOUR WORKSPACE. Replace each `todo!()` with an implementation, then run
 //! `./grade 22`. Work the stages in order; the lesson in
 //! `course/module-22-hamilton/README.md` develops the theory each stage needs.
