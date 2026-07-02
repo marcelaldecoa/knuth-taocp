@@ -1,0 +1,30 @@
+# EditorConfig — consistent whitespace across contributors.
+# https://editorconfig.org
+#
+# Deliberately no max_line_length rule: the reference solutions and grader are
+# hand-formatted (not rustfmt-driven) to stay step-faithful to Knuth; see
+# CONVENTIONS.md.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.rs]
+indent_size = 4
+
+[*.{yml,yaml,toml,json,html,css}]
+indent_size = 2
+
+[*.md]
+indent_size = 2
+# Markdown uses trailing spaces for hard line breaks.
+trim_trailing_whitespace = false
+
+# Windows-only wrappers must keep CRLF.
+[*.{ps1,cmd,bat}]
+end_of_line = crlf

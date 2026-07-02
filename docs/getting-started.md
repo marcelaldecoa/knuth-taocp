@@ -81,6 +81,7 @@ work on next. When a stage passes it points you at that module's
 ```bash
 ./grade                  # progress overview: all modules and your completed stages
 ./grade 3                # grade module 03 stage by stage; stops at the first failure
+./grade next             # jump straight to the module with your next unsolved stage
 ./grade 3 --stage 2      # re-run just one stage (short form: -s 2)
 ./grade 3 -s 2 --hint    # a graduated hint for that stage; add a number for the next
 ./grade 3 -v             # verbose: full cargo test output for the module

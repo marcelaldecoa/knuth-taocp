@@ -131,6 +131,21 @@ every stage test — strengthen the test until it dies.
 - Stages are ordered easy → hard and each teaches one idea. 4–6 stages per
   module, fixed in `grader/src/manifest.rs`.
 
+## Linting and formatting (and why the reference is exempt)
+
+The **reference solutions are intentionally *not* held to `clippy` or `rustfmt`.**
+They mirror Knuth's step-faithful style — explicit `for i in 0..n { … a[i] … }`
+indexing, `x % 2 == 0` over `.is_multiple_of()`, hand-laid line breaks — because
+that faithfulness to the book is the pedagogy. Clippy would "fix" exactly the
+things we want the student to see. So don't run `cargo clippy --fix` or
+`cargo fmt` across `reference/` or the labs; match the surrounding hand-formatted
+style instead.
+
+The **grader is the opposite**: it's tooling, not a lesson, so it *is* held to
+`cargo clippy -p grader -- -D warnings` and has unit tests, both gated in CI
+(the `grader` job in `.github/workflows/verify.yml`). Keep it idiomatic and
+warning-free.
+
 ## Style
 
 - Rust 2021, std only, no unsafe, no external crates.
