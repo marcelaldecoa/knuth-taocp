@@ -18,10 +18,10 @@
 mod manifest;
 
 use manifest::{find_module, Module, MODULES};
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 use std::fs;
 use std::io::IsTerminal;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 
 const PROGRESS_FILE: &str = ".taocp/progress";
@@ -81,13 +81,13 @@ fn repo_root() -> PathBuf {
     }
 }
 
-fn load_progress(root: &PathBuf) -> BTreeSet<String> {
+fn load_progress(root: &Path) -> BTreeSet<String> {
     fs::read_to_string(root.join(PROGRESS_FILE))
         .map(|t| t.lines().map(|l| l.trim().to_string()).filter(|l| !l.is_empty()).collect())
         .unwrap_or_default()
 }
 
-fn save_progress(root: &PathBuf, progress: &BTreeSet<String>) {
+fn save_progress(root: &Path, progress: &BTreeSet<String>) {
     let path = root.join(PROGRESS_FILE);
     if let Some(parent) = path.parent() {
         let _ = fs::create_dir_all(parent);
@@ -254,7 +254,7 @@ fn grade_module(
     (passed, total)
 }
 
-fn print_status(root: &PathBuf, style: &Style) {
+fn print_status(root: &Path, style: &Style) {
     let progress = load_progress(root);
     println!();
     println!("{}", style.bold("The Art of Computer Programming — a hands-on course in Rust"));
@@ -301,6 +301,7 @@ fn print_status(root: &PathBuf, style: &Style) {
     );
     println!();
     println!("  {} ./grade <module>      e.g. ./grade 1", style.dim("run:"));
+    println!("  {} ./grade next          jump to your next unsolved stage", style.dim("run:"));
     println!("  {} ./grade all           grade everything", style.dim("run:"));
     println!("  {} ./grade verify        self-check labs against reference", style.dim("run:"));
 }
@@ -319,6 +320,36 @@ fn next_hint(progress: &BTreeSet<String>) -> String {
         }
     }
     "all done — congratulations!".to_string()
+}
+
+/// The first module that still has an unsolved stage, or `None` if the course
+/// is complete. Used by `./grade next`.
+fn next_unsolved_module(progress: &BTreeSet<String>) -> Option<&'static Module> {
+    MODULES
+        .iter()
+        .find(|m| m.stages.iter().any(|s| !progress.contains(&stage_key(m, s.test_target))))
+}
+
+/// The "you passed — here's where to look next" footer, shared by the module
+/// grading path and `./grade next`.
+fn report_module_pass(root: &Path, style: &Style, m: &Module, only_stage: bool) {
+    println!(
+        "{}",
+        style.green(&format!("Module {} — all graded stages pass.", m.id))
+    );
+    println!(
+        "  {} course/{}/WALKTHROUGH.md — how the reference is built",
+        style.dim("Deepen:"),
+        m.dir
+    );
+    println!(
+        "  {} reference/src/{}.rs — Knuth's step-faithful solution, compare with yours",
+        style.dim("Compare:"),
+        reference_stem(m),
+    );
+    if !only_stage {
+        println!("  Next: {}", next_hint(&load_progress(root)));
+    }
 }
 
 /// Recursively collect files with the given extension, skipping build/VCS dirs.
@@ -361,46 +392,145 @@ fn markdown_link_targets(text: &str) -> Vec<String> {
     targets
 }
 
-/// Check that every *relative* Markdown link in the repo's `.md` files points
-/// at a file that exists. External (http, mailto) and pure-anchor links are
-/// skipped. Returns true when all links resolve. Keeps the course's promise of
-/// precise, self-contained cross-references honest as modules evolve.
-fn check_doc_links(root: &PathBuf, style: &Style) -> bool {
+/// Strip inline Markdown (`` ` ``, `*`, `_`, and `[label](url)` → `label`) from a
+/// heading so it can be turned into an anchor slug.
+fn strip_inline_markdown(s: &str) -> String {
+    let mut out = String::new();
+    let mut chars = s.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '`' | '*' | '_' => {}
+            '[' => {
+                // Emit the link label, then swallow an optional "(url)".
+                for l in chars.by_ref() {
+                    if l == ']' {
+                        break;
+                    }
+                    out.push(l);
+                }
+                if chars.peek() == Some(&'(') {
+                    for u in chars.by_ref() {
+                        if u == ')' {
+                            break;
+                        }
+                    }
+                }
+            }
+            _ => out.push(c),
+        }
+    }
+    out
+}
+
+/// The GitHub-style anchor slug of a heading's text: lowercase, drop
+/// punctuation, spaces become hyphens (Unicode letters/digits are kept).
+fn heading_slug(raw: &str) -> String {
+    let cleaned = strip_inline_markdown(raw);
+    let mut slug = String::new();
+    for ch in cleaned.trim().chars() {
+        if ch == ' ' || ch == '\t' {
+            slug.push('-');
+        } else if ch == '-' || ch.is_ascii_alphanumeric() {
+            slug.push(ch.to_ascii_lowercase());
+        } else if ch.is_alphanumeric() {
+            slug.extend(ch.to_lowercase());
+        }
+        // everything else (punctuation) is dropped
+    }
+    slug
+}
+
+/// Every heading anchor slug defined in a Markdown document.
+fn heading_slugs(text: &str) -> BTreeSet<String> {
+    let mut slugs = BTreeSet::new();
+    for line in text.lines() {
+        let t = line.trim_start();
+        if t.starts_with('#') {
+            let hashes = t.chars().take_while(|&c| c == '#').count();
+            if (1..=6).contains(&hashes) {
+                let rest = t[hashes..].trim();
+                if !rest.is_empty() {
+                    slugs.insert(heading_slug(rest));
+                }
+            }
+        }
+    }
+    slugs
+}
+
+/// Check that every *relative* Markdown link in the repo's `.md` files resolves
+/// to a file that exists, and that any `#anchor` pointing at a Markdown file
+/// matches a real heading there. External (http, mailto) links are skipped.
+/// Keeps the course's promise of precise, self-contained cross-references
+/// honest as modules evolve.
+fn check_doc_links(root: &Path, style: &Style) -> bool {
     print!("  documentation links … ");
     let _ = std::io::Write::flush(&mut std::io::stdout());
     let mut files = Vec::new();
     collect_files(root, "md", &mut files);
-    let mut broken: Vec<(PathBuf, String)> = Vec::new();
-    let mut checked = 0usize;
+
+    // Read every doc once; index heading slugs by canonical path for anchors.
+    let mut contents: Vec<(PathBuf, String)> = Vec::new();
+    let mut slug_index: HashMap<PathBuf, BTreeSet<String>> = HashMap::new();
     for file in &files {
-        let text = match fs::read_to_string(file) {
-            Ok(t) => t,
-            Err(_) => continue,
-        };
+        if let Ok(text) = fs::read_to_string(file) {
+            if let Ok(canon) = fs::canonicalize(file) {
+                slug_index.insert(canon, heading_slugs(&text));
+            }
+            contents.push((file.clone(), text));
+        }
+    }
+
+    let mut broken: Vec<(PathBuf, String, &'static str)> = Vec::new();
+    let mut checked = 0usize;
+    for (file, text) in &contents {
         let base = file.parent().unwrap_or(root);
-        for target in markdown_link_targets(&text) {
-            // Skip external schemes and in-page anchors.
+        for target in markdown_link_targets(text) {
             let lower = target.to_ascii_lowercase();
             if lower.starts_with("http://")
                 || lower.starts_with("https://")
                 || lower.starts_with("mailto:")
                 || lower.starts_with("tel:")
-                || target.starts_with('#')
             {
                 continue;
             }
-            // Drop any #anchor or ?query suffix; check the file part.
-            let path_part = target.split(['#', '?']).next().unwrap_or(&target);
-            if path_part.is_empty() {
-                continue;
-            }
+            let (path_part, anchor) = match target.split_once('#') {
+                Some((p, a)) => (p, Some(a)),
+                None => (target.as_str(), None),
+            };
+            let path_part = path_part.split('?').next().unwrap_or(path_part);
             checked += 1;
-            let resolved = base.join(path_part);
-            if !resolved.exists() {
-                broken.push((file.clone(), target));
+
+            // Resolve the target file: empty path means "this same file".
+            let target_file = if path_part.is_empty() {
+                fs::canonicalize(file).ok()
+            } else {
+                let resolved = base.join(path_part);
+                match fs::canonicalize(&resolved) {
+                    Ok(c) => Some(c),
+                    Err(_) => {
+                        broken.push((file.clone(), target.clone(), "missing file"));
+                        continue;
+                    }
+                }
+            };
+
+            // Validate a #anchor only against Markdown targets we indexed.
+            if let Some(anchor) = anchor {
+                if anchor.is_empty() {
+                    continue;
+                }
+                if let Some(tf) = &target_file {
+                    if let Some(slugs) = slug_index.get(tf) {
+                        if !slugs.contains(&anchor.to_ascii_lowercase()) {
+                            broken.push((file.clone(), target.clone(), "missing anchor"));
+                        }
+                    }
+                }
             }
         }
     }
+
     if broken.is_empty() {
         println!(
             "{} {}",
@@ -410,14 +540,73 @@ fn check_doc_links(root: &PathBuf, style: &Style) -> bool {
         true
     } else {
         println!("{}", style.red("✗"));
-        for (file, target) in &broken {
+        for (file, target, why) in &broken {
             let shown = file.strip_prefix(root).unwrap_or(file);
             println!(
-                "    {} {} → {}",
+                "    {} {} → {} ({})",
                 style.red("broken:"),
                 style.dim(&shown.display().to_string()),
-                target
+                target,
+                why
             );
+        }
+        false
+    }
+}
+
+/// Structural invariants of the manifest against the filesystem: every stage
+/// has its test file and at least one hint, every module ships its assets and a
+/// reference solution, and the dashboard knows every module. Cheap, and it
+/// catches the pedagogical gaps that a green test run would not.
+fn check_structure(root: &Path, style: &Style) -> bool {
+    print!("  course structure … ");
+    let _ = std::io::Write::flush(&mut std::io::stdout());
+    let dashboard = fs::read_to_string(root.join("docs").join("dashboard.html")).unwrap_or_default();
+    let mut problems: Vec<String> = Vec::new();
+    for m in MODULES {
+        let cdir = root.join("course").join(m.dir);
+        let ldir = root.join("labs").join(m.dir);
+        for asset in ["README.md", "WALKTHROUGH.md", "exercises.md", "hints.md"] {
+            if !cdir.join(asset).exists() {
+                problems.push(format!("module {}: missing course/{}/{}", m.id, m.dir, asset));
+            }
+        }
+        let reference = root
+            .join("reference")
+            .join("src")
+            .join(format!("{}.rs", reference_stem(m)));
+        if !reference.exists() {
+            problems.push(format!("module {}: missing reference/src/{}.rs", m.id, reference_stem(m)));
+        }
+        let hints_text = fs::read_to_string(cdir.join("hints.md")).unwrap_or_default();
+        for (i, stage) in m.stages.iter().enumerate() {
+            let n = i + 1;
+            let test = ldir.join("tests").join(format!("{}.rs", stage.test_target));
+            if !test.exists() {
+                problems.push(format!(
+                    "module {} stage {}: missing labs/{}/tests/{}.rs",
+                    m.id, n, m.dir, stage.test_target
+                ));
+            }
+            if parse_hints(&hints_text, n).is_empty() {
+                problems.push(format!(
+                    "module {} stage {}: no hint in hints.md (## Stage {})",
+                    m.id, n, n
+                ));
+            }
+        }
+        // The dashboard mirrors the manifest by hand; make sure it hasn't drifted.
+        if !dashboard.contains(&format!("\"{}\"", m.id)) {
+            problems.push(format!("module {}: not listed in docs/dashboard.html", m.id));
+        }
+    }
+    if problems.is_empty() {
+        println!("{} {}", style.green("✓"), style.dim(&format!("({} modules)", MODULES.len())));
+        true
+    } else {
+        println!("{}", style.red("✗"));
+        for p in &problems {
+            println!("    {} {}", style.red("gap:"), style.dim(p));
         }
         false
     }
@@ -431,6 +620,7 @@ fn verify(root: &PathBuf, style: &Style, verbose: bool) -> bool {
     println!("{}", style.bold("Course self-check: reference solutions vs. lab test suites"));
     let mut ok = true;
 
+    ok &= check_structure(root, style);
     ok &= check_doc_links(root, style);
 
     print!("  reference unit tests … ");
@@ -477,12 +667,17 @@ fn verify(root: &PathBuf, style: &Style, verbose: bool) -> bool {
 /// Parse the graduated hints for one stage out of a module's `hints.md`.
 /// Returns the hints in order (hint 1 = gentlest). Format: a `## Stage <k>`
 /// heading, then lines beginning `<n>.` up to the next `##`.
-fn load_hints(root: &PathBuf, module: &Module, stage_1based: usize) -> Vec<String> {
+fn load_hints(root: &Path, module: &Module, stage_1based: usize) -> Vec<String> {
     let path = root.join("course").join(module.dir).join("hints.md");
-    let text = match fs::read_to_string(&path) {
-        Ok(t) => t,
-        Err(_) => return Vec::new(),
-    };
+    match fs::read_to_string(&path) {
+        Ok(text) => parse_hints(&text, stage_1based),
+        Err(_) => Vec::new(),
+    }
+}
+
+/// Pure hints parser (filesystem-free, so it can be unit-tested): pull the
+/// numbered items under the `## Stage <k>` heading out of `text`.
+fn parse_hints(text: &str, stage_1based: usize) -> Vec<String> {
     let mut in_stage = false;
     let mut hints: Vec<String> = Vec::new();
     let mut current = String::new();
@@ -517,7 +712,7 @@ fn load_hints(root: &PathBuf, module: &Module, stage_1based: usize) -> Vec<Strin
                     current.clear();
                 }
                 // Drop the "N." prefix.
-                let rest = t.splitn(2, '.').nth(1).unwrap_or("").trim_start();
+                let rest = t.split_once('.').map(|(_, r)| r).unwrap_or("").trim_start();
                 current.push_str(rest);
             } else if !current.is_empty() {
                 current.push(' ');
@@ -533,7 +728,7 @@ fn load_hints(root: &PathBuf, module: &Module, stage_1based: usize) -> Vec<Strin
 
 /// Show hints for a module/stage. `which` is 1-based; None = show the first
 /// and say how many more exist.
-fn show_hints(root: &PathBuf, style: &Style, module: &Module, stage: usize, which: Option<usize>) -> ExitCode {
+fn show_hints(root: &Path, style: &Style, module: &Module, stage: usize, which: Option<usize>) -> ExitCode {
     if stage == 0 || stage > module.stages.len() {
         eprintln!("module {} has stages 1..={}", module.id, module.stages.len());
         return ExitCode::FAILURE;
@@ -553,9 +748,9 @@ fn show_hints(root: &PathBuf, style: &Style, module: &Module, stage: usize, whic
     }
     let n = hints.len();
     let show = which.unwrap_or(1).clamp(1, n);
-    for i in 0..show {
+    for (i, hint) in hints.iter().take(show).enumerate() {
         println!();
-        println!("  {} {}", style.yellow(&format!("Hint {}/{}:", i + 1, n)), hints[i]);
+        println!("  {} {}", style.yellow(&format!("Hint {}/{}:", i + 1, n)), hint);
     }
     if show < n {
         println!();
@@ -579,7 +774,7 @@ fn show_hints(root: &PathBuf, style: &Style, module: &Module, stage: usize, whic
 }
 
 /// `./grade doctor` — diagnose the environment and workspace.
-fn doctor(root: &PathBuf, style: &Style) -> ExitCode {
+fn doctor(root: &Path, style: &Style) -> ExitCode {
     println!();
     println!("{}", style.bold("Course doctor — checking your setup"));
     let mut ok = true;
@@ -780,6 +975,23 @@ fn main() -> ExitCode {
             }
         }
         Some("doctor") => doctor(&root, &style),
+        Some("next") => match next_unsolved_module(&progress) {
+            None => {
+                println!();
+                println!("{}", style.green("Every stage is complete — congratulations!"));
+                ExitCode::SUCCESS
+            }
+            Some(m) => {
+                let (p, t) = grade_module(&root, &style, m, None, solutions, verbose, &mut progress);
+                println!();
+                if p >= t {
+                    report_module_pass(&root, &style, m, false);
+                    ExitCode::SUCCESS
+                } else {
+                    ExitCode::FAILURE
+                }
+            }
+        },
         Some("bench") => match positional.get(1).and_then(|q| find_module(q)) {
             Some(m) => bench(&root, &style, m),
             None => {
@@ -830,23 +1042,7 @@ fn main() -> ExitCode {
                 let graded = if only_stage.is_some() { 1 } else { t };
                 println!();
                 if p >= graded {
-                    println!(
-                        "{}",
-                        style.green(&format!("Module {} — all graded stages pass.", m.id))
-                    );
-                    println!(
-                        "  {} course/{}/WALKTHROUGH.md — how the reference is built",
-                        style.dim("Deepen:"),
-                        m.dir
-                    );
-                    println!(
-                        "  {} reference/src/{}.rs — Knuth's step-faithful solution, compare with yours",
-                        style.dim("Compare:"),
-                        reference_stem(m),
-                    );
-                    if only_stage.is_none() {
-                        println!("  Next: {}", next_hint(&load_progress(&root)));
-                    }
+                    report_module_pass(&root, &style, m, only_stage.is_some());
                     ExitCode::SUCCESS
                 } else {
                     ExitCode::FAILURE
@@ -869,6 +1065,7 @@ USAGE:
     ./grade                    show progress across all modules
     ./grade <module>           grade a module stage by stage (e.g. ./grade 3)
     ./grade <module> -s <n>    grade a single stage
+    ./grade next               jump to the module with your next unsolved stage
     ./grade all                grade every module
     ./grade verify             self-check: run all lab tests against the
                                built-in reference solutions
@@ -890,4 +1087,81 @@ EXAMPLES:
     ./grade bench 6            watch the sorts' growth curves
 "
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reference_stem_maps_dir_to_file() {
+        let m = Module {
+            id: "11",
+            dir: "module-11-btree-trie",
+            lab_crate: "lab-11-btree-trie",
+            title: "T",
+            source: "S",
+            stages: &[],
+        };
+        assert_eq!(reference_stem(&m), "m11_btree_trie");
+    }
+
+    #[test]
+    fn every_manifest_module_maps_to_a_known_stem() {
+        // Guards the dir → mNN_slug convention against a typo in the manifest.
+        for m in MODULES {
+            let stem = reference_stem(m);
+            assert!(stem.starts_with('m') && stem.contains('_'), "bad stem: {stem}");
+        }
+    }
+
+    #[test]
+    fn markdown_links_are_extracted() {
+        let t = "see [a](x.md) and [b](../y.md#h) but not a bare (paren).";
+        assert_eq!(markdown_link_targets(t), vec!["x.md", "../y.md#h"]);
+        assert!(markdown_link_targets("no links here").is_empty());
+    }
+
+    #[test]
+    fn heading_slugs_follow_github_rules() {
+        assert_eq!(heading_slug("Pacing and difficulty"), "pacing-and-difficulty");
+        assert_eq!(heading_slug("5. Reading Knuth's notation"), "5-reading-knuths-notation");
+        assert_eq!(heading_slug("The `todo!()` convention"), "the-todo-convention");
+        assert_eq!(heading_slug("A — B"), "a--b"); // em-dash dropped, two spaces → two hyphens
+    }
+
+    #[test]
+    fn heading_slugs_collects_all_levels() {
+        let doc = "# Top\n\nprose\n\n## Sub One\n\n### Deep\n";
+        let slugs = heading_slugs(doc);
+        assert!(slugs.contains("top"));
+        assert!(slugs.contains("sub-one"));
+        assert!(slugs.contains("deep"));
+    }
+
+    #[test]
+    fn parse_hints_pulls_numbered_items_for_the_stage() {
+        let md = "\
+## Stage 1: A\n\n1. first hint.\n2. second hint.\n\n## Stage 2: B\n\n1. other stage.\n";
+        let h1 = parse_hints(md, 1);
+        assert_eq!(h1.len(), 2);
+        assert_eq!(h1[0], "first hint.");
+        assert_eq!(h1[1], "second hint.");
+        let h2 = parse_hints(md, 2);
+        assert_eq!(h2, vec!["other stage."]);
+        assert!(parse_hints(md, 3).is_empty());
+    }
+
+    #[test]
+    fn next_unsolved_is_first_gap_then_none_when_complete() {
+        let empty = BTreeSet::new();
+        assert_eq!(next_unsolved_module(&empty).map(|m| m.id), Some("01"));
+        let mut all = BTreeSet::new();
+        for m in MODULES {
+            for s in m.stages {
+                all.insert(stage_key(m, s.test_target));
+            }
+        }
+        assert!(next_unsolved_module(&all).is_none());
+    }
 }

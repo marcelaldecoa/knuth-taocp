@@ -120,6 +120,7 @@ grader/                        the ./grade tool
 ```bash
 ./grade                  # progress overview
 ./grade 3                # grade module 03 stage by stage; stops at first failure
+./grade next             # jump to the module with your next unsolved stage
 ./grade 3 --stage 2      # re-run one stage
 ./grade 3 -s 2 --hint    # stuck? a graduated hint (add a number for the next)
 ./grade 3 -v             # full test output

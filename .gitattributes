@@ -1,0 +1,13 @@
+# Normalize line endings so checkouts are deterministic across platforms.
+# Text files use LF in the repo; the Windows-only wrappers need CRLF to run.
+
+* text=auto eol=lf
+
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Keep the bash wrapper LF even though it has no extension.
+grade text eol=lf
+grade.ps1 text eol=crlf
+grade.cmd text eol=crlf

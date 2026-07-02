@@ -7,7 +7,8 @@ on:
 jobs:
   # The course must be passable exactly as shipped, on every supported
   # toolchain and OS: stubs compile, and every lab suite is green against the
-  # reference solutions.
+  # reference solutions (which also runs the structural + documentation-link
+  # self-checks).
   verify:
     name: verify (${{ matrix.os }}, Rust ${{ matrix.rust }})
     strategy:
@@ -20,9 +21,28 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Rust ${{ matrix.rust }}
         run: rustup toolchain install ${{ matrix.rust }} --profile minimal && rustup default ${{ matrix.rust }}
+      - uses: Swatinem/rust-cache@v2
       - name: Stubs compile (a fresh clone must build)
         run: cargo check --workspace
       - name: Reference doctests and unit tests
         run: cargo test -p taocp-reference
-      - name: Course self-check (all lab suites vs reference solutions)
+      - name: Course self-check (structure, doc links, all lab suites vs reference)
         run: cargo run -q -p grader -- verify
+
+  # The grader is tooling, not pedagogy, so it is held to idiomatic standards
+  # (clippy) and has its own unit tests. The reference solutions are deliberately
+  # exempt: they mirror Knuth's step-faithful style (explicit indexing, no
+  # iterator sugar), which clippy would "fix" against the course's intent — see
+  # CONVENTIONS.md.
+  grader:
+    name: grader lint & tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust (with clippy)
+        run: rustup toolchain install stable --profile minimal --component clippy && rustup default stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Clippy (grader must be warning-free)
+        run: cargo clippy -p grader --all-targets -- -D warnings
+      - name: Grader unit tests
+        run: cargo test -p grader
