@@ -1,0 +1,25 @@
+# Walkthrough — Module 12: The Spectral Test
+
+Read this AFTER a stage is green — it explains how the reference solution is built and why.
+
+## Stage 1: The lattice structure of linear congruential sequences
+
+`tuples` deliberately separates *generation* from *windowing*: it produces `count + t - 1` terms of the sequence into `xs`, then returns `xs[i..i+t]` slices. That is O(count + t) work instead of O(count·t) and, more importantly, it makes the overlap structure literally true in the data — coordinate 1 of tuple `i` is coordinate 0 of tuple `i+1` because they are the same array element. Note the multiply is done in `i128` (`a * x % m128`) before narrowing back to `i64`; with `m` up to 2^31 the product `a·x` overflows `i64`, and this is the single most common bug in a naive version.
+
+`is_dual_vector` is the executable form of the lattice theorem: `u` is dual iff `u1 + a·u2 + ... + a^{t-1}·ut ≡ 0 (mod m)`. The reference keeps a running `pow = a^i mod m` and an accumulator `s` reduced mod `m` at every step, so no intermediate ever grows — `(ui % m) * pow` is a product of two sub-`m` numbers, safe in `i128`. Two subtleties worth stealing: `rem_euclid` is used rather than `%` because `ui` may be negative (Rust's `%` would return a negative residue and break the `== 0` test), and the zero vector is rejected up front, since `u = 0` satisfies every congruence but is not a legitimate dual vector.
+
+## Stage 2: The two-dimensional spectral test, exactly
+
+The reference is a faithful transcription of Gauss–Lagrange steps G1–G4 as a single `loop`. The elegance is in what it *doesn't* store: it never materializes candidate lattice vectors or sorts anything — it keeps exactly two basis vectors and shrinks them. Step G2 recomputes both norms each pass and swaps so `v1` is the longer; G3 uses `div_round` (`(2d+n).div_euclid(2n)`) to get the nearest integer `q` — critically with round-*to-nearest*, not truncation, because the optimality proof needs `|v1·v2| <= (v2·v2)/2`, which only rounding-to-nearest guarantees. G4 exits when a reduction step fails to shorten.
+
+Why it is correct and not just heuristic: the lesson proves each non-terminating pass strictly decreases `min(|v1|, |v2|)`, and squared norms are positive integers, so the loop must halt; and on exit the reduced basis satisfies an inequality forcing `|α·v1 + β·v2|^2 >= |v2|^2` for all integer `(α,β) ≠ 0`, i.e. `v2` really is a global shortest vector, not a local one. A naive "enumerate all `u2` up to some bound and take the centered `u1`" also works (the reference tests use exactly that as `nu2_squared_brute`, justified by the Hermite bound `nu_2^2 <= (2/√3)m`), but reduction reaches the answer in O(log m) steps instead of O(√m).
+
+## Stage 3: Short dual vectors in three dimensions
+
+There is no 2-D-style basis reduction here; the reference instead does a *certified* bounded search, which is both simpler to trust and easy to make exact. The key design decision is reducing a 3-variable minimization to a 2-variable scan: fix `(u2, u3)`, and `u1` is forced modulo `m`, so its best value is the centered residue `|u1| <= m/2`. The inner loop maintains `r = (a·u2 + a^2·u3) mod m` incrementally — one add of `a` and at most one subtract of `m` per step — so the whole `(2B+1)^2` scan costs a couple of integer ops per cell, no `%` in the hot path.
+
+The certification is the part that turns a search into a proof. `best` starts at `m^2` (the always-available vector `(m,0,0)`), and after each full `[-B,B]^2` sweep the code checks `B^2 >= best`; when that holds, any unscanned vector has `|u2| > B` or `|u3| > B` and hence norm `> B^2 >= best`, so it cannot improve the minimum — the answer is exact. Doubling `B` keeps the total work geometric, and Hermite's theorem (`nu_3^2 <= 2^{1/3} m^{2/3}`) bounds the final `B` below ~4096 even at `m = 2^31`, so termination is guaranteed and fast. A version that picks a fixed `B` without the `B^2 >= best` test would be *unsound*: it could miss a short vector just outside the box and report a too-large `nu_3^2`.
+
+## Stage 4: Figures of merit: judging real generators
+
+These two functions are thin, and intentionally so: all the exact arithmetic lives in stages 2–3, and merit is just the normalization that makes lattices of different `m` comparable. `mu2` is `π·nu_2^2/m` (disk volume over determinant); `mu3` is `(4/3)π·nu_3^3/m` (ball volume over determinant), and the square root taken in `mu3` is the deliberate, isolated entry point for floating point — the lattice minimum `nu_3^2` itself was computed exactly, so the only rounding is in the final cosmetic ratio. The payoff is that the frozen test constants tell a story: RANDU scores `mu_3 ≈ 2.5e-6` (its triples lie on 15 planes — Marsaglia's famous failure), Lewis–Goodman–Miller's 16807 scores a mediocre `~0.51`, and Park–Miller's revised 48271 scores an excellent `~3.35`, all under the same `m = 2^31 - 1`. That the same three-line function separates a catastrophe from a good generator is the whole point of the spectral test.
