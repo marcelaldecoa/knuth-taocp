@@ -99,11 +99,24 @@ grader/                        the ./grade tool
 ./grade                  # progress overview
 ./grade 3                # grade module 03 stage by stage; stops at first failure
 ./grade 3 --stage 2      # re-run one stage
+./grade 3 -s 2 --hint    # stuck? a graduated hint (add a number for the next)
 ./grade 3 -v             # full test output
+./grade bench 6          # run a module's growth-curve benchmark
+./grade doctor           # diagnose your toolchain and workspace
 ./grade all              # everything
 ./grade reset            # forget progress
 ./grade verify           # course self-check (see below)
 ```
+
+When a stage is green, the pass message points you to that module's
+`WALKTHROUGH.md` — a design commentary on the reference implementation, for
+the "compare with Knuth's answer" step. Each module also ships graduated
+`hints.md` (three levels, gentlest first) that `--hint` surfaces.
+
+Prefer a visual map? Open [`docs/dashboard.html`](docs/dashboard.html) in a
+browser: every module and stage grouped by volume, with a personal
+click-to-track progress meter (saved in your browser; `./grade` remains the
+authoritative record).
 
 Progress lives in `.taocp/progress` (gitignored). You can always bypass the
 grader and run `cargo test -p lab-03-structures --test stage_02_linked_list`

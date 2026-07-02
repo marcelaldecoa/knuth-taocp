@@ -3,3 +3,8 @@ name = "taocp-reference"
 version = "0.1.0"
 edition = "2021"
 description = "Reference implementations for the TAOCP-in-Rust course"
+
+[features]
+# No-op: lets `cargo test --workspace --features solutions` typecheck; the
+# real solutions wiring lives in the lab crates.
+solutions = []
