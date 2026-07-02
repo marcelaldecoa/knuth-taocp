@@ -216,6 +216,30 @@ marks especially instructive exercises. Log your attempts in
 | 1.1-5 | 12 | Is a recipe from a cookbook an algorithm? Grade it against the five properties. |
 | ▶1.1-9 | 30 | Define formally what it means for two computational methods to be *equivalent*; prove your E and F equivalent under your definition. |
 
+## In the real world
+
+Extended Euclid is not a museum piece: it computes the modular inverses inside
+RSA key generation and elliptic-curve signatures, so a version of your stage-3
+code runs every time your browser opens a TLS connection. Bignum libraries
+(GMP and friends) normalize every rational number with a gcd. And Lamé's
+theorem is the ancestor of a promise you now see in every serious API:
+*a worst-case bound stated as a theorem, not a hope*. Even the definiteness
+drill — panic loudly on inputs the algorithm wasn't defined for — is exactly
+Rust's `assert!`/debug-assertion culture: an algorithm's domain is part of
+its contract.
+
+## Proof techniques you practiced
+
+- **Invariant + decreasing quantity** — the gcd-preservation lemma plus the
+  strictly shrinking remainder: partial correctness and termination,
+  separately, then combined. You will reuse this on every loop you ever prove.
+- **Certification** — Bézout coefficients make the output *checkable* by
+  anyone; stage 3's tests verify the certificate, not your internals.
+- **Extremal witness** — Lamé's theorem is proved by *constructing* the worst
+  input (consecutive Fibonacci numbers), then arguing nothing beats it.
+- **Empirical confirmation of a theorem** — stage 4's exhaustive sweep below
+  F₁₆ is analysis of algorithms as Knuth practices it: derive, then measure.
+
 ## 5. Where this leads
 
 - The **invariant + decreasing quantity** proof pattern returns in every

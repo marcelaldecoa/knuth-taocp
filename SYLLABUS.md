@@ -1,6 +1,6 @@
 # Syllabus
 
-Ten modules, 46 stages. Each stage is one graded test suite
+Fourteen modules, 62 stages. Each stage is one graded test suite
 (`labs/<module>/tests/stage_NN_*.rs`); `./grade <n>` runs them in order.
 Theory a stage needs is in its module's lesson, `course/<module>/README.md` —
 self-contained, book optional.
@@ -100,8 +100,52 @@ Stages: CNF + DIMACS · unit propagation · DPLL (Algorithm D's lineage),
 van der Waerden W(3,3)=9 as the running example · encodings: exactly-one,
 queens, graph coloring (Petersen graph).
 
+---
+
+Modules 11–14 are the advanced tier: each returns to a volume you already
+know and takes its flagship idea further. Do them in any order after their
+prerequisite core module (11 after 07, 12 after 04, 13 after 08, 14 after 10).
+
+## Module 11 — Multiway Trees and Digital Searching (Vol. 3, §6.2.4 & §6.3)
+
+The disk changes the rules: one node = one page, so fan out. Then stop
+comparing keys and start reading their bits.
+
+Stages: B-tree search/insert with node splitting · invariants + the
+log_⌈m/2⌉ height bound · binary tries · Patricia (path compression).
+
+## Module 12 — The Spectral Test (Vol. 2, §3.3.4)
+
+The most demanding mathematics in the course, and Knuth's favorite test of a
+random-number generator: every LCG's t-tuples form a lattice; measure the
+gap between its hyperplanes, exactly.
+
+Stages: the lattice theorem, verified on RANDU · exact 2-D test by
+Gauss–Lagrange reduction · certified short-vector search in 3-D (RANDU's
+ν₃² = 118) · figures of merit for real generators.
+
+## Module 13 — Bitwise Tricks and Binary Decision Diagrams (Vol. 4A, §7.1.3–7.1.4)
+
+Broadword computing — the word as a 64-lane vector — then the data structure
+that made hardware verification possible.
+
+Stages: ruler function, SWAR popcount, Gosper's hack · reduced ordered BDDs
+with hash-consing (canonicity theorem) · model counting + the variable-
+ordering experiment · applications: independent sets are Fibonacci, queens
+by BDD.
+
+## Module 14 — Conflict-Driven Clause Learning (Vol. 4B, §7.2.2.2, Algorithm C)
+
+The capstone: what modern SAT solvers add to Module 10's DPLL, built piece
+by piece.
+
+Stages: two watched literals (backtracking becomes free) · the trail:
+decisions, levels, reasons · first-UIP conflict analysis (learn a clause
+from every failure) · the complete CDCL solver, cross-checked against brute
+force and pitted against pigeonhole and van der Waerden instances.
+
 ## Where to go next (not yet modules — contributions welcome)
 
-B-trees and tries (§6.2.4, §6.3) · external sorting (§5.4) · the spectral
-test (§3.3.4) · bitwise tricks and BDDs (§7.1.3–7.1.4) · XCC with colors ·
-CDCL (Algorithm 7.2.2.2C) · MMIX itself (Vol. 1, Fascicle 1).
+External sorting (§5.4) · the spectral test in dimensions 4–8 · ZDDs and
+XCC with colors (§7.1.4, §7.2.2.1) · Boolean evaluation and bitwise
+techniques beyond §7.1.3 · MMIX itself (Vol. 1, Fascicle 1).

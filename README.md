@@ -48,9 +48,11 @@ Euclid, H_n − 1 expected maxima, the lg(n!) sorting lower bound, AVL's
 
 ## The curriculum
 
-Ten modules, 46 stages, spanning the published volumes. See
+Fourteen modules, 62 stages, spanning the published volumes. See
 [SYLLABUS.md](SYLLABUS.md) for the full map of stages, algorithms, and the
-mathematics each module teaches.
+mathematics each module teaches — and [docs/toolkit.md](docs/toolkit.md) for
+what the journey builds in you: the proof techniques and engineering
+judgments, module by module.
 
 | Module | Covers | Flagship material |
 |---|---|---|
@@ -64,10 +66,16 @@ mathematics each module teaches.
 | 08 Combinatorial Generation | Vol. 4A §7.2.1 | Gray codes, permutations, plain changes, combinations, partitions |
 | 09 Backtracking & Dancing Links | Vol. 4B §7.2.2–.1 | n queens, bitwise backtrack, Algorithm X/DLX, Sudoku |
 | 10 Satisfiability | Vol. 4B §7.2.2.2 | DIMACS, unit propagation, a DPLL solver, SAT encodings |
+| 11 Multiway Trees & Digital Searching | Vol. 3 §6.2.4, §6.3 | B-trees with the height-bound proof; tries; Patricia |
+| 12 The Spectral Test | Vol. 2 §3.3.4 | The lattice hiding inside every LCG; RANDU's 16 planes, computed exactly |
+| 13 Bitwise Tricks & BDDs | Vol. 4A §7.1.3–7.1.4 | Broadword computing; reduced ordered BDDs, canonicity, model counting |
+| 14 Conflict-Driven Clause Learning | Vol. 4B §7.2.2.2 | Watched literals, implication graphs, first-UIP learning — a real SAT solver |
 
 The order is Knuth's own recommended path for implementers (it fronts Vol. 1
 and Vol. 3's implementation-rich chapters and defers the heaviest
-mathematics), and difficulty is gradual within and across modules.
+mathematics), and difficulty is gradual within and across modules. Modules
+01–10 are the core arc; 11–14 are advanced extensions that deepen each
+volume's flagship theme.
 
 ## How the repository is laid out
 
@@ -132,5 +140,6 @@ his MIX-era memory model onto Rust arenas instead (see CONVENTIONS.md).
 
 The course is data: `grader/src/manifest.rs` defines modules and stages, and
 [CONVENTIONS.md](CONVENTIONS.md) defines the contract every module satisfies
-(`./grade verify` enforces it). New modules — B-trees, tries, BDDs, spectral
-test, CDCL — are welcome along the same lines.
+(`./grade verify` enforces it). New modules — external sorting, the higher-
+dimensional spectral test, ZDDs, XCC, MMIX itself — are welcome along the
+same lines.

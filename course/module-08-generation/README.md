@@ -533,6 +533,34 @@ marks especially instructive exercises. Log attempts in
 | 7.2.1.4-1 | 10 | List the 11 partitions of 6 by hand in reverse-lex; check against `partitions(6)`. |
 | ▶7.2.1.4-? | 30 | Derive the pentagonal-number recurrence for p(n) from Euler's product and verify p(50)=204226. |
 
+## In the real world
+
+C++'s `std::next_permutation` is Algorithm L, verbatim — multiset handling
+included. Gray codes live in rotary encoders and ADCs (one bit flips per
+step, so a mid-transition read is off by at most one position), in
+error-masking for asynchronous counters, and in algorithmics wherever a
+set changes by one element per step and you want O(1) incremental updates
+(subset-sum sweeps, Hamiltonian walks on hypercubes). Combination and
+partition generation drive property-based testing, experimental design,
+and the enumeration loops of computational chemistry. When you next see an
+API offering "iterate all k-subsets", you now know the three questions
+that matter: what order, what cost per step, and is it loopless.
+
+## Proof techniques you practiced
+
+- **Induction on recursive structure** — Gray code correctness from its
+  reflection construction; the closed form g(k) = k ⊕ ⌊k/2⌋ verified
+  against it.
+- **Invariant control state** — plain changes' direction/offset tables:
+  a nontrivial invariant maintained across n! steps and provable by
+  induction on n.
+- **Bijections as involutions** — partition conjugation proved by
+  transposing Ferrers diagrams; conjugate∘conjugate = identity is the test.
+- **Order as specification** — lexicographic, reflected-Gray, revolving-
+  door: the *sequence* is part of the contract, and your tests pin it.
+- **Generating-function reasoning** — Euler's pentagonal recurrence for
+  p(n): stated, used, and empirically confirmed to p(100) = 190 569 292.
+
 ## 10. Where this leads
 
 - **Backtracking (Module 09)** generalizes generation: when you cannot afford to

@@ -556,6 +556,36 @@ instructive exercises. Log attempts in
 | 6.4-8 | 22 | Analyse linear probing: derive `(1/2)(1 + 1/(1−α))` for successful search. |
 | ▶6.4-? | 28 | Compare double hashing to uniform hashing; explain secondary clustering. |
 
+## In the real world
+
+Binary search is the most-bugged "trivial" algorithm in history — the
+overflow in `(l + r) / 2` hid in the JDK for nine years, and your
+comparison-count bound is also the audit checklist that catches such
+things. B-tree relatives (Module 11) and balanced BSTs back `BTreeMap`,
+databases, and filesystems; AVL's rotation vocabulary is shared by
+red-black trees, and the balance-factor bookkeeping you fought with is the
+same discipline, just stricter. Open addressing won the modern hash-table
+wars: Swiss tables (abseil, and Rust's std via hashbrown) are open
+addressing tuned for SIMD probing, and their maximum-load-factor constants
+are read directly off the (1 + 1/(1−α))-shaped curves you measured in
+stage 4. Knuth's 1962 linear-probing analysis — the calculation that
+founded analysis of algorithms — now decides when a billion hash maps
+resize.
+
+## Proof techniques you practiced
+
+- **Comparison-tree lower bounds** — ⌊lg n⌋+1 is forced by counting leaves;
+  the same tree gives the BST average-depth recurrence.
+- **Extremal structures** — Fibonacci trees are precisely the skinniest
+  legal AVL trees; height ≤ 1.44 lg n falls out of F_h growth.
+- **Invariants under local surgery** — rotations preserve the BST order
+  invariant while repairing the balance invariant; verified per case.
+- **Probabilistic analysis with dependence** — linear probing's clusters
+  are *not* independent events, which is exactly what makes the analysis
+  (and the empirical load-factor curves) instructive.
+- **Model checking against an oracle** — long deterministic op sequences
+  compared against `BTreeSet`/`HashSet`: the property tester's workhorse.
+
 ## 9. Where this leads
 
 - **Comparison lower bounds** (`lg N`) tie back to Module 06's sorting bound —

@@ -382,6 +382,40 @@ Log attempts in `course/module-04-random/exercises.md`.
 | ▶3.4.2-8 | 22 | Prove Algorithm P generates each permutation with probability 1/t! (you did — stage 3; write it up). |
 | 3.4.2-10 | M25 | Analyze the expected number of moves (slot replacements) reservoir sampling makes over a stream of length N. |
 
+## Why it's done this way
+
+Every stage pairs a *generator* with a *judgment about it*: an LCG with a
+period theorem, a shuffle with a uniformity proof, a statistic with a
+distribution. That pairing is the module's real lesson — Knuth's Chapter 3
+is not a recipe box of generators, it is a training course in *how to
+distrust one*. The famous cautionary tale of §3.1 (his elaborate
+"super-random" Algorithm K that promptly collapsed into a 3178-cycle... or
+into a fixed point) opens the chapter for exactly this reason.
+
+## In the real world
+
+RANDU is not a hypothetical: results computed with it in the 1960s–70s had
+to be re-examined once its 15-plane geometry surfaced, and it remains the
+canonical example of "passes 1-D tests, fails in 3-D". The naive shuffle's
+bias is a production bug class — a random-comparator shuffle famously
+skewed a 2010 browser-choice ballot — and your 27-tape enumeration in
+stage 3 is precisely the audit that catches it. Reservoir sampling runs in
+every stream-analytics stack that must sample fairly from data too big to
+hold. Chi-square is the same machinery behind A/B-test sanity checks:
+stage 2's function is a data-science primitive.
+
+## Proof techniques you practiced
+
+- **Number-theoretic structure** — the full-period theorem ties a program's
+  observable behavior to congruence conditions you can check by hand.
+- **Induction for uniformity** — Algorithm P is proved fair by inducting on
+  the suffix already shuffled.
+- **Divisibility obstruction** — the naive shuffle *cannot* be fair because
+  3³ = 27 outcomes can't split evenly over 6 permutations; no amount of
+  testing is as final as this one-line counting argument.
+- **Hypothesis testing done honestly** — a statistic, its distribution, a
+  significance threshold, and the discipline of not over-reading one run.
+
 ## 8. Where this leads
 
 - The **chi-square test** is the entry point to §3.3's full battery (equi-

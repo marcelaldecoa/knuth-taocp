@@ -317,8 +317,127 @@ pub const MODULES: &[Module] = &[
             },
         ],
     },
+    MODULE_10,
     Module {
-        id: "10",
+        id: "11",
+        dir: "module-11-btree-trie",
+        lab_crate: "lab-11-btree-trie",
+        title: "Multiway Trees and Digital Searching",
+        source: "Vol. 3, §6.2.4 & §6.3",
+        stages: &[
+            Stage {
+                test_target: "stage_01_btree",
+                title: "B-tree search and insertion with node splitting",
+                algorithm: "§6.2.4",
+            },
+            Stage {
+                test_target: "stage_02_btree_analysis",
+                title: "B-tree invariants and the height bound",
+                algorithm: "§6.2.4 analysis",
+            },
+            Stage {
+                test_target: "stage_03_trie",
+                title: "Digital searching: tries",
+                algorithm: "Algorithm 6.3T",
+            },
+            Stage {
+                test_target: "stage_04_patricia",
+                title: "Patricia: compressed binary tries",
+                algorithm: "Algorithm 6.3P",
+            },
+        ],
+    },
+    Module {
+        id: "12",
+        dir: "module-12-spectral",
+        lab_crate: "lab-12-spectral",
+        title: "The Spectral Test",
+        source: "Vol. 2, §3.3.4",
+        stages: &[
+            Stage {
+                test_target: "stage_01_lattice",
+                title: "The lattice structure of linear congruential sequences",
+                algorithm: "§3.3.4 preliminaries",
+            },
+            Stage {
+                test_target: "stage_02_spectral_2d",
+                title: "The two-dimensional spectral test, exactly",
+                algorithm: "Gauss–Lagrange reduction",
+            },
+            Stage {
+                test_target: "stage_03_spectral_3d",
+                title: "Short dual vectors in three dimensions",
+                algorithm: "Algorithm 3.3.4S (bounded search)",
+            },
+            Stage {
+                test_target: "stage_04_merit",
+                title: "Figures of merit: judging real generators",
+                algorithm: "§3.3.4 ratings",
+            },
+        ],
+    },
+    Module {
+        id: "13",
+        dir: "module-13-bits-bdds",
+        lab_crate: "lab-13-bits-bdds",
+        title: "Bitwise Tricks and Binary Decision Diagrams",
+        source: "Vol. 4A, §7.1.3–7.1.4",
+        stages: &[
+            Stage {
+                test_target: "stage_01_bit_tricks",
+                title: "Ruler function, sideways addition, Gosper's hack",
+                algorithm: "§7.1.3",
+            },
+            Stage {
+                test_target: "stage_02_bdd_build",
+                title: "Building reduced ordered BDDs",
+                algorithm: "§7.1.4",
+            },
+            Stage {
+                test_target: "stage_03_bdd_count",
+                title: "Model counting and the ordering problem",
+                algorithm: "Algorithm 7.1.4C",
+            },
+            Stage {
+                test_target: "stage_04_bdd_apps",
+                title: "BDDs at work: independent sets and queens",
+                algorithm: "§7.1.4 applications",
+            },
+        ],
+    },
+    Module {
+        id: "14",
+        dir: "module-14-cdcl",
+        lab_crate: "lab-14-cdcl",
+        title: "Conflict-Driven Clause Learning",
+        source: "Vol. 4B, §7.2.2.2, Algorithm C",
+        stages: &[
+            Stage {
+                test_target: "stage_01_watched_literals",
+                title: "Lazy data structures: two watched literals",
+                algorithm: "§7.2.2.2 (Algorithm C's engine)",
+            },
+            Stage {
+                test_target: "stage_02_trail",
+                title: "The trail: decisions, levels, reasons",
+                algorithm: "§7.2.2.2",
+            },
+            Stage {
+                test_target: "stage_03_clause_learning",
+                title: "Conflict analysis: learning from failure",
+                algorithm: "Algorithm 7.2.2.2C (first UIP)",
+            },
+            Stage {
+                test_target: "stage_04_cdcl_solver",
+                title: "The complete CDCL solver",
+                algorithm: "Algorithm 7.2.2.2C",
+            },
+        ],
+    },
+];
+
+const MODULE_10: Module = Module {
+    id: "10",
         dir: "module-10-sat",
         lab_crate: "lab-10-sat",
         title: "Satisfiability",
@@ -345,8 +464,7 @@ pub const MODULES: &[Module] = &[
                 algorithm: "§7.2.2.2 encodings",
             },
         ],
-    },
-];
+};
 
 /// Find a module by "1", "01", "module-01-...", or a substring of its dir.
 pub fn find_module(query: &str) -> Option<&'static Module> {
