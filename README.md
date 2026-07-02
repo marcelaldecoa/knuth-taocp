@@ -178,8 +178,9 @@ his MIX-era memory model onto Rust arenas instead (see CONVENTIONS.md).
 
 ## Contributing / authoring
 
-The course is data: `grader/src/manifest.rs` defines modules and stages, and
-[CONVENTIONS.md](CONVENTIONS.md) defines the contract every module satisfies
-(`./grade verify` enforces it). New modules — external sorting, the higher-
-dimensional spectral test, ZDDs, XCC, MMIX itself — are welcome along the
-same lines.
+Start with [CONTRIBUTING.md](CONTRIBUTING.md) — it's the front door, from typo
+fixes to whole new modules. The course is data: `grader/src/manifest.rs` defines
+modules and stages, and [CONVENTIONS.md](CONVENTIONS.md) defines the contract
+every module satisfies (`./grade verify` enforces it — labs against the
+reference, and every documentation link resolving). New modules are welcome
+along the same lines; see [SYLLABUS.md](SYLLABUS.md)'s "Where to go next".

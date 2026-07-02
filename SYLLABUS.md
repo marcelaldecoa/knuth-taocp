@@ -5,10 +5,33 @@ Twenty-two modules, 94 stages. Each stage is one graded test suite
 Theory a stage needs is in its module's lesson, `course/<module>/README.md` —
 self-contained, book optional.
 
-Estimated pacing: a module every 1–2 weeks alongside a job. The mathematics
-deepens gradually; nothing beyond comfortable undergraduate discrete math is
-assumed, and the lessons build the rest (induction → sums → asymptotics →
-probabilistic analysis → combinatorics).
+> **New to Knuth?** Read [docs/for-newcomers.md](docs/for-newcomers.md) first
+> (a book-optional primer + how to study), then
+> [docs/getting-started.md](docs/getting-started.md) for setup and commands.
+> [docs/why-knuth-matters.md](docs/why-knuth-matters.md) tours where these
+> algorithms live in modern technology.
+
+The mathematics deepens gradually; nothing beyond comfortable undergraduate
+discrete math is assumed, and the lessons build the rest (induction → sums →
+asymptotics → probabilistic analysis → combinatorics).
+
+## Pacing and difficulty
+
+Rough effort alongside a job — a planning aid, not a stopwatch. Difficulty
+climbs gently inside the core arc and steps up in the advanced tier. The amount
+of hand-holding in the lab *tapers* as you go (see
+[docs/for-newcomers.md §5](docs/for-newcomers.md)): Module 01 is a fully guided
+tour, Modules 02–04 give the algorithm and let you reach for the Rust yourself,
+and from Module 05 on you get the algorithm and the contract.
+
+| Tier | Modules | Character | Per module |
+|---|---|---|---|
+| Foundations | 01–03 | Definitions, the math toolkit, Knuth's memory model. A gentle ramp. | ~1 week |
+| Core methods | 04–10 | Randomness, arithmetic, sorting, searching, generation, backtracking, SAT. The heart of the course. | 1–2 weeks |
+| Advanced tier | 11–22 | Each revisits a volume and pushes its flagship idea further; take any one after its prerequisite core module. Steeper, and a few (12, 14, 16) are genuinely hard. | 1–2 weeks, some more |
+
+Within a module the stages are ordered easy → hard, so partial progress is
+always real progress. `./grade` remembers exactly where you are.
 
 ## Module 01 — The Notion of an Algorithm (Vol. 1, §1.1)
 
