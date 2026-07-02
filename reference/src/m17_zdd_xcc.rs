@@ -49,7 +49,9 @@ enum Op {
 /// A shared arena of ZDD nodes over variables x0 < x1 < x2 < … (smaller
 /// index tested nearer the root). A node `(v, lo, hi)` denotes the family
 ///
-///     F = lo-family  ∪  { s ∪ {v} : s ∈ hi-family },
+/// ```text
+/// F = lo-family  ∪  { s ∪ {v} : s ∈ hi-family },
+/// ```
 ///
 /// i.e. LO = "the member sets not containing v", HI = "the member sets
 /// containing v, with v removed". The arena is kept *reduced* at all

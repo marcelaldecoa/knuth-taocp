@@ -73,7 +73,8 @@ fn color_semantics_unit_cases() {
     branch.add_option(&[0], &[(0, 2)]); // 1
     branch.add_option(&[1], &[(0, 1)]); // 2
     branch.add_option(&[1], &[(0, 2)]); // 3
-    let sols = branch.solve_all();
+    let mut sols = branch.solve_all();
+    sols.sort();
     assert_eq!(sols, vec![vec![0, 2], vec![1, 3]]);
 }
 
@@ -138,10 +139,9 @@ fn word_pair_grid_with_color_matched_crossings() {
     // CROSS, and the colors force them to agree on the letter.
     //
     // Hand derivation of the answer: rows (r0, r1) ∈ D² gives 9 grids;
-    // the columns must also lie in D, which kills (AB, AB) (col1 = BB)
-    // and (BA, BA) (col0 = BB... wait, col0 of (BA, BA) is BB) — check
-    // all nine: AA/AA ✓, AA/AB ✓, AA/BA ✓, AB/AA ✓, AB/AB ✗(col1=BB),
-    // AB/BA ✓, BA/AA ✓, BA/AB ✓, BA/BA ✗(col0=BB). So 7 solutions.
+    // the columns must also lie in D. Checking all nine: AA/AA ✓,
+    // AA/AB ✓, AA/BA ✓, AB/AA ✓, AB/AB ✗ (col1 = BB), AB/BA ✓,
+    // BA/AA ✓, BA/AB ✓, BA/BA ✗ (col0 = BB). So exactly 7 solutions.
     let dict: [(u32, u32); 3] = [(0, 0), (0, 1), (1, 0)];
     let mut x = Xcc::new(4, 4);
     let mut decode: Vec<(&str, usize, (u32, u32))> = Vec::new();
