@@ -523,6 +523,39 @@ ones. Log attempts in `course/module-06-sorting/exercises.md`.
 | ▶5.3.1-3 | 25 | Use Stirling to show `lg(n!) = n lg n − n lg e + O(log n)`, hence the `n lg n` comparison floor (§7). |
 | 5.2.5-4 | 20 | Prove LSD radix sort correct by induction on the digit position, using per-pass stability (§7). |
 
+## In the real world
+
+The standard library sorts you call every day are direct descendants of
+this module. TimSort (Python, Java, and Rust's stable `sort`) is natural
+merge sort industrialized: it finds the runs your `count_runs` counts,
+extends short ones with insertion sort, and merges adaptively — Knuth's
+§5.2.4 plus fifty years of constant-factor engineering. Rust's unstable
+`sort_unstable` (pdqsort) is Algorithm Q hardened: median-of-three
+pivoting, the same insertion-sort cutoff M you implemented, plus modern
+pattern defenses against the adversarial inputs you built in stage 3's
+tests. Radix sort owns GPUs and database columnar engines, exactly because
+it escapes the lg n! bound you proved. And inversions are Kendall's tau:
+your stage-1 counter is the kernel of rank-correlation statistics used in
+recommender-system evaluation.
+
+## Proof techniques you practiced
+
+- **Loop invariants** — every sort carries one; quicksort's partition
+  invariant is the exemplar.
+- **Bijection and conservation** — moves = inversions (each insertion-sort
+  move removes exactly one), and n(n−1)/4 average inversions by pairing
+  each permutation with its reverse.
+- **Recurrence solving** — quicksort's average unwound to 2(n+1)Hₙ-style
+  form by the telescoping/perturbation trick from Module 02.
+- **Amortization by summation** — heap construction is O(n) because the sum
+  of subtree heights telescopes; a bound nobody guesses and everybody can
+  verify.
+- **Information-theoretic lower bound** — lg n! ≈ n lg n − n lg e via
+  Stirling, plus the adversary that enforces it — and the two honest escape
+  hatches (radix: more information per operation; hashing: Module 07).
+- **Induction over passes** — LSD radix correctness rides entirely on
+  per-pass stability.
+
 ## 11. Where this leads
 
 - **Inversions** and the `lg(n!)` bound are the entry point to §5.3

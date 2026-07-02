@@ -270,6 +270,43 @@ Ratings: 00 immediate · 20 an hour · 30 hours · 40 term project · 50 open.
 | ▶7.2.2.1–? | 30 | Extend `ExactCover` with *secondary* items (columns that may be covered at most once, not exactly once) — the "XC" variant. |
 | 7.2.2.1–? | 35 | Implement Knuth's random-probe tree-size estimator and compare its prediction to the true n-queens tree for n ≤ 12. |
 
+## Why it's done this way
+
+The module's arc — brute backtrack, then bitwise state, then dancing links —
+is one question asked three times with rising sophistication: *what does it
+cost to try something and take it back?* Arrays you overwrite (cheap try,
+cheap untry), bitmasks you shift (try and untry become register operations),
+and finally doubly linked lists whose deletions remember how to heal
+themselves. Knuth's insistence on reversibility-by-design, rather than
+copy-and-restore, is the deep habit this module installs.
+
+## In the real world
+
+Dancing links powers real exact-cover engines: puzzle generators
+(commercial Sudoku setters rate difficulty by DLX search statistics),
+tiling and layout tools, and Knuth's own XCC solvers that researchers use
+for combinatorial design search. Bitwise backtracking is the soul of chess
+engines — bitboards are Walker's trick industrialized. The undo discipline
+of cover/uncover is the same pattern as database transaction rollback and
+editor undo stacks: mutate with a plan for exact reversal. And Knuth's
+Monte Carlo tree-size estimator (§7.2.2) anticipates how modern solvers
+predict search effort before committing to it.
+
+## Proof techniques you practiced
+
+- **Reversible-mutation invariants** — cover followed by uncover restores
+  the structure *exactly*, provable because undeletion uses the deleted
+  node's own intact links, LIFO order.
+- **Symmetry and known-value cross-checks** — the n-queens sequence
+  (1, 0, 0, 2, 10, 4, 40, 92, …) as a multi-point anchor against three
+  independent implementations.
+- **Reduction with a bijection proof** — Sudoku solutions correspond
+  one-to-one with exact covers of the 324-item universe; stage 4's tests
+  check the bijection's both directions.
+- **Heuristic justified by counting** — the MRV column choice minimizes
+  branching factor at the root of each subtree; you watched it collapse
+  node counts.
+
 ## 8. Where this leads
 
 - **Secondary items and colors (XCC).** Knuth's §7.2.2.1 continues into exact

@@ -406,6 +406,44 @@ especially instructive exercises. Log your attempts in
 (Numbers are indicative; consult Vol. 4B for the exact statements — the section
 has over 500 exercises.)
 
+## Why it's done this way
+
+SAT closes the course's Volume 4B arc because it *unifies* it: DPLL is
+Algorithm 7.2.2B's backtracking with inference bolted on, the encodings of
+stage 4 are Module 09's reductions generalized, and the semantic
+test-validation style (models checked by evaluation, never by comparison
+to a blessed answer) is certification — Module 01's Bézout idea — grown
+up. We build DPLL rather than jumping straight to CDCL for a Knuthian
+reason: you cannot value clause learning until you have watched plain
+DPLL rediscover the same conflict a thousand times.
+
+## In the real world
+
+After the 1994 Pentium FDIV recall, the hardware industry adopted formal
+verification built on SAT; every shipped CPU today has had SAT solvers
+argue for its correctness. Package managers (conda, PHP's Composer) encode
+dependency resolution as SAT. Solvers schedule crews, verify device
+drivers, and find cryptographic collisions. The DIMACS format you parse in
+stage 1 is the lingua franca of an annual competition that has driven
+solver performance up several orders of magnitude since 2000 — Knuth
+himself ships SAT13 and friends, and §7.2.2.2 is his 300-page love letter
+to the field.
+
+## Proof techniques you practiced
+
+- **Completeness by induction** — DPLL explores a binary tree of
+  assignments; correctness on both branches lifts to the root.
+- **Faithful reduction** — pigeonhole, queens, coloring, van der Waerden:
+  each encoding proved to preserve solutions both ways before being
+  trusted.
+- **Certificates and asymmetry** — a model is a checkable SAT certificate;
+  UNSAT has no small witness in general (that asymmetry *is* NP vs co-NP),
+  which is why your tests verify models semantically but must trust the
+  solver's UNSAT verdicts — cross-checked by brute force where feasible.
+- **Lower-bound awareness** — Haken's theorem (resolution needs
+  exponential proofs for pigeonhole) tells you *why* stage 3's solver
+  grinds on PHP, and what Module 14's clause learning can and cannot fix.
+
 ## 11. Where this leads
 
 - **CDCL / Algorithm C.** Conflict analysis, clause learning, and

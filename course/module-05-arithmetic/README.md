@@ -101,24 +101,43 @@ wins, so real implementations — and your `big_mul_karatsuba` — switch over.
 ## 3. The binary gcd (§4.5.2)
 
 You proved Euclid correct in Module 01. But division is the most expensive
-integer operation on real hardware. Josef Stein's 1967 **binary gcd** avoids it
-entirely, using only subtraction, parity tests, and shifts:
+integer operation on real hardware. The **binary gcd** (published by Josef
+Stein in 1967; Knuth notes the idea may go back to first-century China) avoids
+division entirely, using only subtraction, parity tests, and shifts. Here is
+Knuth's Algorithm B, for positive integers u and v (t is a signed helper
+variable holding +u or −v):
 
 ```text
-B1. [Find power of 2.]  If u and v are both even, gcd = 2·gcd(u/2, v/2);
-                        pull out the common factor 2^k once, up front.
-B2. [Remove 2s.]        Now at least one is odd. Halve whichever are even
-                        (a factor of 2 in one operand can't be common).
-B3. [Subtract.]         With both odd, the larger minus the smaller is even
-                        and smaller than the larger; reduce and repeat.
-B6. [Done.]             When one operand hits 0, the other times 2^k is gcd.
+B1. [Find power of 2.]  Set k <- 0; then repeatedly set u <- u/2, v <- v/2,
+                        k <- k+1, until u and v are not both even.
+B2. [Initialize.]       If u is odd, set t <- -v and go to B4;
+                        otherwise set t <- u.
+B3. [Halve t.]          (t is even and nonzero.) Set t <- t/2.
+B4. [Is t even?]        If t is even, go back to B3.
+B5. [Reset max(u,v).]   If t > 0, set u <- t; otherwise set v <- -t.
+                        (The larger of u, v is replaced by |t|; both odd now.)
+B6. [Subtract.]         Set t <- u - v. If t != 0, go back to B3.
+                        Otherwise the answer is u * 2^k.
 ```
 
-Correctness rests on three facts, one per case: gcd(2u,2v) = 2·gcd(u,v);
-gcd(2u,v) = gcd(u,v) when v is odd; and gcd(u,v) = gcd(u−v,v). Each step either
-halves a value or replaces the pair by a smaller one, so it terminates in
-O(log(uv)) steps — and every step is a shift or subtract. Convention:
-gcd(0,n) = n. The lab's `binary_gcd` must agree with Euclid on a whole grid.
+Correctness rests on three gcd identities, one per case:
+
+1. gcd(2u, 2v) = 2·gcd(u, v)                — step B1 pulls out common 2s;
+2. gcd(2u, v) = gcd(u, v) when v is odd     — steps B3/B4 discard useless 2s;
+3. gcd(u, v) = gcd(u − v, v)                — step B6, and u − v is *even*
+   when u, v are both odd, feeding B3 again.
+
+Each trip through B3–B6 halves |t| at least once and never increases
+max(u, v), so the algorithm terminates after O(log uv) shift/subtract steps.
+
+**Hand trace on u = 48, v = 18.** B1: both even → (24, 9), k = 1; stop (9 is
+odd). B2: u = 24 even → t = 24. B3/B4: 24 → 12 → 6 → 3 (odd). B5: t > 0 →
+u = 3. B6: t = 3 − 9 = −6 ≠ 0. B3/B4: −6 → −3 (odd). B5: t < 0 → v = 3.
+B6: t = 3 − 3 = 0 → answer 3·2¹ = **6**. ✓ (gcd(48,18) = 6.)
+
+Knuth's own worked example is gcd(40902, 24140) = 34 = 2·17 — the lab pins it,
+and `binary_gcd` must also agree with Euclid on a whole grid. Convention
+(consistent with §4.5.2): gcd(0, n) = gcd(n, 0) = n.
 
 ---
 
@@ -200,6 +219,43 @@ Ratings: 00 immediate · 20 an hour · 30 hours · 40 term project · 50 open.
 | 4.3.3–? | 30 | Work out the constant in Karatsuba's recurrence; find the crossover with classical multiply empirically. |
 | ▶4.5.2–? | 28 | Compare the number of steps of binary gcd vs Euclid on Fibonacci pairs. |
 | 4.5.4–? | 35 | Implement Pollard's rho factoring and factor a 60-bit semiprime. |
+
+## Why it's done this way
+
+Base 2³² limbs in a `Vec<u32>` are Knuth's "base-b digits" with b chosen so
+that a limb product fits in a hardware word pair — the exact consideration
+(§4.3.1) that made him analyze carry bounds so carefully. The canonical-form
+rule (no leading zero limbs) is definiteness applied to data: one value, one
+representation, testable equality. And the classical-before-clever ordering
+(Algorithm M before Karatsuba) is the chapter's thesis in miniature: you
+cannot appreciate — or correctly cut over to — the O(n^1.585) algorithm
+until you know exactly what the O(n²) one costs.
+
+## In the real world
+
+Your stage 1–3 functions are a miniature GMP: real bignum libraries are
+Algorithms A/S/M plus Karatsuba (then Toom–Cook and FFT beyond some size),
+with the same cutover tuning your Karatsuba threshold models. Binary gcd
+variants run inside cryptographic libraries where division timing leaks
+secrets. Miller–Rabin with a deterministic witness set is not an
+approximation of practice — it *is* practice: mainstream crypto libraries
+run exactly this test on candidate primes for your TLS keys, and the
+u64-witness result you verified is the reason competitive programmers treat
+64-bit primality as a solved O(12 · log n) subroutine.
+
+## Proof techniques you practiced
+
+- **Invariant bounds on intermediate values** — the carry fits because
+  (b−1)² + (b−1) + (b−1) = b² − 1 < b²: arithmetic correctness as an
+  inequality you prove once and assert everywhere.
+- **Divide-and-conquer recurrences** — T(n) = 3T(n/2) + O(n) solved by the
+  recursion tree; the exponent lg 3 falls out, not in.
+- **Exhaustive case analysis** — binary gcd's three identities, one per
+  parity case, welded into a terminating whole.
+- **The √1 argument** — a nontrivial square root of 1 mod n factors n:
+  group theory converted directly into a composite-detector.
+- **Quantified probabilistic guarantees** — error ≤ 4⁻ᵏ per k rounds, and
+  the honest asymmetry: "probably prime" vs "certainly composite".
 
 ## 8. Where this leads
 

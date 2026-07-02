@@ -460,6 +460,42 @@ in `course/module-02-math/exercises.md`.
 | ▶1.2.10-... | M21 | Compute the variance of A in Algorithm M from G_n(z), and verify Var(A) = H_n − H_n^(2) numerically for n = 6 against the exact histogram. |
 | 1.2.11.1-... | M15 | True or false, with proof or counterexample: (a) O(n) + O(n) = O(n); (b) 2^{O(n)} = O(2^n); (c) if f = O(g) then ln f = O(ln g). |
 
+## Why it's done this way
+
+Knuth spends a hundred pages on "preliminaries" because analysis of
+algorithms is *applied* discrete mathematics: every later cost function is a
+sum, every average is an expectation, every bound is an asymptotic statement.
+The module's shape — closed forms before asymptotics, exact rationals before
+floating approximations — mirrors his discipline: *compute exactly first,
+approximate knowingly second*. That is why stage 4 makes you build Hₙ as an
+exact fraction before comparing it with ln n + γ.
+
+## In the real world
+
+Harmonic numbers are the most-quoted constant in practical average-case
+analysis: the expected number of times a "best so far" record updates
+(Algorithm M — your stage 5) is H_n − 1, which is why streaming max/min
+loops and secretary-problem-style cutoff rules are cheap in practice.
+Binomial coefficients price out test-coverage combinatorics and reliability
+calculations. Fast-doubling Fibonacci is the toy case of evaluating any
+linear recurrence in O(log n) time — the trick behind Markov-chain powers
+and path counting in graphs. And O-notation is simply the contract language
+of the industry; this module is where you learn to read its fine print
+(the constants, and where they hide).
+
+## Proof techniques you practiced
+
+- **Induction**, stated honestly with base case and hypothesis — the engine
+  under every identity here.
+- **The perturbation method** — derive a sum by shifting it against itself
+  (the geometric series here; quicksort's recurrence in Module 06).
+- **Double counting** — Vandermonde's convolution counts one committee two
+  ways.
+- **Linearity of expectation** — E[A] = H_n − 1 without ever touching the
+  (messy) distribution of A itself.
+- **Exact-then-asymptotic** — Hₙ as a reduced fraction first, then the
+  |Hₙ − ln n − γ| < 1/(2n) approximation with an error you can certify.
+
 ## 11. Where this leads
 
 - **H_n − 1 is a template.** The same indicator-plus-linearity argument

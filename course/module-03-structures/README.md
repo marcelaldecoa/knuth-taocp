@@ -519,6 +519,40 @@ especially instructive ones. Log attempts in
 | 2.3.1-21 | 22 | Prove Algorithm S returns the inorder successor for every node, including the last. |
 | ▶2.3.1-23 | 24 | Write the threaded insertion Algorithm I and prove it preserves all threads. |
 
+## Why it's done this way
+
+Knuth's MIX-era memory model — INFO and LINK fields in flat storage, an
+AVAIL list of free cells, Λ for "no link" — looks dated until you write a
+linked structure in Rust. Then it turns out to be the *idiomatic* answer:
+a `Vec<Node>` arena with `usize` links sidesteps the borrow checker's
+hostility to pointer cycles, keeps nodes cache-adjacent, and makes every
+"pointer" printable and testable. We use it in every tree module that
+follows, not out of nostalgia but because the 1968 memory model and the
+2020s performance model agree.
+
+## In the real world
+
+Topological sort *is* your build system: cargo, make, and every CI pipeline
+run Algorithm 2.2.3T's in-degree-and-queue idea over dependency graphs, and
+spreadsheets recompute cells with it. Arena allocation is how rustc itself
+stores its ASTs, how game engines lay out entities, and how databases
+manage pages. The threaded tree's central trick — a structure whose unused
+null links are recycled to encode extra navigation for free — resurfaces in
+succinct data structures and in the parent-pointer compression tricks of
+modern B-tree implementations. And the stack-realizability question of
+stage 1 is a bona fide interview classic with a Catalan-number answer.
+
+## Proof techniques you practiced
+
+- **Data-structure invariants** — each operation preserves a stated shape
+  property (queue wraparound, AVAIL-list integrity, thread correctness).
+- **Counting via bijection** — binary trees ↔ balanced parenthesis strings
+  ↔ stack-realizable outputs: three faces of the Catalan numbers.
+- **Structural induction on trees** — traversal correctness and the
+  preorder+inorder reconstruction argument.
+- **Conservation arguments** — topological sort terminates having output
+  everything iff no cycle exists: count what enters and leaves the queue.
+
 ## 10. Where this leads
 
 - The **AVAIL free list** is the seed of dynamic storage allocation (§2.5) and
