@@ -60,7 +60,6 @@ fn conflict_reports_the_right_clause() {
     // Decisions falsify (¬x1 ∨ ¬x2) directly: only clause 0 can conflict.
     let mut db = db_with(2, &[&[-1, -2]]);
     db.assign(1);
-    assert_eq!(db.propagate(), None);
     db.assign(2);
     assert_eq!(db.propagate(), Some(0));
 

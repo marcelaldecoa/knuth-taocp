@@ -92,30 +92,40 @@ fn backjump_pops_exactly_the_right_suffix() {
 /// a miniature of what the stage-4 driver will do.
 #[test]
 fn integrated_scenario_with_watched_clauses() {
-    let mut db = ClauseDb::new(4);
+    let mut db = ClauseDb::new(6);
     db.add_clause(vec![-1, 2]); // c0
-    db.add_clause(vec![-2, 3]); // c1
-    db.add_clause(vec![-3, -4]); // c2
-    let mut trail = Trail::new(4);
+    db.add_clause(vec![-6, -2, 3]); // c1
+    db.add_clause(vec![-1, -3]); // c2
+    let mut trail = Trail::new(6);
 
-    // Decision level 1: x1 = true. Propagation forces x2 then x3.
+    // Decision level 1: x6 = true. Nothing becomes unit.
+    trail.decide(6);
+    db.assign(6);
+    assert_eq!(db.propagate(), None);
+    assert_eq!(db.take_implications(), vec![]);
+    assert_eq!(trail.literals(), &[6]);
+
+    // Decision level 2: x1 = true forces x2 (c0) and ¬x3 (c2), which
+    // together falsify c1 = (¬x6 ∨ ¬x2 ∨ x3) — and only c1: its rivals
+    // are both satisfied, so the conflict is unique whatever the watcher
+    // order.
     trail.decide(1);
     db.assign(1);
-    assert_eq!(db.propagate(), None);
+    assert_eq!(db.propagate(), Some(1), "the conflict must name c1");
     for (lit, reason) in db.take_implications() {
         trail.enqueue(lit, Some(reason));
     }
-    assert_eq!(trail.literals(), &[1, 2, 3]);
-    assert_eq!(trail.decision_level(), 1);
-    assert_eq!(trail.level_of(2), Some(1));
-    assert_eq!(trail.level_of(3), Some(1));
-    assert_eq!(trail.reason_of(2), Some(0));
-    assert_eq!(trail.reason_of(3), Some(1));
-
-    // Decision level 2: x4 = true falsifies c2 = (¬x3 ∨ ¬x4).
-    trail.decide(4);
-    db.assign(4);
-    assert_eq!(db.propagate(), Some(2), "the conflict must name c2");
+    assert_eq!(trail.decision_level(), 2);
+    assert_eq!(trail.len(), 4, "6, 1 and the two forced literals");
+    assert_eq!(trail.level_of(1), Some(2));
+    assert_eq!(trail.level_of(2), Some(2));
+    assert_eq!(trail.level_of(3), Some(2));
+    assert_eq!(trail.reason_of(1), None, "x1 was a decision");
+    assert_eq!(trail.reason_of(2), Some(0), "x2 was forced by c0");
+    assert_eq!(trail.reason_of(3), Some(2), "x3 was forced by c2");
+    let mut level2 = trail.assignments_at_level(2).to_vec();
+    level2.sort_unstable();
+    assert_eq!(level2, vec![-3, 1, 2], "same set whatever the watcher order");
 
     // Undo both levels; ClauseDb and Trail stay in sync, no watch fixup.
     for lit in trail.backjump(0) {
@@ -123,15 +133,16 @@ fn integrated_scenario_with_watched_clauses() {
     }
     assert_eq!(trail.len(), 0);
     assert_eq!(trail.decision_level(), 0);
-    for v in 1..=4 {
+    for v in 1..=6i32 {
         assert_eq!(db.value(v), None);
         assert_eq!(trail.level_of(v as usize), None);
     }
     assert!(db.check_watch_invariant());
 
-    // A different level 1 succeeds: ¬x4 first, then x1 propagates cleanly.
-    trail.decide(-4);
-    db.assign(-4);
+    // A different level 1 succeeds: with ¬x6, clause c1 is satisfied and
+    // the same x1 decision now propagates without conflict.
+    trail.decide(-6);
+    db.assign(-6);
     assert_eq!(db.propagate(), None);
     trail.decide(1);
     db.assign(1);
@@ -140,7 +151,7 @@ fn integrated_scenario_with_watched_clauses() {
         trail.enqueue(lit, Some(reason));
     }
     assert_eq!(db.value(2), Some(true));
-    assert_eq!(db.value(3), Some(true));
-    assert_eq!(trail.assignments_at_level(2), &[1, 2, 3]);
+    assert_eq!(db.value(3), Some(false));
+    assert_eq!(trail.level_of(2), Some(2));
     assert!(db.check_watch_invariant());
 }
