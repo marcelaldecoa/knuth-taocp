@@ -1,18 +1,35 @@
 //! Module 02 — Mathematical Preliminaries (TAOCP Vol. 1, §1.2).
 //!
-//! YOUR WORKSPACE. Replace each `todo!()` with an implementation, then run
-//! `./grade 2` from the repository root. Work the stages in order — each
-//! test file `tests/stage_NN_*.rs` corresponds to one stage, and the lesson
-//! in `course/module-02-math/README.md` develops all the mathematics you
-//! need (closed forms, binomial identities, Fibonacci facts, harmonic
-//! numbers, and the analysis of Algorithm M).
+//! # YOUR WORKSPACE — one rung up from the guided tour
+//!
+//! Replace each `todo!()` with an implementation, then run `./grade 2` from the
+//! repository root. Work the stages in order; each `tests/stage_NN_*.rs`
+//! corresponds to one stage, and the lesson in `course/module-02-math/README.md`
+//! develops all the mathematics you need (closed forms, binomial identities,
+//! Fibonacci facts, harmonic numbers, and the analysis of Algorithm M).
+//!
+//! **The scaffolding is lighter here than in Module 01 — on purpose.** Each stub
+//! below still gives you the *mathematics* and the *approach* (the closed form,
+//! the identity, the recurrence, the step-labelled algorithm). What it no longer
+//! does is name the exact Rust method or operator for every line — that's now
+//! yours to reach for. This is a skill worth building: the Rust standard-library
+//! docs at <https://doc.rust-lang.org/std/> are searchable and excellent, and
+//! for integers you'll live in
+//! [`u128`](https://doc.rust-lang.org/std/primitive.u128.html) and
+//! [`i128`](https://doc.rust-lang.org/std/primitive.i128.html) (note `.pow()`,
+//! `.min()`, `.rev()`). The safety nets from Module 01 all remain: the lesson,
+//! three graduated hints per stage (`./grade 2 -s K --hint`), the reference
+//! solution, and `WALKTHROUGH.md`.
 //!
 //! Everything here is exact integer arithmetic except `harmonic_f64`. No
 //! external crates; write private helpers (e.g. a gcd) freely — only the
-//! public names and signatures below are part of the contract.
+//! public names and signatures below are part of the contract. Tip: you already
+//! wrote Euclid's algorithm in Module 01 — a `gcd` helper returns here as a
+//! subroutine for the exact harmonic fractions.
 
 // ---------------------------------------------------------------------------
 // Stage 1 — Sums in closed form (§1.2.3)
+// Stuck? `./grade 2 -s 1 --hint` (add a number for the next, deeper hint).
 // ---------------------------------------------------------------------------
 
 /// 1 + 2 + ... + n, exactly, for any `u64` input.
@@ -61,6 +78,7 @@ pub fn geometric_sum(x: i128, n: u32) -> i128 {
 
 // ---------------------------------------------------------------------------
 // Stage 2 — Binomial coefficients (§1.2.6)
+// Stuck? `./grade 2 -s 2 --hint`.
 // ---------------------------------------------------------------------------
 
 /// The binomial coefficient C(n, k), exactly; 0 when k > n.
@@ -83,6 +101,7 @@ pub fn binomial(n: u32, k: u32) -> u128 {
 
 // ---------------------------------------------------------------------------
 // Stage 3 — Fibonacci numbers (§1.2.8)
+// Stuck? `./grade 2 -s 3 --hint`.
 // ---------------------------------------------------------------------------
 
 /// The Fibonacci number F_n, with Knuth's indexing:
@@ -99,6 +118,7 @@ pub fn fibonacci(n: u32) -> u128 {
 
 // ---------------------------------------------------------------------------
 // Stage 4 — Harmonic numbers (§1.2.7)
+// Stuck? `./grade 2 -s 4 --hint`.
 // ---------------------------------------------------------------------------
 
 /// The harmonic number H_n = 1 + 1/2 + ... + 1/n as an exact fraction
@@ -124,6 +144,7 @@ pub fn harmonic_f64(n: u64) -> f64 {
 
 // ---------------------------------------------------------------------------
 // Stage 5 — Algorithm 1.2.10M: finding the maximum
+// Stuck? `./grade 2 -s 5 --hint`.
 // ---------------------------------------------------------------------------
 
 /// Algorithm 1.2.10M (Find the maximum). Given X[1..n] with n >= 1, return
