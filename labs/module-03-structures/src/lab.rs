@@ -5,6 +5,14 @@
 //! test file `tests/stage_NN_*.rs` corresponds to one stage, and the lesson
 //! in `course/module-03-structures/README.md` walks you through the theory.
 //!
+//! **Scaffolding tier (same as Modules 02 and 04):** each stub gives you the
+//! algorithm — Knuth's step labels, the equations, the error policy — and a
+//! suggested field layout, but leaves the Rust to you. Reach for the standard
+//! library yourself (<https://doc.rust-lang.org/std/>); you'll lean on
+//! [`Vec`](https://doc.rust-lang.org/std/vec/struct.Vec.html) and
+//! [`Option`](https://doc.rust-lang.org/std/option/enum.Option.html) here. The
+//! nets remain: lesson, `./grade 3 -s K --hint`, reference, `WALKTHROUGH.md`.
+//!
 //! **Memory model for the whole module** (see the lesson, §2): Knuth's
 //! linked memory becomes an index-based arena — a `Vec` of cells addressed
 //! by `usize` indices, with the null link Λ represented by [`LAMBDA`]
@@ -30,6 +38,7 @@ pub struct Underflow;
 
 // ---------------------------------------------------------------------------
 // Stage 1 — §2.2.1–2.2.2: stacks and queues in sequential storage
+// Stuck? `./grade 3 -s 1 --hint` (add a number for the next, deeper hint).
 // ---------------------------------------------------------------------------
 
 /// A fixed-capacity stack in sequential storage (§2.2.2, eq. (2)–(3)).
@@ -165,6 +174,7 @@ pub fn stack_permutable(perm: &[usize]) -> bool {
 
 // ---------------------------------------------------------------------------
 // Stage 2 — §2.2.3: linked allocation with an AVAIL list
+// Stuck? `./grade 3 -s 2 --hint`.
 // ---------------------------------------------------------------------------
 
 /// An arena of one-word nodes, each with an INFO field and a LINK field,
@@ -257,6 +267,7 @@ impl<T> LinkedArena<T> {
 
 // ---------------------------------------------------------------------------
 // Stage 3 — Algorithm 2.2.3T: topological sorting
+// Stuck? `./grade 3 -s 3 --hint`.
 // ---------------------------------------------------------------------------
 
 /// Algorithm 2.2.3T (Topological sort).
@@ -291,6 +302,7 @@ pub fn topological_sort(n: usize, relations: &[(usize, usize)]) -> Option<Vec<us
 
 // ---------------------------------------------------------------------------
 // Stage 4 — §2.3.1, Algorithm 2.3.1T: binary trees and their traversal
+// Stuck? `./grade 3 -s 4 --hint`.
 // ---------------------------------------------------------------------------
 
 /// A binary tree in an index arena: each node has INFO, LLINK, RLINK, with
@@ -408,6 +420,7 @@ pub fn from_traversals<T: Clone + PartialEq>(preorder: &[T], inorder: &[T]) -> B
 
 // ---------------------------------------------------------------------------
 // Stage 5 — §2.3.1, Algorithm 2.3.1S: threaded binary trees
+// Stuck? `./grade 3 -s 5 --hint`.
 // ---------------------------------------------------------------------------
 
 /// A **fully threaded** binary tree with a list head (§2.3.1). Every

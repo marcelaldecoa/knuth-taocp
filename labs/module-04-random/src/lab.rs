@@ -6,6 +6,15 @@
 //! in `course/module-04-random/README.md` teaches the theory each stage
 //! needs (full-period theorem, chi-square, uniformity proofs).
 //!
+//! **Scaffolding tier (same as Modules 02 and 03):** each stub states the
+//! recurrence or the step-labelled algorithm and the exact contract the tests
+//! check, but leaves the Rust to you — including which integer method avoids
+//! overflow (look at [`u64`](https://doc.rust-lang.org/std/primitive.u64.html)'s
+//! `wrapping_mul`/`wrapping_add`, and computing in
+//! [`u128`](https://doc.rust-lang.org/std/primitive.u128.html) when a product
+//! could exceed 64 bits). The nets remain: lesson,
+//! `./grade 4 -s K --hint`, reference, `WALKTHROUGH.md`.
+//!
 //! Convention used throughout the course: keep Knuth's step labels
 //! (P1, P2, ...) as comments in your implementation.
 //!
@@ -14,6 +23,11 @@
 //! return a value uniform in `0..bound`. The tests build such closures
 //! from your `Lcg` using the *high-order* bits — the lesson explains why
 //! `x % bound` on a power-of-two-modulus LCG would be a disaster.
+
+// ---------------------------------------------------------------------------
+// Stage 1 — §3.2.1: the linear congruential generator and its period
+// Stuck? `./grade 4 -s 1 --hint` (add a number for the next, deeper hint).
+// ---------------------------------------------------------------------------
 
 /// Stage 1 — The linear congruential generator (§3.2.1):
 ///
@@ -81,6 +95,11 @@ pub fn period(a: u64, c: u64, m: u64, seed: u64) -> u64 {
     todo!("direct cycle detection: first repeated state closes the cycle")
 }
 
+// ---------------------------------------------------------------------------
+// Stage 2 — §3.3.1: the chi-square test
+// Stuck? `./grade 4 -s 2 --hint`.
+// ---------------------------------------------------------------------------
+
 /// Stage 2 — the chi-square statistic V of §3.3.1:
 ///
 /// ```text
@@ -107,6 +126,11 @@ pub fn chi_square_uniform(counts: &[u64]) -> f64 {
     let _ = counts;
     todo!("equal expected counts n/k, then delegate to chi_square")
 }
+
+// ---------------------------------------------------------------------------
+// Stage 3 — Algorithm 3.4.2P: shuffling (Fisher–Yates), and the biased version
+// Stuck? `./grade 4 -s 3 --hint`.
+// ---------------------------------------------------------------------------
 
 /// Stage 3 — Algorithm 3.4.2P (Shuffling; Fisher–Yates).
 ///
@@ -140,6 +164,11 @@ pub fn naive_shuffle<T>(items: &mut [T], rng: &mut impl FnMut(u64) -> u64) {
     let _ = (items, rng);
     todo!("for i in 0..n: swap items[i] with items[rng(n)]")
 }
+
+// ---------------------------------------------------------------------------
+// Stage 4 — Algorithm 3.4.2R: reservoir sampling
+// Stuck? `./grade 4 -s 4 --hint`.
+// ---------------------------------------------------------------------------
 
 /// Stage 4 — Algorithm 3.4.2R (Reservoir sampling): choose `k` items
 /// uniformly at random from a stream whose length is *not known in
