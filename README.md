@@ -48,7 +48,7 @@ Euclid, H_n − 1 expected maxima, the lg(n!) sorting lower bound, AVL's
 
 ## The curriculum
 
-Fourteen modules, 62 stages, spanning the published volumes. See
+Eighteen modules, 78 stages, spanning the published volumes. See
 [SYLLABUS.md](SYLLABUS.md) for the full map of stages, algorithms, and the
 mathematics each module teaches — and [docs/toolkit.md](docs/toolkit.md) for
 what the journey builds in you: the proof techniques and engineering
@@ -70,12 +70,17 @@ judgments, module by module.
 | 12 The Spectral Test | Vol. 2 §3.3.4 | The lattice hiding inside every LCG; RANDU's 16 planes, computed exactly |
 | 13 Bitwise Tricks & BDDs | Vol. 4A §7.1.3–7.1.4 | Broadword computing; reduced ordered BDDs, canonicity, model counting |
 | 14 Conflict-Driven Clause Learning | Vol. 4B §7.2.2.2 | Watched literals, implication graphs, first-UIP learning — a real SAT solver |
+| 15 External Sorting | Vol. 3 §5.4 | Replacement selection's snow-plow, loser trees, polyphase merge on Fibonacci |
+| 16 The Spectral Test in Higher Dimensions | Vol. 2 §3.3.4 | Algorithm S: dual bases, reduction, certified search, ν_t for t ≤ 6 |
+| 17 ZDDs & Exact Covering with Colors | Vol. 4A §7.1.4, Vol. 4B §7.2.2.1 | Family algebra, structure counting in graphs, XCC with purify/unpurify |
+| 18 MMIX: Knuth's Machine | Vol. 1 Fascicle 1 | Build the machine, then run Euclid and FindMax on it — full circle |
 
 The order is Knuth's own recommended path for implementers (it fronts Vol. 1
 and Vol. 3's implementation-rich chapters and defers the heaviest
 mathematics), and difficulty is gradual within and across modules. Modules
-01–10 are the core arc; 11–14 are advanced extensions that deepen each
-volume's flagship theme.
+01–10 are the core arc; 11–18 are advanced extensions that deepen each
+volume's flagship theme — ending with MMIX itself, where the course's first
+algorithm runs on the machine Knuth built for it.
 
 ## How the repository is laid out
 
