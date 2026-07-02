@@ -27,6 +27,18 @@ $ ./grade 1
     Edit: labs/module-01-algorithms/src/lab.rs — your code
 ```
 
+## New to Knuth?
+
+If *The Art of Computer Programming* is new to you — or you've bounced off it
+before — read **[docs/for-newcomers.md](docs/for-newcomers.md)** first: a
+gentle, book-optional primer on who Knuth is, why TAOCP has its reputation, what
+you actually need to know going in, and how to study a module. Then
+**[docs/getting-started.md](docs/getting-started.md)** walks you through setup,
+the repository layout, and every command step by step (with Windows/PowerShell
+notes). Module 01's lab is written as a fully **guided tour** — each stub spells
+out the algorithm and links the exact Rust docs you need — and the hand-holding
+tapers deliberately as you gain footing.
+
 ## Quick start
 
 You need a Rust toolchain (any recent stable; the course has **zero
@@ -90,6 +102,8 @@ machine Knuth built for it.
 ## How the repository is laid out
 
 ```text
+docs/for-newcomers.md          new to Knuth? the primer + how to study
+docs/getting-started.md        setup, repo tour, every command (Windows-aware)
 course/module-NN-*/README.md   the lesson: theory + stage-by-stage lab guide
 course/module-NN-*/exercises.md your log for Knuth's exercises (with ratings)
 labs/module-NN-*/src/lab.rs    YOUR file — stubs with todo!() to replace
