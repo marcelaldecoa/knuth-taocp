@@ -14,6 +14,16 @@ Each module `NN` with directory `module-NN-<slug>` ships four things:
    worked traces of each algorithm) → stage-by-stage lab guide → check-your-
    understanding questions → curated exercises with Knuth's ratings → where
    this leads. Paraphrase; never reproduce the book's text at length.
+
+   Three sections are mandatory in every lesson, because the course promises
+   practicality as well as rigor:
+   - **Why it's done this way** — the design rationale (may be woven through
+     the theory instead of a single section, but it must be *explicit*).
+   - **In the real world** — where this material lives in production systems
+     today; concrete and accurate, no hand-waving.
+   - **Proof techniques you practiced** — a recap naming each technique and
+     the place it carried weight; these feed the course-wide map in
+     `docs/toolkit.md`.
 2. **Exercises log** — `course/module-NN-<slug>/exercises.md` (template as in
    module 01).
 3. **Reference implementation** — `reference/src/mNN_<slug>.rs`. Complete,

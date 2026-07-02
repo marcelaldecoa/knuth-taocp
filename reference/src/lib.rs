@@ -18,3 +18,7 @@ pub mod m07_searching;
 pub mod m08_generation;
 pub mod m09_backtrack;
 pub mod m10_sat;
+pub mod m11_btree_trie;
+pub mod m12_spectral;
+pub mod m13_bits_bdds;
+pub mod m14_cdcl;
