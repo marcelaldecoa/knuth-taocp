@@ -22,3 +22,7 @@ pub mod m11_btree_trie;
 pub mod m12_spectral;
 pub mod m13_bits_bdds;
 pub mod m14_cdcl;
+pub mod m15_external;
+pub mod m16_spectral_hd;
+pub mod m17_zdd_xcc;
+pub mod m18_mmix;

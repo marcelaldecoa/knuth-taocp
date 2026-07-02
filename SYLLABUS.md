@@ -1,6 +1,6 @@
 # Syllabus
 
-Fourteen modules, 62 stages. Each stage is one graded test suite
+Eighteen modules, 78 stages. Each stage is one graded test suite
 (`labs/<module>/tests/stage_NN_*.rs`); `./grade <n>` runs them in order.
 Theory a stage needs is in its module's lesson, `course/<module>/README.md` —
 self-contained, book optional.
@@ -144,8 +144,44 @@ decisions, levels, reasons · first-UIP conflict analysis (learn a clause
 from every failure) · the complete CDCL solver, cross-checked against brute
 force and pitted against pigeonhole and van der Waerden instances.
 
+## Module 15 — External Sorting (Vol. 3, §5.4)
+
+When data doesn't fit: the memory hierarchy as the real cost model.
+
+Stages: replacement selection and the snow-plow 2P law (5.4.1R) · k-way
+merging with a loser tree · polyphase merge and its Fibonacci distributions ·
+the full pipeline with I/O accounting.
+
+## Module 16 — The Spectral Test in Higher Dimensions (Vol. 2, §3.3.4, Algorithm S)
+
+Module 12 extended to t ≤ 6, following Algorithm S's architecture:
+reduce, then enumerate with a certificate.
+
+Stages: the U/V dual-basis pair and its m·I invariant · size reduction by
+unimodular transformations · the certified exhaustive search · ν_t and μ_t
+for real generators (RANDU condemned in every dimension; 48271 vindicated).
+
+## Module 17 — ZDDs and Exact Covering with Colors (Vol. 4A §7.1.4, Vol. 4B §7.2.2.1)
+
+Sparse families of sets as first-class data, then Dancing Links' final form.
+
+Stages: zero-suppressed DDs and their canonical form · the family algebra
+(union, intersection, join) · counting matchings and independent sets in
+graphs (Fibonacci, Lucas, and telephone numbers fall out) · XCC: exact
+cover with colors, with Latin squares as the star witness.
+
+## Module 18 — MMIX: Knuth's Machine (Vol. 1, Fascicle 1)
+
+The closer. Build an MMIX subset — registers, big-endian memory, real
+opcodes, floor division — plus a two-pass assembler, then run the course's
+first algorithm on it and count the mems.
+
+Stages: machine state, loads and stores · arithmetic with MMIX's exact
+semantics · branches and loops · Euclid and FindMax on the metal, with
+Knuth's υ/μ cost model.
+
 ## Where to go next (not yet modules — contributions welcome)
 
-External sorting (§5.4) · the spectral test in dimensions 4–8 · ZDDs and
-XCC with colors (§7.1.4, §7.2.2.1) · Boolean evaluation and bitwise
-techniques beyond §7.1.3 · MMIX itself (Vol. 1, Fascicle 1).
+Floating point done right (§4.2) · optimum sorting networks (§5.3) ·
+retrieval on secondary keys (§6.5) · BDD variable reordering · Hamiltonian
+paths toward Vol. 4C's pre-fascicles.

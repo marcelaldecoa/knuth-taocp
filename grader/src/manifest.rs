@@ -434,6 +434,122 @@ pub const MODULES: &[Module] = &[
             },
         ],
     },
+    Module {
+        id: "15",
+        dir: "module-15-external",
+        lab_crate: "lab-15-external",
+        title: "External Sorting",
+        source: "Vol. 3, §5.4",
+        stages: &[
+            Stage {
+                test_target: "stage_01_replacement_selection",
+                title: "Replacement selection: runs twice the memory",
+                algorithm: "Algorithm 5.4.1R",
+            },
+            Stage {
+                test_target: "stage_02_multiway_merge",
+                title: "k-way merging with a tree of losers",
+                algorithm: "§5.4.1",
+            },
+            Stage {
+                test_target: "stage_03_polyphase",
+                title: "Polyphase merge: Fibonacci on tape",
+                algorithm: "Algorithm 5.4.2D",
+            },
+            Stage {
+                test_target: "stage_04_external_sort",
+                title: "The full pipeline, with I/O accounted",
+                algorithm: "§5.4 synthesis",
+            },
+        ],
+    },
+    Module {
+        id: "16",
+        dir: "module-16-spectral-hd",
+        lab_crate: "lab-16-spectral-hd",
+        title: "The Spectral Test in Higher Dimensions",
+        source: "Vol. 2, §3.3.4, Algorithm S",
+        stages: &[
+            Stage {
+                test_target: "stage_01_dual_basis",
+                title: "Dual lattice bases in dimension t",
+                algorithm: "§3.3.4, steps S1–S3",
+            },
+            Stage {
+                test_target: "stage_02_reduction",
+                title: "Basis reduction by unimodular transformations",
+                algorithm: "§3.3.4, steps S5–S7",
+            },
+            Stage {
+                test_target: "stage_03_exhaustive",
+                title: "The certified exhaustive search",
+                algorithm: "§3.3.4, steps S8–S10",
+            },
+            Stage {
+                test_target: "stage_04_spectral_t",
+                title: "ν_t and μ_t for real generators, t ≤ 6",
+                algorithm: "Algorithm 3.3.4S",
+            },
+        ],
+    },
+    Module {
+        id: "17",
+        dir: "module-17-zdd-xcc",
+        lab_crate: "lab-17-zdd-xcc",
+        title: "ZDDs and Exact Covering with Colors",
+        source: "Vol. 4A, §7.1.4 & Vol. 4B, §7.2.2.1",
+        stages: &[
+            Stage {
+                test_target: "stage_01_zdd_build",
+                title: "Zero-suppressed decision diagrams",
+                algorithm: "§7.1.4 (ZDD reduction rule)",
+            },
+            Stage {
+                test_target: "stage_02_zdd_ops",
+                title: "The family algebra: union, intersection, join",
+                algorithm: "§7.1.4",
+            },
+            Stage {
+                test_target: "stage_03_zdd_paths",
+                title: "Counting structures in graphs with ZDDs",
+                algorithm: "§7.1.4 applications",
+            },
+            Stage {
+                test_target: "stage_04_xcc",
+                title: "Exact cover with colors",
+                algorithm: "Algorithm 7.2.2.1C",
+            },
+        ],
+    },
+    Module {
+        id: "18",
+        dir: "module-18-mmix",
+        lab_crate: "lab-18-mmix",
+        title: "MMIX: Knuth's Machine",
+        source: "Vol. 1, Fascicle 1",
+        stages: &[
+            Stage {
+                test_target: "stage_01_registers_loadstore",
+                title: "Machine state, memory, loads and stores",
+                algorithm: "MMIX basics",
+            },
+            Stage {
+                test_target: "stage_02_arithmetic",
+                title: "Arithmetic: signed, unsigned, overflow, DIV",
+                algorithm: "MMIX operations",
+            },
+            Stage {
+                test_target: "stage_03_branches",
+                title: "Comparisons, branches, and loops",
+                algorithm: "MMIX control flow",
+            },
+            Stage {
+                test_target: "stage_04_programs",
+                title: "Programs: Euclid and FindMax on the metal",
+                algorithm: "Fascicle 1 programs",
+            },
+        ],
+    },
 ];
 
 const MODULE_10: Module = Module {
