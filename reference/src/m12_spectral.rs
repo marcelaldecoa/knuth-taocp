@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn tuples_overlap_and_follow_the_recurrence() {
         // First terms of x_{n+1} = 137·x_n mod 256 from x_0 = 1:
-        // 1, 137, 89 (137^2 = 18769 = 73·256 + 81? no: check by machine).
+        // 1, 137, 81, 87, ... (137^2 = 18769 = 73·256 + 81).
         let ts = tuples(137, 256, 2, 1, 5);
         assert_eq!(ts.len(), 5);
         for w in &ts {
