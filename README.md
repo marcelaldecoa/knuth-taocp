@@ -48,7 +48,7 @@ Euclid, H_n − 1 expected maxima, the lg(n!) sorting lower bound, AVL's
 
 ## The curriculum
 
-Eighteen modules, 78 stages, spanning the published volumes. See
+Twenty-two modules, 94 stages, spanning the published volumes. See
 [SYLLABUS.md](SYLLABUS.md) for the full map of stages, algorithms, and the
 mathematics each module teaches — and [docs/toolkit.md](docs/toolkit.md) for
 what the journey builds in you: the proof techniques and engineering
@@ -74,13 +74,18 @@ judgments, module by module.
 | 16 The Spectral Test in Higher Dimensions | Vol. 2 §3.3.4 | Algorithm S: dual bases, reduction, certified search, ν_t for t ≤ 6 |
 | 17 ZDDs & Exact Covering with Colors | Vol. 4A §7.1.4, Vol. 4B §7.2.2.1 | Family algebra, structure counting in graphs, XCC with purify/unpurify |
 | 18 MMIX: Knuth's Machine | Vol. 1 Fascicle 1 | Build the machine, then run Euclid and FindMax on it — full circle |
+| 19 Floating-Point Arithmetic | Vol. 2 §4.2 | Round-to-even, why addition isn't associative, Kahan summation |
+| 20 Optimum Sorting & Networks | Vol. 3 §5.3 | The lg n! floor, Ford–Johnson, Batcher's network, the zero-one principle |
+| 21 Boolean Functions & Optimal Evaluation | Vol. 4A §7.1.1–7.1.2 | Truth-tables-as-integers, Boolean chains, Dedekind's monotone counting |
+| 22 Hamiltonian Paths & Constraint Satisfaction | toward Vol. 4C §7.2.2.4 | Backtracking, Warnsdorff, hypercube↔Gray codes, Held–Karp — the finale |
 
 The order is Knuth's own recommended path for implementers (it fronts Vol. 1
 and Vol. 3's implementation-rich chapters and defers the heaviest
 mathematics), and difficulty is gradual within and across modules. Modules
-01–10 are the core arc; 11–18 are advanced extensions that deepen each
-volume's flagship theme — ending with MMIX itself, where the course's first
-algorithm runs on the machine Knuth built for it.
+01–10 are the core arc; 11–22 are advanced extensions that deepen each
+volume's flagship theme — ending where NP-hardness meets everything you've
+learned, and (in Module 18) where the course's first algorithm runs on the
+machine Knuth built for it.
 
 ## How the repository is laid out
 
