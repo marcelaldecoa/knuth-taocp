@@ -4,23 +4,23 @@ TAOCP's deepest lesson is not any single algorithm. It is a *way of working*:
 state things precisely, prove what you claim, count what you build, and only
 then trust it. This page names the tools you acquire, module by module, so
 you can watch yourself acquire them — and so that at the end you can look
-back and see not "I did 62 stages" but "I now think differently."
+back and see not "I did 94 stages" but "I now think differently."
 
 ## 1. Proof techniques, and where you practice them
 
 | Technique | First met | Practiced again in |
 |---|---|---|
-| **Invariant + decreasing quantity** (the master pattern: partial correctness from an invariant, termination from a well-founded measure) | 01 (Euclid) | 05 (binary gcd), 06 (every sort's loop invariant), 07 (AVL rebalancing), 09 (backtrack state restoration), 14 (CDCL progress measure) |
-| **Mathematical induction**, including strong and structural forms | 02 (§1.2.1) | 03 (tree properties), 04 (shuffle uniformity), 06 (radix stability, one pass at a time), 13 (BDD canonicity, by induction on variables) |
-| **Direct counting / double counting** | 02 (binomial identities) | 06 (inversions = insertion-sort moves), 08 (completeness of generation orders), 13 (model counting) |
-| **Expectation by linearity & harmonic sums** | 02 (E[A] = Hₙ − 1) | 06 (quicksort's average), 07 (BST depth, hashing probes) |
-| **Extremal / worst-case-witness arguments** (exhibit the exact input that hurts most) | 01 (Fibonacci pairs, Lamé) | 06 (organ-pipe & sorted inputs), 07 (Fibonacci trees for AVL), 13 (bad variable orders) |
-| **Information-theoretic lower bounds** (an adversary and lg of the answer count) | 06 (lg n! comparisons) | 07 (⌊lg n⌋+1 for search) — and the *escape routes*: radix (06), hashing (07) |
-| **Probabilistic analysis with honest statistics** (a hypothesis, a statistic, a distribution, a verdict) | 04 (chi-square) | 04 (shuffle bias made *quantitative*), 12 (figures of merit) |
-| **Algebraic/number-theoretic structure** (congruences, lattices, group actions) | 01 (Bézout) | 04 (full-period theorem), 05 (Miller–Rabin's √1 argument), 12 (the lattice of an LCG — the same congruence x_{n+1} ≡ ax_n seen *geometrically*) |
-| **Reduction between problems** (solve X by encoding it as Y, prove the encodings faithful) | 09 (Sudoku → exact cover) | 10 & 14 (queens, coloring, van der Waerden → SAT), 13 (counting via BDDs) |
-| **Amortized / potential reasoning** | 03 (arena free lists) | 07 (table load factors), 14 (two-watched literals: backtracking is free *by design*) |
-| **Certification** (outputs that carry their own proof) | 01 (Bézout coefficients) | 10/14 (a model *is* a checkable certificate; UNSAT needs a proof — the asymmetry that defines NP vs co-NP) |
+| **Invariant + decreasing quantity** (the master pattern: partial correctness from an invariant, termination from a well-founded measure) | 01 (Euclid) | 05 (binary gcd), 06 (every sort's loop invariant), 07 (AVL rebalancing), 09 (backtrack state restoration), 11 (B-tree splits), 14 (CDCL progress measure), 16 (the m·I duality invariant) |
+| **Mathematical induction**, including strong and structural forms | 02 (§1.2.1) | 03 (tree properties), 04 (shuffle uniformity), 06 (radix stability, one pass at a time), 13 (BDD canonicity, by induction on variables), 20 (the zero-one principle), 22 (Gray code = hypercube cycle) |
+| **Direct counting / double counting** | 02 (binomial identities) | 06 (inversions = insertion-sort moves), 08 (completeness of generation orders), 13 (model counting), 17 (ZDD family sizes), 21 (Dedekind's monotone functions) |
+| **Expectation by linearity & harmonic sums** | 02 (E[A] = Hₙ − 1) | 06 (quicksort's average), 07 (BST depth, hashing probes), 11 (trie depth) |
+| **Extremal / worst-case-witness arguments** (exhibit the exact input that hurts most) | 01 (Fibonacci pairs, Lamé) | 06 (organ-pipe & sorted inputs), 07 (Fibonacci trees for AVL), 13 (bad variable orders), 20 (Ford–Johnson's worst case) |
+| **Information-theoretic lower bounds** (an adversary and lg of the answer count) | 06 (lg n! comparisons) | 07 (⌊lg n⌋+1 for search), 20 (S(n) and the n=12 gap) — and the *escape routes*: radix (06), hashing (07), networks (20) |
+| **Probabilistic analysis with honest statistics** (a hypothesis, a statistic, a distribution, a verdict) | 04 (chi-square) | 04 (shuffle bias made *quantitative*), 12 (figures of merit), 16 (higher-dimensional merit), 19 (the unit-roundoff error bound) |
+| **Algebraic/number-theoretic structure** (congruences, lattices, group actions) | 01 (Bézout) | 04 (full-period theorem), 05 (Miller–Rabin's √1 argument), 12 & 16 (the lattice of an LCG — the same congruence x_{n+1} ≡ ax_n seen *geometrically*, reduced in any dimension) |
+| **Reduction between problems** (solve X by encoding it as Y, prove the encodings faithful) | 09 (Sudoku → exact cover) | 10 & 14 (queens, coloring, van der Waerden → SAT), 13 & 17 (counting via BDDs/ZDDs), 22 (TSP ← Held–Karp, Gray codes ↔ hypercube tours) |
+| **Amortized / potential reasoning** | 03 (arena free lists) | 07 (table load factors), 14 (two-watched literals: backtracking is free *by design*), 15 (the snow-plow's 2P runs) |
+| **Certification** (outputs that carry their own proof) | 01 (Bézout coefficients) | 10/14 (a model *is* a checkable certificate; UNSAT needs a proof — the asymmetry that defines NP vs co-NP), 20 (the zero-one principle certifies a whole network) |
 
 The table is the course's real syllabus. Every technique appears at least
 twice because a technique seen once is trivia; seen three times, it is yours.
