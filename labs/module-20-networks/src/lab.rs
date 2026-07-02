@@ -1,5 +1,11 @@
 //! Module 20 — Optimum Sorting and Sorting Networks (TAOCP Vol. 3, §5.3).
 //!
+//! **Scaffolding tier — Module 05 and up:** the stub states the algorithm and
+//! the contract and trusts you to translate it to Rust; the guided-tour aids of
+//! Modules 01–04 are gone by design. The nets remain for every stage — the
+//! lesson, three graduated hints (`--hint`), the reference, and the walkthrough.
+//! (The taper is described in docs/for-newcomers.md §5.)
+//!
 //! YOUR WORKSPACE. Replace each `todo!()` with an implementation, then run
 //! `./grade 20` from the repository root. Work the stages in order — each test
 //! file `tests/stage_NN_*.rs` corresponds to one stage, and the lesson in
