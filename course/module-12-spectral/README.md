@@ -129,11 +129,11 @@ Both defects are governed by the same quantity, and that is the test:
     ν_t² = min { u_1² + ... + u_t² :
                  u_1 + a·u_2 + ... + a^{t-1}·u_t ≡ 0 (mod m),  u ≠ 0 }.
 
-ν_t is the length of the shortest nonzero dual vector; the maximum gap
-between adjacent covering planes is m/ν_t, and the coarsest plane family
-has roughly ν_t·√t·(something ≤ 1) — at most ‖u‖·√t ≥ Σ|u_i| planes. Large
-ν_t is good; the dual vectors of *all* directions are then long, so no
-direction sees wide slabs.
+ν_t is the length of the shortest nonzero dual vector. The maximum gap
+between adjacent covering planes, over all families, is m/ν_t; and the
+family cut out by that shortest u has at most Σ|u_i| ≤ √t·ν_t planes
+(Cauchy–Schwarz). Large ν_t is good: every direction's dual vectors are
+then long, so no direction sees wide empty slabs or few planes.
 
 ### The RANDU catastrophe, exactly
 
