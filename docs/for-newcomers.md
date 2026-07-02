@@ -50,6 +50,11 @@ every algorithm in **Rust**, a modern language. The lessons carry the
 mathematics but derive it at a walking pace, and the tests turn each theorem
 into something you can *watch* come true on your own machine.
 
+Want proof this is worth the climb before you start? **[Why Knuth still runs the
+world](why-knuth-matters.md)** tours the landmark algorithms — from the string
+search inside every genome aligner to the SAT solver behind your package
+manager — and points to the module where you build each one.
+
 ## 2. What this course actually is
 
 A hands-on re-telling of TAOCP where **you write the code**. It is structured
@@ -158,7 +163,43 @@ Trace the input by hand, find where your mental model and the machine disagree,
 *then* fix. That habit — insisting you understand *why* — is the actual
 curriculum. The algorithms are just the vehicle.
 
-## 7. Ready?
+## 7. Reading Knuth's notation (a small cheat-sheet)
+
+TAOCP (and its sister book *Concrete Mathematics*) uses a few compact notations
+that trip up first-time readers. You don't need these to pass the course — the
+lessons spell everything out — but they make the *books* far less intimidating,
+so here they are up front. Knuth deliberately chose or popularized each one to
+remove an ambiguity.
+
+- **Iverson brackets** `[P]` — a proposition in square brackets *is* a number:
+  `1` if `P` is true, `0` if false. It turns "sum only the terms where…" into
+  plain multiplication. The Kronecker delta `δ_ij` is just `[i = j]`, and
+  `Σ_{1≤i≤10} i²` can be written `Σ_i i²·[1 ≤ i ≤ 10]` — the condition rides
+  *inside* the sum instead of hanging off it. (You'll feel why this is convenient
+  in Module 02.)
+
+- **Falling and rising factorials** `x^{underline n}` and `x^{overline n}` —
+  Knuth fixed the old ambiguous "(x)_n" notation with an underline/overline that
+  *points* in the direction the factors move:
+  - falling: `x^{underline n} = x(x−1)(x−2)···(x−n+1)` — the count of ways to
+    arrange `n` of `x` items (permutations); `k^{underline n} = k!/(k−n)!`.
+  - rising: `x^{overline n} = x(x+1)(x+2)···(x+n−1)`.
+
+  The falling factorial is the discrete world's analogue of a power: the finite
+  difference `Δ(x^{underline n}) = n·x^{underline(n−1)}` mirrors the derivative
+  `d/dx (xⁿ) = n·xⁿ⁻¹` exactly. That parallel is a recurring theme in Module 02.
+
+- **Stirling numbers** — Knuth standardized the readable, binomial-style
+  notation: `{n atop k}` (curly braces) counts ways to *partition* `n` items into
+  `k` non-empty groups; `[n atop k]` (square brackets) counts permutations of `n`
+  items with `k` cycles. Braces for subsets, brackets for cycles — a mnemonic
+  that replaced a zoo of clashing symbols.
+
+If you ever want to go deeper on this machinery, *Concrete Mathematics*
+(Graham–Knuth–Patashnik) is the companion volume that builds it patiently; the
+course's Module 02 gives you the working subset you actually need.
+
+## 8. Ready?
 
 - Set up your machine and learn the commands: **[Getting started](getting-started.md)**.
 - Then open **[the Module 01 lesson](../course/module-01-algorithms/README.md)**

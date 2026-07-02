@@ -37,7 +37,9 @@ you actually need to know going in, and how to study a module. Then
 the repository layout, and every command step by step (with Windows/PowerShell
 notes). Module 01's lab is written as a fully **guided tour** — each stub spells
 out the algorithm and links the exact Rust docs you need — and the hand-holding
-tapers deliberately as you gain footing.
+tapers deliberately as you gain footing. Want motivation first?
+**[docs/why-knuth-matters.md](docs/why-knuth-matters.md)** tours Knuth's landmark
+algorithms and where they run in today's technology.
 
 ## Quick start
 
@@ -103,6 +105,7 @@ machine Knuth built for it.
 
 ```text
 docs/for-newcomers.md          new to Knuth? the primer + how to study
+docs/why-knuth-matters.md      tour of Knuth's algorithms in modern tech
 docs/getting-started.md        setup, repo tour, every command (Windows-aware)
 course/module-NN-*/README.md   the lesson: theory + stage-by-stage lab guide
 course/module-NN-*/exercises.md your log for Knuth's exercises (with ratings)
