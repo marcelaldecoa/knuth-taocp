@@ -14,6 +14,25 @@ this module you will have implemented Euclid's algorithm three ways, proved it
 correct, and reproduced the first nontrivial algorithm analysis in history —
 Gabriel Lamé's 1845 theorem about its worst case.
 
+> **Companion exhibit — _The Invisible Ruler_.** This module has a visual twin in
+> the [Museum of Algorithms](pathname:///museum/exhibit-1.1-invisible-ruler.html):
+> an interactive instrument where Euclid's algorithm carves squares out of a
+> rectangle, the Bézout coefficients (stage 3) balance on a scale, and the
+> Fibonacci worst case (stage 4) draws itself. Run it as you read.
+
+<figure>
+  <iframe
+    src="/knuth-taocp/museum/exhibit-1.1-invisible-ruler.html"
+    title="The Invisible Ruler — an interactive exhibit on Euclid's algorithm"
+    loading="lazy"
+    style="width:100%;height:760px;border:1px solid #d8cfb8;border-radius:4px;background:#F4EDDD">
+  </iframe>
+  <figcaption style="font-size:0.85em;color:#6b7a82;text-align:center;margin-top:0.5em">
+    Euclid's saw &amp; Bézout's scale — change the two lengths and press Run.
+    <a href="/knuth-taocp/museum/exhibit-1.1-invisible-ruler.html" target="_blank" rel="noopener">Open full-screen ↗</a>
+  </figcaption>
+</figure>
+
 ---
 
 ## 1. What is an algorithm?
