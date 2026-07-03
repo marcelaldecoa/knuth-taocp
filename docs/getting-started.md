@@ -115,7 +115,6 @@ docs/why-knuth-matters.md        tour of Knuth's algorithms in modern tech
 docs/concrete-mathematics.md     the companion math book, mapped to the course
 docs/glossary.md                 ratings, §-refs, step labels, notation — defined once
 docs/toolkit.md                  the proof techniques the course builds, module by module
-docs/dashboard.html              a visual progress map (open in a browser)
 
 course/module-NN-*/README.md     the LESSON: theory + a stage-by-stage lab guide
 course/module-NN-*/hints.md      graduated hints (surfaced by --hint)
@@ -140,11 +139,11 @@ Everything else is there to guide, test, or grade you. (`src/lib.rs` and
 3. A **hint**: `./grade N -s K --hint`.
 4. Only after passing: the **walkthrough** and the **reference solution**.
 
-## 6. The visual dashboard (optional)
+## 6. The visual course map (optional)
 
-Prefer a map to a list? Open [`docs/dashboard.html`](dashboard.html) in any
-browser: every module and stage grouped by TAOCP volume, with a click-to-track
-progress meter saved in your browser's local storage.
+Prefer a map to a list? The [course website](https://marcelaldecoa.github.io/knuth-taocp/)
+opens on a map of every module and stage grouped by TAOCP volume, with a
+click-to-track progress meter saved in your browser's local storage.
 
 It's a convenience, not the source of truth — **`./grade` remains the
 authoritative record** of what you've actually passed. Your real progress lives

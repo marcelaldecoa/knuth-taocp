@@ -98,7 +98,7 @@ Every instruction is one tetra, four bytes:
 X is (almost always) the destination register; Y and Z are sources. The
 stroke of genius is the **immediate rule**: opcodes come in even/odd pairs,
 and the odd opcode means *Z is the byte itself, not a register number*.
-`ADD $1,$2,$3` is opcode 0x20 ($3 as register); `ADD $1,$2,3` is opcode
+`ADD $1,$2,$3` is opcode 0x20 (\$3 as register); `ADD $1,$2,3` is opcode
 0x21 (the constant 3). The decoder tests one bit; the instruction set
 doubles. For branches the same low bit means *backward* instead (§2.3).
 
@@ -114,8 +114,8 @@ in `op`, and every test goes through those names):
 | 0x38–0x3F | SL, SLU, SR, SRU | shifts: arithmetic vs logical |
 | 0x40–0x4B | BN, BZ, BNN, BNZ | branches (odd = backward) |
 | 0x80–0x8F | LDB(U), LDW(U), LDT(U), LDO(U) | loads, signed/unsigned |
-| 0xA0–0xAD | STB, STW, STT, STO | stores (low bytes of $X) |
-| 0xE3 | SETL | $X ← 16-bit immediate YZ |
+| 0xA0–0xAD | STB, STW, STT, STO | stores (low bytes of \$X) |
+| 0xE3 | SETL | \$X ← 16-bit immediate YZ |
 | 0xF0, 0xF1 | JMP | 24-bit relative jump (odd = backward) |
 | 0xFE | GET | read special register (rH = 3, rR = 6) |
 
@@ -129,7 +129,7 @@ the range. Because *everything* is pc-relative, assembled code is
 position-independent: stage 3 loads the same words at three different
 addresses and demands identical behavior.
 
-Branch conditions read $X as a *signed* octabyte: BN (negative), BZ
+Branch conditions read \$X as a *signed* octabyte: BN (negative), BZ
 (zero), BNN (nonnegative), BNZ (nonzero). Together with CMP's −1/0/1
 result these four are a complete comparison kit.
 
@@ -143,7 +143,7 @@ result these four are a complete comparison kit.
 0x89 becomes 0xFFFFFFFFFFFFFF89 (that is −119, as a signed octabyte).
 `LDBU` zero-extends: 0x89 becomes 0x0000…0089. Same for wydes and tetras;
 for octas LDO and LDOU coincide (there is nothing left to extend). Stores
-go the other way: `STB` writes the low byte of $X. Work one example by
+go the other way: `STB` writes the low byte of \$X. Work one example by
 hand before coding — store 0x0123456789ABCDEF at 0x100 and predict all
 eight LDB results; stage 1 pins exactly these.
 
@@ -151,7 +151,7 @@ eight LDB results; stage 1 pins exactly these.
 
 Most hardware truncates quotients toward zero. Knuth's MMIX does not:
 
-**Definition (Fascicle 1).** `DIV $X,$Y,$Z` sets $X ← ⌊y/z⌋ and
+**Definition (Fascicle 1).** `DIV $X,$Y,$Z` sets \$X ← ⌊y/z⌋ and
 rR ← y − z·⌊y/z⌋, operands signed.
 
 **Theorem (floor division).** For integers y, z with z ≠ 0 there is
@@ -181,7 +181,7 @@ series relies on — y mod z is periodic in y, (y mod z) mod z = y mod z,
 and gcd arguments never need sign case-splits. Truncating division's
 remainder changes sign with the dividend and breaks all three. Even the
 edge case is Knuth's: §1.2.4 *defines* y mod 0 = y, and MMIX's DIV by zero
-duly sets $X = 0, rR = $Y. (Full MMIX also raises an "integer divide
+duly sets \$X = 0, rR = \$Y. (Full MMIX also raises an "integer divide
 check" exception there; MMIX-LITE keeps the values, skips the exception —
 a documented cut.)
 
@@ -196,19 +196,19 @@ is i64::MIN, which is also what full MMIX produces bit-wise).
   NEG/SL; MMIX-LITE wraps (two's complement), which makes each signed op
   agree bit-for-bit with its unsigned twin. Documented simplification;
   the tests treat wrapping as the contract.
-- **MULU** computes the full 128-bit product: low half to $X, high half to
+- **MULU** computes the full 128-bit product: low half to \$X, high half to
   rH (read with `GET $X,rH`). Pin: (2⁶⁴−1)² has high half 2⁶⁴−2 and low
   half 1. Signed MUL does *not* touch rH.
 - **DIVU** with no rD register is plain 64-bit unsigned division — exactly
-  full MMIX's behavior when rD = 0, including divide-by-zero: $X = 0,
-  rR = $Y.
-- **NEG** is spelled subtraction: `NEG $X,Y,$Z` = Y − $Z where Y is
+  full MMIX's behavior when rD = 0, including divide-by-zero: \$X = 0,
+  rR = \$Y.
+- **NEG** is spelled subtraction: `NEG $X,Y,$Z` = Y − \$Z where Y is
   *always* an immediate byte; `NEG $X,$Z` abbreviates Y = 0. MMIX has no
   unary minus.
 - **Shifts** do **not** reduce the count mod 64 (x86 does; MMIX doesn't):
   a count ≥ 64 pushes every bit out — SL/SLU/SRU give 0, SR gives the sign
   fill (0 or all ones). SR is arithmetic (sign-propagating), SRU logical.
-- **CMP/CMPU** put −1, 0, or 1 in $X (−1 = all ones), signed vs unsigned.
+- **CMP/CMPU** put −1, 0, or 1 in \$X (−1 = all ones), signed vs unsigned.
   CMP then BN/BZ/BNZ/BNN is how MMIX says `if`.
 
 ---
@@ -290,8 +290,8 @@ E2. [Is it zero?]      If r = 0, terminate; n is the answer.
 E3. [Reduce.]          Set m <- n, n <- r; go back to E1.
 ```
 
-The same algorithm, compiled by hand for MMIX-LITE ($0 = m, $1 = n; the
-answer lands in $1):
+The same algorithm, compiled by hand for MMIX-LITE (\$0 = m, \$1 = n; the
+answer lands in \$1):
 
 ```text
 E1      DIV  $2,$0,$1     ; E1. q <- floor(m/n), rR <- m mod n
@@ -304,17 +304,17 @@ DONE    TRAP 0,0,0        ; halt
 ```
 
 Seven tetras. Note the compilation choices: step E1's *two* outputs
-(quotient and remainder) map onto DIV's two destinations ($X and rR);
+(quotient and remainder) map onto DIV's two destinations (\$X and rR);
 "go back" becomes a relative JMP; the move `m ← n` is an ADD with
 immediate zero, MMIX's idiom for register copy. Trace it on Knuth's
 (544, 119), one line per pass, next to the module-01 table:
 
-| pass | $0 (m) | $1 (n) | DIV: $2 (q) | rR → $3 (r) | BZ taken? |
+| pass | \$0 (m) | \$1 (n) | DIV: \$2 (q) | rR → \$3 (r) | BZ taken? |
 |---|---|---|---|---|---|
 | 1 | 544 | 119 | 4 | 68 | no |
 | 2 | 119 | 68 | 1 | 51 | no |
 | 3 | 68 | 51 | 1 | 17 | no |
-| 4 | 51 | 17 | 3 | **0** | yes → halt, $1 = 17 |
+| 4 | 51 | 17 | 3 | **0** | yes → halt, \$1 = 17 |
 
 Four divisions, answer 17 — the same table you wrote by hand in module
 01, now produced by a machine you built. The cost is a closed form: each
@@ -349,7 +349,7 @@ in its doc comment.
 
 `Mmix::new`, register file, big-endian `ld_/st_` accessors with
 round-down alignment, `load_program`, and the fetch–decode–execute
-skeleton of `step` with the LDx/STx families. Address = $Y + Z-operand,
+skeleton of `step` with the LDx/STx families. Address = \$Y + Z-operand,
 wrapping. Get the sign-extension example of §3.1 right and this stage
 falls. Watch the two easy-to-swap details: big-endian byte order, and
 `pc` advancing by 4 *before* the instruction executes (branches are
@@ -416,7 +416,7 @@ victory lap; if anything was fudged, this is where it surfaces.
 ## 8. Check your understanding
 
 1. Store 0x0123456789ABCDEF at 0x200. What do `LDW $1,$2,6`,
-   `LDWU $1,$2,6`, and `LDT $1,$2,5` load ($2 = 0x200)? *(Hint: 0xCDEF
+   `LDWU $1,$2,6`, and `LDT $1,$2,5` load (\$2 = 0x200)? *(Hint: 0xCDEF
    sign-extends; the tetra address rounds down to 0x204.)*
 2. What are −1 mod 5 and 1 mod −5 under MMIX's DIV, and why would a
    truncating DIV break the invariant `gcd(m, n) = gcd(n, m mod n)` proof
@@ -431,7 +431,7 @@ victory lap; if anything was fudged, this is where it surfaces.
    budget".)*
 5. Euclid's listing uses `ADD $0,$1,0` as a move. Why is the immediate
    form (opcode 0x21) essential — what would `ADD $0,$1,$0` (0x20) do
-   instead? *(Hint: $0 is not zero; MMIX has no hardwired zero register,
+   instead? *(Hint: \$0 is not zero; MMIX has no hardwired zero register,
    unlike RISC-V.)*
 
 ## 9. Exercises from the text

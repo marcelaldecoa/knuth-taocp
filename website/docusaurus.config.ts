@@ -3,10 +3,16 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rewriteLinks from './src/remark/rewriteLinks.mjs';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
-const mathPlugins = {
+// Shared Markdown pipeline: rewrite cross-instance/repo links to site routes,
+// then render math. Applied to both docs instances.
+const contentPlugins = {
+  // rewriteLinks must run BEFORE Docusaurus's default Markdown-link resolver
+  // (which would otherwise throw on the cross-instance .md links first).
+  beforeDefaultRemarkPlugins: [rewriteLinks],
   remarkPlugins: [remarkMath],
   rehypePlugins: [rehypeKatex],
 };
@@ -25,16 +31,16 @@ const config: Config = {
   organizationName: 'marcelaldecoa',
   projectName: 'knuth-taocp',
 
-  // Cross-instance relative links (course → handbook) and any stray markdown
-  // links warn rather than fail the build; tighten to 'throw' once clean.
-  onBrokenLinks: 'warn',
-  onBrokenAnchors: 'warn',
+  // Strict: cross-instance/repo links are normalized to site routes by the
+  // rewriteLinks remark plugin, so any remaining broken link is a real error.
+  onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
   markdown: {
     // Parse .md as CommonMark (the course prose uses bare { } and < freely);
     // reserve MDX/JSX for .mdx lessons that embed interactive components.
     format: 'detect',
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: 'throw',
     },
   },
 
@@ -55,7 +61,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           editUrl:
             'https://github.com/marcelaldecoa/knuth-taocp/edit/main/',
-          ...mathPlugins,
+          ...contentPlugins,
         },
         blog: false,
         theme: {
@@ -75,7 +81,7 @@ const config: Config = {
         routeBasePath: 'handbook',
         sidebarPath: './sidebars-handbook.ts',
         editUrl: 'https://github.com/marcelaldecoa/knuth-taocp/edit/main/',
-        ...mathPlugins,
+        ...contentPlugins,
       },
     ],
   ],

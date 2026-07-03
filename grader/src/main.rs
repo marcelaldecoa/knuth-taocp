@@ -555,13 +555,13 @@ fn check_doc_links(root: &Path, style: &Style) -> bool {
 }
 
 /// Structural invariants of the manifest against the filesystem: every stage
-/// has its test file and at least one hint, every module ships its assets and a
-/// reference solution, and the dashboard knows every module. Cheap, and it
-/// catches the pedagogical gaps that a green test run would not.
+/// has its test file and at least one hint, and every module ships its assets
+/// and a reference solution. Cheap, and it catches the pedagogical gaps that a
+/// green test run would not. (The website's manifest.json mirror is guarded
+/// separately by the manifest-drift CI check.)
 fn check_structure(root: &Path, style: &Style) -> bool {
     print!("  course structure … ");
     let _ = std::io::Write::flush(&mut std::io::stdout());
-    let dashboard = fs::read_to_string(root.join("docs").join("dashboard.html")).unwrap_or_default();
     let mut problems: Vec<String> = Vec::new();
     for m in MODULES {
         let cdir = root.join("course").join(m.dir);
@@ -594,10 +594,6 @@ fn check_structure(root: &Path, style: &Style) -> bool {
                     m.id, n, n
                 ));
             }
-        }
-        // The dashboard mirrors the manifest by hand; make sure it hasn't drifted.
-        if !dashboard.contains(&format!("\"{}\"", m.id)) {
-            problems.push(format!("module {}: not listed in docs/dashboard.html", m.id));
         }
     }
     if problems.is_empty() {
