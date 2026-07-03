@@ -4,6 +4,8 @@
 > §6.2.1 (binary search), §6.2.2 (binary search trees), §6.2.3 (balanced
 > trees), §6.4 (hashing).
 > **Lab:** `labs/module-07-searching` · **Grade it:** `./grade 7`
+> **Concrete Mathematics companion:** Chapters 6 (Special Numbers) and 9
+> (Asymptotics) — harmonic sums drive the hashing analysis — see [../../docs/concrete-mathematics.md](../../docs/concrete-mathematics.md).
 >
 > This lesson is self-contained: you can complete the module without the book.
 > If you own Vol. 3, read §6.2.1–6.2.3 and §6.4 alongside it.

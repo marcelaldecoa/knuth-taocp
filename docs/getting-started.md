@@ -113,6 +113,7 @@ docs/for-newcomers.md            ← start here if Knuth is new to you
 docs/getting-started.md          ← this file
 docs/why-knuth-matters.md        tour of Knuth's algorithms in modern tech
 docs/concrete-mathematics.md     the companion math book, mapped to the course
+docs/glossary.md                 ratings, §-refs, step labels, notation — defined once
 docs/toolkit.md                  the proof techniques the course builds, module by module
 docs/dashboard.html              a visual progress map (open in a browser)
 

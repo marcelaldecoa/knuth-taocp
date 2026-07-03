@@ -5,6 +5,8 @@
 > §5.2.3 (Algorithm H), §5.2.4 (Algorithm N), §5.2.5 (Algorithm R), and
 > §5.3.1 (the information-theoretic lower bound).
 > **Lab:** `labs/module-06-sorting` · **Grade it:** `./grade 6`
+> **Concrete Mathematics companion:** Chapters 2 (Sums) and 9 (Asymptotics) —
+> the machinery behind every average-case bound here — see [../../docs/concrete-mathematics.md](../../docs/concrete-mathematics.md).
 >
 > This lesson is self-contained: you can complete the module without the book.
 > If you own Vol. 3, read §5.1.1 and §5.2 alongside — this is the heart of the

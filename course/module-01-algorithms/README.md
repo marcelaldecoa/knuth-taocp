@@ -3,6 +3,8 @@
 > **Source:** *The Art of Computer Programming*, Vol. 1, 3rd ed., §1.1 (with a
 > look ahead to §1.2.1 and §4.5.3).
 > **Lab:** `labs/module-01-algorithms` · **Grade it:** `./grade 1`
+> **Concrete Mathematics companion:** Chapter 4 (Number Theory) develops the gcd
+> and divisibility this module rests on — see [../../docs/concrete-mathematics.md](../../docs/concrete-mathematics.md).
 >
 > This lesson is self-contained: you can complete the module without the book.
 > If you own Vol. 1, read §1.1 first — the lesson tells you where to look.
