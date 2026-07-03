@@ -1,0 +1,105 @@
+/* Ported from the original dashboard.html card/shelf/pip styles, scoped. */
+
+.map { margin: 2rem 0; }
+
+/* progress meter */
+.meter { display: grid; gap: 0.6rem; margin-bottom: 2rem; }
+.meterHead {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.meterCount { font-variant-numeric: tabular-nums; font-size: 0.9rem; color: var(--taocp-ink-soft); }
+.meterCount b { color: var(--taocp-ink); font-size: 1.05rem; }
+.meterActions { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+.hint { font-size: 0.8rem; color: var(--taocp-muted); }
+.linkbtn {
+  font-size: 0.76rem; letter-spacing: 0.04em; color: var(--taocp-accent);
+  background: none; border: none; cursor: pointer; padding: 0;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.linkbtn:hover { color: var(--taocp-gold-deep); }
+.bar {
+  height: 12px; background: var(--taocp-plate-edge); border: 1px solid var(--taocp-plate-edge);
+  border-radius: 999px; overflow: hidden;
+}
+.bar > span {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--taocp-oxblood), var(--taocp-gold));
+  transition: width 0.5s ease;
+}
+
+/* shelves */
+.shelf { margin: 2.2rem 0; }
+.shelfLabel {
+  display: flex; align-items: baseline; gap: 0.8rem; margin-bottom: 1rem;
+  border-bottom: 1px solid var(--taocp-plate-edge); padding-bottom: 0.4rem;
+}
+.shelfVol {
+  font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--taocp-accent); font-weight: 600;
+}
+.shelfName { font-style: italic; color: var(--taocp-ink-soft); font-size: 1.02rem; }
+.shelfStat {
+  margin-left: auto; font-size: 0.74rem; color: var(--taocp-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+
+/* cards */
+.card {
+  background: var(--taocp-plate); border: 1px solid var(--taocp-plate-edge);
+  border-left: 3px solid var(--taocp-oxblood); border-radius: 3px;
+  padding: 1rem 1.05rem 0.85rem; display: flex; flex-direction: column; gap: 0.55rem;
+}
+.cardDone { border-left-color: var(--taocp-done); }
+.cardTop { display: flex; align-items: flex-start; gap: 0.7rem; }
+.modnum {
+  font-size: 0.78rem; font-weight: 600; color: #fff; background: var(--taocp-oxblood);
+  padding: 0.12rem 0.42rem; border-radius: 3px; flex: none; font-variant-numeric: tabular-nums;
+}
+.modnumDone { background: var(--taocp-done); }
+.cardHead { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.cardTitle {
+  font-weight: 600; font-size: 1.06rem; line-height: 1.15; color: var(--taocp-ink);
+  text-decoration: none;
+}
+.cardTitle:hover { color: var(--taocp-oxblood); text-decoration: underline; }
+.cardSrc { font-size: 0.72rem; color: var(--taocp-muted); }
+.ring { margin-left: auto; flex: none; }
+
+.pips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.pip {
+  font-size: 0.68rem; font-variant-numeric: tabular-nums;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: #efe8db; border: 1px solid var(--taocp-plate-edge); color: var(--taocp-ink-soft);
+  border-radius: 3px; padding: 0.2rem 0.42rem; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.pip:hover { border-color: var(--taocp-oxblood); }
+.pip[aria-pressed='true'] { background: var(--taocp-done); border-color: var(--taocp-done); color: #fff; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--taocp-muted); flex: none; }
+.pip[aria-pressed='true'] .dot { background: #fff; }
+
+.expand {
+  align-self: flex-start; font-size: 0.68rem; letter-spacing: 0.05em;
+  color: var(--taocp-muted); background: none; border: none; cursor: pointer;
+  padding: 0; text-transform: uppercase;
+}
+.expand:hover { color: var(--taocp-oxblood); }
+
+.stagelist { margin: 0.1rem 0 0; padding: 0; list-style: none; }
+.stagelist li {
+  font-size: 0.82rem; color: var(--taocp-ink-soft); padding: 0.18rem 0 0.18rem 1.4rem;
+  position: relative; border-top: 1px dotted var(--taocp-plate-edge);
+}
+.stagelist li::before {
+  content: attr(data-n); position: absolute; left: 0; top: 0.18rem;
+  font-size: 0.7rem; color: var(--taocp-muted);
+}
+.stageOn { color: var(--taocp-done); text-decoration: line-through; }
+.stageSrc { display: inline-block; margin-left: 0.5rem; font-size: 0.68rem; color: var(--taocp-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bar > span, .ring circle { transition: none !important; }
+}

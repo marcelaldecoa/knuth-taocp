@@ -1,0 +1,310 @@
+{
+  "volumes": [
+    {
+      "key": "Vol. 1",
+      "name": "Fundamental Algorithms",
+      "modules": [
+        {
+          "id": "01",
+          "dir": "module-01-algorithms",
+          "title": "The Notion of an Algorithm",
+          "source": "Vol. 1, §1.1",
+          "stages": [
+            { "title": "Euclid's algorithm, step by step", "algorithm": "Algorithm 1.1E", "test_target": "stage_01_euclid" },
+            { "title": "Avoiding trivial replacements", "algorithm": "Algorithm 1.1F (ex. 1.1-3)", "test_target": "stage_02_euclid_f" },
+            { "title": "Extended Euclid: certifying the gcd", "algorithm": "Algorithm 1.2.1E", "test_target": "stage_03_extended_euclid" },
+            { "title": "Counting divisions; Lamé's worst case", "algorithm": "Theorem 4.5.3F (Lamé)", "test_target": "stage_04_lame" }
+          ]
+        },
+        {
+          "id": "02",
+          "dir": "module-02-math",
+          "title": "Mathematical Preliminaries",
+          "source": "Vol. 1, §1.2",
+          "stages": [
+            { "title": "Sums in closed form", "algorithm": "§1.2.3", "test_target": "stage_01_sums" },
+            { "title": "Binomial coefficients", "algorithm": "§1.2.6", "test_target": "stage_02_binomials" },
+            { "title": "Fibonacci numbers, fast", "algorithm": "§1.2.8", "test_target": "stage_03_fibonacci" },
+            { "title": "Harmonic numbers, exactly and asymptotically", "algorithm": "§1.2.7", "test_target": "stage_04_harmonic" },
+            { "title": "Analysis of an algorithm: finding the maximum", "algorithm": "Algorithm 1.2.10M", "test_target": "stage_05_find_max" }
+          ]
+        },
+        {
+          "id": "03",
+          "dir": "module-03-structures",
+          "title": "Information Structures",
+          "source": "Vol. 1, Ch. 2",
+          "stages": [
+            { "title": "Stacks and queues in sequential storage", "algorithm": "§2.2.1–2.2.2", "test_target": "stage_01_stack_queue" },
+            { "title": "Linked allocation with an AVAIL list", "algorithm": "§2.2.3", "test_target": "stage_02_linked_list" },
+            { "title": "Topological sorting", "algorithm": "Algorithm 2.2.3T", "test_target": "stage_03_toposort" },
+            { "title": "Traversing binary trees", "algorithm": "Algorithm 2.3.1T", "test_target": "stage_04_tree_traversal" },
+            { "title": "Threaded binary trees", "algorithm": "Algorithm 2.3.1S", "test_target": "stage_05_threaded_tree" }
+          ]
+        },
+        {
+          "id": "18",
+          "dir": "module-18-mmix",
+          "title": "MMIX: Knuth's Machine",
+          "source": "Vol. 1, Fascicle 1",
+          "stages": [
+            { "title": "Machine state, memory, loads and stores", "algorithm": "MMIX basics", "test_target": "stage_01_registers_loadstore" },
+            { "title": "Arithmetic: signed, unsigned, overflow, DIV", "algorithm": "MMIX operations", "test_target": "stage_02_arithmetic" },
+            { "title": "Comparisons, branches, and loops", "algorithm": "MMIX control flow", "test_target": "stage_03_branches" },
+            { "title": "Programs: Euclid and FindMax on the metal", "algorithm": "Fascicle 1 programs", "test_target": "stage_04_programs" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "Vol. 2",
+      "name": "Seminumerical Algorithms",
+      "modules": [
+        {
+          "id": "04",
+          "dir": "module-04-random",
+          "title": "Random Numbers",
+          "source": "Vol. 2, Ch. 3",
+          "stages": [
+            { "title": "The linear congruential method", "algorithm": "§3.2.1", "test_target": "stage_01_lcg" },
+            { "title": "The chi-square test", "algorithm": "§3.3.1", "test_target": "stage_02_chi_square" },
+            { "title": "Shuffling", "algorithm": "Algorithm 3.4.2P", "test_target": "stage_03_shuffle" },
+            { "title": "Reservoir sampling", "algorithm": "Algorithm 3.4.2R", "test_target": "stage_04_reservoir" }
+          ]
+        },
+        {
+          "id": "05",
+          "dir": "module-05-arithmetic",
+          "title": "Arithmetic",
+          "source": "Vol. 2, Ch. 4",
+          "stages": [
+            { "title": "Multiple-precision addition and subtraction", "algorithm": "Algorithms 4.3.1A, 4.3.1S", "test_target": "stage_01_bignum_add" },
+            { "title": "Classical multiplication", "algorithm": "Algorithm 4.3.1M", "test_target": "stage_02_bignum_mul" },
+            { "title": "Faster multiplication by divide and conquer", "algorithm": "§4.3.3", "test_target": "stage_03_karatsuba" },
+            { "title": "The binary gcd algorithm", "algorithm": "Algorithm 4.5.2B", "test_target": "stage_04_binary_gcd" },
+            { "title": "Probabilistic primality testing", "algorithm": "Algorithm 4.5.4P (Miller–Rabin lineage)", "test_target": "stage_05_primality" }
+          ]
+        },
+        {
+          "id": "12",
+          "dir": "module-12-spectral",
+          "title": "The Spectral Test",
+          "source": "Vol. 2, §3.3.4",
+          "stages": [
+            { "title": "The lattice structure of linear congruential sequences", "algorithm": "§3.3.4 preliminaries", "test_target": "stage_01_lattice" },
+            { "title": "The two-dimensional spectral test, exactly", "algorithm": "Gauss–Lagrange reduction", "test_target": "stage_02_spectral_2d" },
+            { "title": "Short dual vectors in three dimensions", "algorithm": "Algorithm 3.3.4S (bounded search)", "test_target": "stage_03_spectral_3d" },
+            { "title": "Figures of merit: judging real generators", "algorithm": "§3.3.4 ratings", "test_target": "stage_04_merit" }
+          ]
+        },
+        {
+          "id": "16",
+          "dir": "module-16-spectral-hd",
+          "title": "The Spectral Test in Higher Dimensions",
+          "source": "Vol. 2, §3.3.4, Algorithm S",
+          "stages": [
+            { "title": "Dual lattice bases in dimension t", "algorithm": "§3.3.4, steps S1–S3", "test_target": "stage_01_dual_basis" },
+            { "title": "Basis reduction by unimodular transformations", "algorithm": "§3.3.4, steps S5–S7", "test_target": "stage_02_reduction" },
+            { "title": "The certified exhaustive search", "algorithm": "§3.3.4, steps S8–S10", "test_target": "stage_03_exhaustive" },
+            { "title": "ν_t and μ_t for real generators, t ≤ 6", "algorithm": "Algorithm 3.3.4S", "test_target": "stage_04_spectral_t" }
+          ]
+        },
+        {
+          "id": "19",
+          "dir": "module-19-float",
+          "title": "Floating-Point Arithmetic",
+          "source": "Vol. 2, §4.2",
+          "stages": [
+            { "title": "Representation: pack, unpack, normalize", "algorithm": "§4.2.1", "test_target": "stage_01_representation" },
+            { "title": "Addition and subtraction with rounding", "algorithm": "Algorithm 4.2.1A", "test_target": "stage_02_add_sub" },
+            { "title": "Multiplication and division", "algorithm": "Algorithm 4.2.1M", "test_target": "stage_03_mul_div" },
+            { "title": "Error analysis: ulps and compensated summation", "algorithm": "§4.2.2", "test_target": "stage_04_error_analysis" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "Vol. 3",
+      "name": "Sorting and Searching",
+      "modules": [
+        {
+          "id": "06",
+          "dir": "module-06-sorting",
+          "title": "Sorting",
+          "source": "Vol. 3, Ch. 5",
+          "stages": [
+            { "title": "Straight insertion; inversions", "algorithm": "Algorithm 5.2.1S, §5.1.1", "test_target": "stage_01_insertion" },
+            { "title": "Shellsort: diminishing increments", "algorithm": "Algorithm 5.2.1D", "test_target": "stage_02_shellsort" },
+            { "title": "Quicksort: partition exchange", "algorithm": "Algorithm 5.2.2Q", "test_target": "stage_03_quicksort" },
+            { "title": "Heapsort", "algorithm": "Algorithm 5.2.3H", "test_target": "stage_04_heapsort" },
+            { "title": "Natural merge sort", "algorithm": "Algorithm 5.2.4N", "test_target": "stage_05_natural_merge" },
+            { "title": "Radix sorting", "algorithm": "Algorithm 5.2.5R", "test_target": "stage_06_radix" }
+          ]
+        },
+        {
+          "id": "07",
+          "dir": "module-07-searching",
+          "title": "Searching",
+          "source": "Vol. 3, Ch. 6",
+          "stages": [
+            { "title": "Binary search", "algorithm": "Algorithm 6.2.1B", "test_target": "stage_01_binary_search" },
+            { "title": "Binary search trees", "algorithm": "Algorithm 6.2.2T", "test_target": "stage_02_bst" },
+            { "title": "Balanced trees (AVL)", "algorithm": "Algorithm 6.2.3A", "test_target": "stage_03_avl" },
+            { "title": "Hashing with open addressing", "algorithm": "Algorithms 6.4L, 6.4D", "test_target": "stage_04_hashing" }
+          ]
+        },
+        {
+          "id": "11",
+          "dir": "module-11-btree-trie",
+          "title": "Multiway Trees and Digital Searching",
+          "source": "Vol. 3, §6.2.4 & §6.3",
+          "stages": [
+            { "title": "B-tree search and insertion with node splitting", "algorithm": "§6.2.4", "test_target": "stage_01_btree" },
+            { "title": "B-tree invariants and the height bound", "algorithm": "§6.2.4 analysis", "test_target": "stage_02_btree_analysis" },
+            { "title": "Digital searching: tries", "algorithm": "Algorithm 6.3T", "test_target": "stage_03_trie" },
+            { "title": "Patricia: compressed binary tries", "algorithm": "Algorithm 6.3P", "test_target": "stage_04_patricia" }
+          ]
+        },
+        {
+          "id": "15",
+          "dir": "module-15-external",
+          "title": "External Sorting",
+          "source": "Vol. 3, §5.4",
+          "stages": [
+            { "title": "Replacement selection: runs twice the memory", "algorithm": "Algorithm 5.4.1R", "test_target": "stage_01_replacement_selection" },
+            { "title": "k-way merging with a tree of losers", "algorithm": "§5.4.1", "test_target": "stage_02_multiway_merge" },
+            { "title": "Polyphase merge: Fibonacci on tape", "algorithm": "Algorithm 5.4.2D", "test_target": "stage_03_polyphase" },
+            { "title": "The full pipeline, with I/O accounted", "algorithm": "§5.4 synthesis", "test_target": "stage_04_external_sort" }
+          ]
+        },
+        {
+          "id": "20",
+          "dir": "module-20-networks",
+          "title": "Optimum Sorting and Sorting Networks",
+          "source": "Vol. 3, §5.3",
+          "stages": [
+            { "title": "Comparison lower bounds by decision trees", "algorithm": "§5.3.1", "test_target": "stage_01_decision_trees" },
+            { "title": "Merge insertion (Ford–Johnson)", "algorithm": "Algorithm 5.3.1M", "test_target": "stage_02_merge_insertion" },
+            { "title": "Sorting networks: Batcher's odd-even merge", "algorithm": "Algorithm 5.3.4M", "test_target": "stage_03_networks" },
+            { "title": "The zero-one principle and bitonic sorting", "algorithm": "Theorem 5.3.4Z", "test_target": "stage_04_zero_one" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "Vol. 4A",
+      "name": "Combinatorial Algorithms, Part 1",
+      "modules": [
+        {
+          "id": "08",
+          "dir": "module-08-generation",
+          "title": "Combinatorial Generation",
+          "source": "Vol. 4A, §7.2.1",
+          "stages": [
+            { "title": "Gray binary code", "algorithm": "Algorithm 7.2.1.1G", "test_target": "stage_01_gray_codes" },
+            { "title": "Permutations in lexicographic order", "algorithm": "Algorithm 7.2.1.2L", "test_target": "stage_02_lex_permutations" },
+            { "title": "Plain changes: adjacent transpositions", "algorithm": "Algorithm 7.2.1.2P", "test_target": "stage_03_plain_changes" },
+            { "title": "Generating combinations", "algorithm": "Algorithm 7.2.1.3T", "test_target": "stage_04_combinations" },
+            { "title": "Partitions of an integer", "algorithm": "Algorithm 7.2.1.4P", "test_target": "stage_05_partitions" }
+          ]
+        },
+        {
+          "id": "13",
+          "dir": "module-13-bits-bdds",
+          "title": "Bitwise Tricks and Binary Decision Diagrams",
+          "source": "Vol. 4A, §7.1.3–7.1.4",
+          "stages": [
+            { "title": "Ruler function, sideways addition, Gosper's hack", "algorithm": "§7.1.3", "test_target": "stage_01_bit_tricks" },
+            { "title": "Building reduced ordered BDDs", "algorithm": "§7.1.4", "test_target": "stage_02_bdd_build" },
+            { "title": "Model counting and the ordering problem", "algorithm": "Algorithm 7.1.4C", "test_target": "stage_03_bdd_count" },
+            { "title": "BDDs at work: independent sets and queens", "algorithm": "§7.1.4 applications", "test_target": "stage_04_bdd_apps" }
+          ]
+        },
+        {
+          "id": "17",
+          "dir": "module-17-zdd-xcc",
+          "title": "ZDDs and Exact Covering with Colors",
+          "source": "Vol. 4A, §7.1.4 & Vol. 4B, §7.2.2.1",
+          "stages": [
+            { "title": "Zero-suppressed decision diagrams", "algorithm": "§7.1.4 (ZDD reduction rule)", "test_target": "stage_01_zdd_build" },
+            { "title": "The family algebra: union, intersection, join", "algorithm": "§7.1.4", "test_target": "stage_02_zdd_ops" },
+            { "title": "Counting structures in graphs with ZDDs", "algorithm": "§7.1.4 applications", "test_target": "stage_03_zdd_paths" },
+            { "title": "Exact cover with colors", "algorithm": "Algorithm 7.2.2.1C", "test_target": "stage_04_xcc" }
+          ]
+        },
+        {
+          "id": "21",
+          "dir": "module-21-boolean",
+          "title": "Boolean Functions and Optimal Evaluation",
+          "source": "Vol. 4A, §7.1.1–7.1.2",
+          "stages": [
+            { "title": "Truth tables and normal forms", "algorithm": "§7.1.1", "test_target": "stage_01_truth_tables" },
+            { "title": "Boolean chains and combinational cost", "algorithm": "§7.1.2", "test_target": "stage_02_boolean_chains" },
+            { "title": "Median, threshold, and symmetric functions", "algorithm": "§7.1.1", "test_target": "stage_03_median_threshold" },
+            { "title": "Optimum chains for small functions", "algorithm": "§7.1.2", "test_target": "stage_04_optimal_chains" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "Vol. 4B",
+      "name": "Combinatorial Algorithms, Part 2",
+      "modules": [
+        {
+          "id": "09",
+          "dir": "module-09-backtrack",
+          "title": "Backtracking and Dancing Links",
+          "source": "Vol. 4B, §7.2.2–7.2.2.1",
+          "stages": [
+            { "title": "Basic backtrack: n queens", "algorithm": "Algorithm 7.2.2B", "test_target": "stage_01_n_queens" },
+            { "title": "Backtracking with bitwise state", "algorithm": "Walker's method, §7.2.2", "test_target": "stage_02_walker_bitwise" },
+            { "title": "Exact cover via dancing links", "algorithm": "Algorithm 7.2.2.1X", "test_target": "stage_03_dancing_links" },
+            { "title": "Sudoku as an exact-cover problem", "algorithm": "§7.2.2.1 application", "test_target": "stage_04_sudoku" }
+          ]
+        },
+        {
+          "id": "10",
+          "dir": "module-10-sat",
+          "title": "Satisfiability",
+          "source": "Vol. 4B, §7.2.2.2",
+          "stages": [
+            { "title": "Conjunctive normal form and DIMACS", "algorithm": "§7.2.2.2 representations", "test_target": "stage_01_cnf" },
+            { "title": "Unit propagation", "algorithm": "§7.2.2.2", "test_target": "stage_02_unit_propagation" },
+            { "title": "A DPLL solver", "algorithm": "Algorithm 7.2.2.2D", "test_target": "stage_03_dpll" },
+            { "title": "Encoding problems into SAT", "algorithm": "§7.2.2.2 encodings", "test_target": "stage_04_sat_applications" }
+          ]
+        },
+        {
+          "id": "14",
+          "dir": "module-14-cdcl",
+          "title": "Conflict-Driven Clause Learning",
+          "source": "Vol. 4B, §7.2.2.2, Algorithm C",
+          "stages": [
+            { "title": "Lazy data structures: two watched literals", "algorithm": "§7.2.2.2 (Algorithm C's engine)", "test_target": "stage_01_watched_literals" },
+            { "title": "The trail: decisions, levels, reasons", "algorithm": "§7.2.2.2", "test_target": "stage_02_trail" },
+            { "title": "Conflict analysis: learning from failure", "algorithm": "Algorithm 7.2.2.2C (first UIP)", "test_target": "stage_03_clause_learning" },
+            { "title": "The complete CDCL solver", "algorithm": "Algorithm 7.2.2.2C", "test_target": "stage_04_cdcl_solver" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "Toward Vol. 4C",
+      "name": "Pre-fascicles",
+      "modules": [
+        {
+          "id": "22",
+          "dir": "module-22-hamilton",
+          "title": "Hamiltonian Paths and Constraint Satisfaction",
+          "source": "Toward Vol. 4C, §7.2.2.4 (pre-fascicles)",
+          "stages": [
+            { "title": "Hamiltonian paths by backtracking", "algorithm": "§7.2.2.4", "test_target": "stage_01_backtrack" },
+            { "title": "Warnsdorff's heuristic: the knight's tour", "algorithm": "§7.2.2.4", "test_target": "stage_02_warnsdorff" },
+            { "title": "Hamiltonian cycles on the hypercube are Gray codes", "algorithm": "§7.2.1.1 ↔ §7.2.2.4", "test_target": "stage_03_gray_cycles" },
+            { "title": "Held–Karp: shortest Hamiltonian path by bitmask DP", "algorithm": "§7.2.2.4 (dynamic programming)", "test_target": "stage_04_held_karp" }
+          ]
+        }
+      ]
+    }
+  ]
+}

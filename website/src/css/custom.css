@@ -1,0 +1,202 @@
+/**
+ * TAOCP theme — mirrors the classic Addison-Wesley dust-jacket identity:
+ * deep plum cloth, cream/parchment paper, gold-foil rules, matte ink.
+ *
+ * Type system is a SINGLE serif family (Spectral, self-hosted below), with
+ * hierarchy from weight + size — the way the covers work. Math stays in true
+ * Computer Modern via KaTeX, which is where the "Knuth feel" matters most.
+ * (To use literal Computer Modern for headings instead, self-host Latin Modern
+ * and add it ahead of Spectral in --taocp-serif.)
+ */
+
+/* --- Spectral, self-hosted (no CDN; matches the course's offline ethos) --- */
+@font-face {
+  font-family: 'Spectral'; font-weight: 400; font-style: normal; font-display: swap;
+  src: url('../../node_modules/@fontsource/spectral/files/spectral-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Spectral'; font-weight: 400; font-style: italic; font-display: swap;
+  src: url('../../node_modules/@fontsource/spectral/files/spectral-latin-400-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Spectral'; font-weight: 500; font-style: normal; font-display: swap;
+  src: url('../../node_modules/@fontsource/spectral/files/spectral-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Spectral'; font-weight: 600; font-style: normal; font-display: swap;
+  src: url('../../node_modules/@fontsource/spectral/files/spectral-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Spectral'; font-weight: 700; font-style: normal; font-display: swap;
+  src: url('../../node_modules/@fontsource/spectral/files/spectral-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Spectral'; font-weight: 800; font-style: normal; font-display: swap;
+  src: url('../../node_modules/@fontsource/spectral/files/spectral-latin-800-normal.woff2') format('woff2');
+}
+
+/* --- Cormorant Garamond: a high-contrast display cut for cover/page titles --- */
+@font-face {
+  font-family: 'Cormorant Garamond'; font-weight: 600; font-style: normal; font-display: swap;
+  src: url('../../node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cormorant Garamond'; font-weight: 600; font-style: italic; font-display: swap;
+  src: url('../../node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cormorant Garamond'; font-weight: 700; font-style: normal; font-display: swap;
+  src: url('../../node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-700-normal.woff2') format('woff2');
+}
+
+:root {
+  /* --- Addison-Wesley TAOCP palette --- */
+  --taocp-oxblood: #5c1d2a;       /* deep plum/maroon — the primary brand color */
+  --taocp-oxblood-deep: #4a1525;  /* cloth-binding plum — navbar, dark panels */
+  --taocp-gold: #c6a664;          /* brass foil — rules, accents */
+  --taocp-gold-deep: #b89742;
+  --taocp-paper: #f4f1e1;         /* aged parchment — page ground */
+  --taocp-plate: #fbf9f0;         /* lighter parchment — cards lift off the page */
+  --taocp-plate-edge: #e0d9c4;
+  --taocp-ink: #1f1b16;           /* matte black — body text */
+  --taocp-ink-soft: #4a4238;
+  --taocp-muted: #8a8072;
+  --taocp-done: #3f6b45;
+
+  --taocp-serif: 'Spectral', 'Palatino Linotype', Palatino, 'Book Antiqua',
+    'URW Palladio L', Georgia, serif;
+  /* High-contrast display cut for cover/page titles. */
+  --taocp-display: 'Cormorant Garamond', 'Spectral', Georgia, serif;
+  /* Accent for eyebrows/labels/badges — plum on parchment, lightened on cloth
+     so it stays legible in dark mode (kept separate from --taocp-oxblood, which
+     is also used as the plum *surface* color and must stay deep in both modes). */
+  --taocp-accent: var(--taocp-oxblood);
+
+  /* --- map onto Infima --- */
+  --ifm-color-primary: #5c1d2a;
+  --ifm-color-primary-dark: #531a26;
+  --ifm-color-primary-darker: #4a1525;
+  --ifm-color-primary-darkest: #3d1220;
+  --ifm-color-primary-light: #6b2331;
+  --ifm-color-primary-lighter: #7a2838;
+  --ifm-color-primary-lightest: #93314a;
+
+  --ifm-background-color: var(--taocp-paper);
+  --ifm-background-surface-color: var(--taocp-plate);
+  --ifm-font-color-base: var(--taocp-ink);
+  --ifm-heading-color: var(--taocp-ink);
+  --ifm-font-family-base: var(--taocp-serif);
+  --ifm-heading-font-family: var(--taocp-serif);
+  --ifm-heading-font-weight: 600;
+  --ifm-hr-border-color: var(--taocp-gold);
+  --ifm-hr-border-width: 1px;
+  --ifm-link-color: var(--taocp-oxblood);
+  --ifm-link-hover-color: var(--taocp-oxblood-deep);
+
+  --ifm-code-font-size: 92%;
+  --ifm-code-background: #efe9d8;
+  --docusaurus-highlighted-code-line-bg: rgba(92, 29, 42, 0.1);
+
+  --ifm-navbar-background-color: var(--taocp-oxblood-deep);
+  --ifm-navbar-link-color: #f2ecdc;
+  --ifm-navbar-link-hover-color: #ffffff;
+  --ifm-navbar-shadow: 0 2px 0 var(--taocp-gold);
+
+  --ifm-menu-color-active: var(--taocp-oxblood);
+  --ifm-toc-border-color: var(--taocp-plate-edge);
+
+  /* Footer = a plum band bookending the plum hero, in both themes. */
+  --ifm-footer-background-color: var(--taocp-oxblood-deep);
+  --ifm-footer-color: #e8dfce;
+  --ifm-footer-link-color: #e8dfce;
+  --ifm-footer-title-color: var(--taocp-gold);
+}
+
+[data-theme='dark'] {
+  /* Dark = the cloth cover: plum-black ground, cream ink, gold foil unchanged. */
+  --taocp-paper: #17110f;
+  --taocp-plate: #201713;
+  --taocp-plate-edge: #3a2a22;
+  --taocp-ink: #ece2cf;
+  --taocp-ink-soft: #cabfaa;
+  --taocp-muted: #9a8f7d;
+
+  --ifm-color-primary: #d98a97;
+  --ifm-color-primary-dark: #cf7382;
+  --ifm-color-primary-darker: #c8656f;
+  --ifm-color-primary-darkest: #b84557;
+  --ifm-color-primary-light: #e3a1ab;
+  --ifm-color-primary-lighter: #e8afb7;
+  --ifm-color-primary-lightest: #f0c9cf;
+
+  --ifm-background-color: #17110f;
+  --ifm-background-surface-color: #201713;
+  --ifm-font-color-base: #ece2cf;
+  --ifm-heading-color: #f3ead7;
+  --ifm-link-color: #e0a0a9;
+  --ifm-link-hover-color: #ecc0c6;
+  --ifm-code-background: #2a1e18;
+  --docusaurus-highlighted-code-line-bg: rgba(217, 138, 151, 0.15);
+
+  --ifm-navbar-background-color: #2a0f16;
+  --ifm-toc-border-color: #3a2a22;
+
+  /* Lighten the label/eyebrow accent so it reads on the cloth-dark ground. */
+  --taocp-accent: #d98a97;
+  --ifm-footer-background-color: #2a0f16;
+}
+
+/* --- parchment grain: a faint monochrome noise over the paper ground --- */
+body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+[data-theme='dark'] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* --- book-like touches: strong horizontal blocking, gold foil rules --- */
+.markdown h1 {
+  font-family: var(--taocp-display);
+  font-weight: 700;
+  letter-spacing: 0;
+  font-size: 2.6rem;
+  line-height: 1.05;
+}
+.markdown h2 {
+  /* Section heads stay in the text family — hierarchy by weight/size. */
+  border-bottom: 1px solid var(--taocp-gold);
+  padding-bottom: 0.3rem;
+}
+
+/* Footer: force the plum band regardless of Infima's footer--dark class, which
+   re-sets --ifm-footer-background-color at element scope — so use the token
+   directly rather than the (hijackable) variable. */
+.footer {
+  background-color: var(--taocp-oxblood-deep);
+  border-top: 2px solid var(--taocp-gold);
+}
+.footer .footer__title { color: var(--taocp-gold); }
+.footer .footer__link-item { color: #e8dfce; }
+.footer .footer__link-item:hover { color: #ffffff; }
+.footer .footer__copyright { color: #b9ab93; }
+.markdown blockquote {
+  border-left: 3px solid var(--taocp-gold);
+  background: var(--taocp-plate);
+  font-style: italic;
+}
+.katex {
+  font-size: 1.05em;
+}
+
+/* Navbar title reads like a foil-stamped spine */
+.navbar__title {
+  font-family: var(--taocp-serif);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-size: 0.95rem;
+  color: var(--taocp-gold);
+}
+.navbar__brand:hover .navbar__title {
+  color: #ffffff;
+}

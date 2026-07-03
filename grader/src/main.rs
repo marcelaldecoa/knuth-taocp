@@ -975,6 +975,10 @@ fn main() -> ExitCode {
             }
         }
         Some("doctor") => doctor(&root, &style),
+        Some("manifest") => {
+            emit_manifest_json();
+            ExitCode::SUCCESS
+        }
         Some("next") => match next_unsolved_module(&progress) {
             None => {
                 println!();
@@ -1056,6 +1060,91 @@ fn main() -> ExitCode {
     }
 }
 
+/// Emit the course manifest as JSON on stdout, grouped by TAOCP volume in
+/// curriculum order. The website consumes this to generate the course sidebar
+/// and the interactive course map, so those can never drift from this single
+/// source of truth. Accepts (and ignores) a trailing `--json` for readability.
+fn emit_manifest_json() {
+    // Volume display names, keyed by the prefix of `Module::source`.
+    fn volume_name(key: &str) -> &'static str {
+        match key {
+            "Vol. 1" => "Fundamental Algorithms",
+            "Vol. 2" => "Seminumerical Algorithms",
+            "Vol. 3" => "Sorting and Searching",
+            "Vol. 4A" => "Combinatorial Algorithms, Part 1",
+            "Vol. 4B" => "Combinatorial Algorithms, Part 2",
+            "Toward Vol. 4C" => "Pre-fascicles",
+            _ => "Other",
+        }
+    }
+    // The volume key is the source text up to the first comma.
+    fn volume_key(source: &str) -> &str {
+        source.split(',').next().unwrap_or(source).trim()
+    }
+
+    // Group modules by volume, preserving first-appearance (= manifest) order,
+    // which reproduces the canonical shelf ordering (Vol 1, 2, 3, 4A, 4B, 4C).
+    let mut order: Vec<&str> = Vec::new();
+    let mut groups: HashMap<&str, Vec<&Module>> = HashMap::new();
+    for m in MODULES {
+        let key = volume_key(m.source);
+        if !order.contains(&key) {
+            order.push(key);
+        }
+        groups.entry(key).or_default().push(m);
+    }
+
+    let mut out = String::from("{\n  \"volumes\": [\n");
+    for (vi, key) in order.iter().enumerate() {
+        out.push_str("    {\n");
+        out.push_str(&format!("      \"key\": {},\n", json_str(key)));
+        out.push_str(&format!("      \"name\": {},\n", json_str(volume_name(key))));
+        out.push_str("      \"modules\": [\n");
+        let mods = &groups[key];
+        for (mi, m) in mods.iter().enumerate() {
+            out.push_str("        {\n");
+            out.push_str(&format!("          \"id\": {},\n", json_str(m.id)));
+            out.push_str(&format!("          \"dir\": {},\n", json_str(m.dir)));
+            out.push_str(&format!("          \"title\": {},\n", json_str(m.title)));
+            out.push_str(&format!("          \"source\": {},\n", json_str(m.source)));
+            out.push_str("          \"stages\": [\n");
+            for (si, s) in m.stages.iter().enumerate() {
+                out.push_str("            { ");
+                out.push_str(&format!("\"title\": {}, ", json_str(s.title)));
+                out.push_str(&format!("\"algorithm\": {}, ", json_str(s.algorithm)));
+                out.push_str(&format!("\"test_target\": {} ", json_str(s.test_target)));
+                out.push('}');
+                out.push_str(if si + 1 < m.stages.len() { ",\n" } else { "\n" });
+            }
+            out.push_str("          ]\n        }");
+            out.push_str(if mi + 1 < mods.len() { ",\n" } else { "\n" });
+        }
+        out.push_str("      ]\n    }");
+        out.push_str(if vi + 1 < order.len() { ",\n" } else { "\n" });
+    }
+    out.push_str("  ]\n}\n");
+    print!("{out}");
+}
+
+/// Minimal JSON string escaping (the course carries zero dependencies, so no serde).
+fn json_str(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 2);
+    out.push('"');
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+    out
+}
+
 fn print_help() {
     println!(
         "\
@@ -1072,6 +1161,7 @@ USAGE:
     ./grade hint <m> <stage>   show a graduated hint (add a number for the next)
     ./grade bench <module>     run a module's growth-curve benchmark
     ./grade doctor             diagnose your toolchain and workspace
+    ./grade manifest           print the course structure as JSON (for the website)
     ./grade reset              clear recorded progress
 
 FLAGS:
