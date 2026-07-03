@@ -1,0 +1,563 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing II — The Engine of Chance · Exhibit 2.1 — The Illusion of Chaos
+  A self-contained, single-file interactive essay on pseudorandom numbers,
+  the linear congruential method, and the spectral test — after Donald Knuth's
+  The Art of Computer Programming, Vol. 2, §3.2.1 & §3.3.4.
+
+  No build step. No frameworks. No network: fonts vendored beside this file
+  (./fonts/*.woff2, relative). Instrument: the Loom of Chaos — an LCG pair-plot
+  driven by exact BigInt arithmetic (moduli up to 2^32).
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Loom of Chaos — a linear congruential generator visualizer where bad multipliers weave visible lattice stripes and good ones scatter to white noise." />
+<title>The Illusion of Chaos · Exhibit 2.1 · The Museum of Algorithms</title>
+
+<style>
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(42px,8.5vw,86px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* THE LAB */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.15fr .95fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; }
+  .panel .phead .k{ color:var(--gold); }
+
+  canvas#loom{ display:block; width:100%; height:auto; background:#080c0f; border:1px solid #05090b; border-radius:2px; }
+
+  .dialwrap{ margin-top:16px; padding:12px 14px; background:rgba(0,0,0,.3); border:1px solid var(--lab-line); border-radius:2px; }
+  .dialwrap .dlabel{ display:flex; justify-content:space-between; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8496a0; margin-bottom:8px; }
+  .dialwrap .dlabel b{ color:var(--gold); font-size:14px; letter-spacing:0; }
+  input[type=range]{ width:100%; accent-color:var(--gold); }
+  .dscale{ display:flex; justify-content:space-between; font-size:10px; color:#5f7079; margin-top:4px; letter-spacing:.06em; }
+
+  .fields{ display:flex; flex-wrap:wrap; gap:10px 14px; margin-top:16px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field label{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#8496a0; }
+  .field input[type=text]{ width:130px; background:#05090b; border:1px solid var(--lab-line); color:#eef3f5; font-family:var(--mono); font-size:14px; padding:8px 10px; border-radius:2px; outline:none; }
+  .field.short input{ width:92px; }
+  .field input:focus{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(198,166,100,.18); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+
+  .presets{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .chip{ font-family:var(--mono); font-size:11.5px; letter-spacing:.03em; background:transparent; border:1px dashed #46565e; color:#9fb0b9; padding:6px 10px; border-radius:2px; cursor:pointer; }
+  .chip:hover{ border-color:var(--gold); color:var(--gold); border-style:solid; }
+  .chip.bad{ border-color:#6a3a40; color:#c98a86; } .chip.bad:hover{ border-color:#e79a8f; color:#e79a8f; }
+  .chip.good{ border-color:#3a5f52; color:#8fc4a8; } .chip.good:hover{ border-color:#a8d5b5; color:#a8d5b5; }
+
+  .readout-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .stat{ flex:1; min-width:96px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:9px 11px; }
+  .stat .lbl{ font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:#7f9099; }
+  .stat .val{ font-size:19px; color:#eef3f5; margin-top:2px; word-break:break-word; }
+  .stat .val.gold{ color:var(--gold); } .stat .val.good{ color:#8fd0a8; } .stat .val.warn{ color:#e79a8f; }
+
+  .verdict{ padding:10px 12px; border-radius:2px; margin-bottom:12px; font-size:13px; line-height:1.5; border:1px solid; }
+  .verdict.good{ background:rgba(60,110,80,.14); border-color:#3a5f52; color:#bfe0cc; }
+  .verdict.warn{ background:rgba(120,50,50,.16); border-color:#6a3a40; color:#e8c0ba; }
+  .verdict b{ font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.02em; }
+
+  .console{ height:150px; overflow-y:auto; font-size:12.5px; line-height:1.55; padding-right:6px; }
+  .console::-webkit-scrollbar{ width:8px; } .console::-webkit-scrollbar-thumb{ background:#2b3a42; border-radius:4px; }
+  .cline{ padding:4px 0; border-bottom:1px dotted #24333a; color:#b7c6cd; }
+  .cline .op{ color:var(--gold); } .cline.small{ color:#7f9099; font-size:11.5px; } .cline.warn{ color:#e79a8f; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">2.1</div>
+      <p class="eyebrow">Wing II · The Engine of Chance</p>
+      <h1>The Illusion<br/>of Chaos</h1>
+      <p class="sub">Pseudorandom numbers and the spectral test</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> II — Seminumerical Algorithms</span>
+        <span><b>SECTION</b> 3.2.1, 3.3.4</span>
+        <span><b>c.</b> 1949 · Lehmer</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">A computer is the most obedient machine ever built. It does exactly what it is told, the same way every time — which is precisely why it cannot, by itself, be surprising. And yet nearly everything we ask of it now depends on surprise: to simulate a galaxy or a pandemic, to shuffle a deck, to encrypt a message, to train a network, the machine must produce numbers that look like they were drawn from a hat. How does a perfectly deterministic device manufacture chance? It doesn't. It manufactures the <em>illusion</em> of chance — a stream of numbers each rigidly determined by the last, arranged so cunningly that no simple test can tell them from true randomness.</p>
+
+      <p class="reveal">John von Neumann, who tried the first arithmetic recipe (the "middle-square" method) in 1946, saw the paradox with a clarity that has never been improved upon, and stated it as a joke that is also a warning.</p>
+
+      <blockquote class="pull reveal">"Anyone who considers arithmetical methods of producing random digits is, of course, in a state of sin."
+        <cite>— John von Neumann, 1949</cite></blockquote>
+
+      <p class="reveal">The sin is unavoidable; the craft lies in sinning <em>well</em>. In 1949 Derrick Lehmer proposed the recipe that would dominate for half a century — the <strong>linear congruential generator</strong>. Take a modulus <span class="mono">m</span>, a multiplier <span class="mono">a</span>, an increment <span class="mono">c</span>, and a seed <span class="mono">X₀</span>, then grind out the sequence by one line of arithmetic:</p>
+
+      <h2 class="reveal"><span class="num">I · The Recurrence</span>One line that never repeats too soon</h2>
+
+      <p class="reveal" style="text-align:center; font-family:var(--mono); font-size:17px; color:var(--plum)"><strong>X<sub>n+1</sub> = (a · X<sub>n</sub> + c) mod m</strong></p>
+
+      <p class="reveal">Each number is the remainder of a multiply-and-add — cheap, and utterly deterministic. Because every value lies in <span class="mono">{0, 1, …, m−1}</span>, the sequence must eventually repeat; the only question is <em>when</em>. A generator whose cycle is shorter than <span class="mono">m</span> wastes most of its range and betrays itself quickly. Knuth devotes §3.2.1.2 to the conditions — the <strong>Hull–Dobell theorem</strong> — under which an LCG achieves the full period <span class="mono">m</span>: the increment must be coprime to <span class="mono">m</span>, and <span class="mono">a−1</span> must be divisible by every prime factor of <span class="mono">m</span> (and by 4 if <span class="mono">m</span> is). Get those wrong and the illusion collapses at once.</p>
+
+      <p class="reveal">But a full period is necessary, not sufficient. A generator can visit every value and still be deeply, fatally patterned — and the pattern is invisible in the raw stream. You have to <em>look</em> at it correctly. Plot each consecutive pair <span class="mono">(X<sub>n</sub>, X<sub>n+1</sub>)</span> as a point in the unit square, and the truth comes out of hiding.</p>
+    </section>
+
+    <!-- THE LAB -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 2.1</div>
+            <div class="title">The Loom of Chaos</div>
+          </div>
+          <div class="sn">LCG PAIR-PLOT · exact BigInt · the spectral test by eye</div>
+        </div>
+
+        <div class="lab-grid">
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Pair-plot of (Xₙ, Xₙ₊₁) in the unit square</span><span class="k" id="ptsK">0 pts</span></div>
+              <canvas id="loom" width="520" height="520" role="img" aria-label="A scatter plot of consecutive pairs from a linear congruential generator, revealing lattice structure"></canvas>
+            </div>
+
+            <div class="dialwrap">
+              <div class="dlabel"><span>The Spectral Dial — multiplier a</span><b id="dialA">a = 7</b></div>
+              <input id="dial" type="range" min="0" max="1000" value="90" />
+              <div class="dscale"><span>a = 1 · coarse stripes</span><span>a → m · white noise</span></div>
+            </div>
+
+            <div class="fields">
+              <div class="field short"><label for="inA">multiplier a</label><input id="inA" type="text" inputmode="numeric" value="7" /></div>
+              <div class="field short"><label for="inC">increment c</label><input id="inC" type="text" inputmode="numeric" value="0" /></div>
+              <div class="field"><label for="inM">modulus m</label><input id="inM" type="text" inputmode="numeric" value="2147483647" /></div>
+              <div class="field short"><label for="inSeed">seed X₀</label><input id="inSeed" type="text" inputmode="numeric" value="1" /></div>
+            </div>
+
+            <div class="controls">
+              <button class="btn primary" id="weaveBtn">↻ Weave</button>
+              <button class="btn" id="applyBtn">Apply fields</button>
+            </div>
+
+            <div class="presets" id="presets">
+              <span style="color:#6c7d85;letter-spacing:.12em;font-size:10.5px;align-self:center;text-transform:uppercase">Presets:</span>
+              <button class="chip bad" data-a="7" data-c="0" data-m="2147483647" data-seed="1">a=7 · 7 stripes</button>
+              <button class="chip good" data-a="16807" data-c="0" data-m="2147483647" data-seed="1">MINSTD · good</button>
+              <button class="chip" data-a="65539" data-c="0" data-m="2147483648" data-seed="1">RANDU · infamous</button>
+              <button class="chip good" data-a="1664525" data-c="1013904223" data-m="4294967296" data-seed="1">Num. Recipes · good</button>
+              <button class="chip bad" data-a="1229" data-c="1" data-m="2048" data-seed="1">m=2048 · coarse</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Console — the generator on trial</span><span class="k" id="statusK">ready</span></div>
+
+              <div class="readout-row">
+                <div class="stat"><div class="lbl">Period</div><div class="val gold" id="statPeriod">—</div></div>
+                <div class="stat"><div class="lbl">Square filled</div><div class="val" id="statFill">—</div></div>
+              </div>
+
+              <div class="verdict" id="verdict"><b>—</b></div>
+
+              <div class="cline small" id="recur" style="margin-bottom:10px; word-break:break-word"></div>
+
+              <div class="console" id="console"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">Every linear congruential generator lays its points on a lattice of parallel lines. A <em>bad</em> multiplier packs them onto a few coarse stripes you can see across the room; a <em>good</em> one makes the lattice so fine it dissolves into apparent noise. Drag the Spectral Dial and watch the stripes multiply and vanish. This is the spectral test, performed by eye.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · Random Numbers Fall in the Planes</span>The spectral test</h2>
+
+      <p class="reveal">What you are seeing is not an artifact of the plot; it is the deepest structural fact about linear congruential generators. Because each term is a linear function of the last, the points <span class="mono">(X<sub>n</sub>, X<sub>n+1</sub>)</span> cannot be scattered freely — they are trapped on a regular <strong>lattice</strong>, and that lattice consists of a family of equally spaced parallel lines. In two dimensions you see lines; feed the same generator's triples <span class="mono">(X<sub>n</sub>, X<sub>n+1</sub>, X<sub>n+2</sub>)</span> into a cube and you see <em>planes</em>. George Marsaglia announced this in 1968 with the greatest title in the literature: <em>"Random numbers fall mainly in the planes."</em></p>
+
+      <p class="reveal">The <strong>spectral test</strong>, which Knuth calls in §3.3.4 by far the most powerful test we have for these generators, simply measures the coarseness of that lattice: how few, and how widely spaced, are the hyperplanes onto which the points fall. A good generator's planes are so numerous and so tightly packed that no simulation can resolve them; a bad one's are few enough to distort any calculation that samples in that many dimensions.</p>
+
+      <blockquote class="pull reveal">The tragedy of RANDU: <span class="mono">a = 65539, m = 2³¹</span>. In two dimensions it looks flawless. But every triple it produces falls on just fifteen planes in the cube — and for a decade of Monte Carlo simulations, nobody looked in three.</blockquote>
+
+      <p class="reveal">Load the <span class="mono">RANDU</span> preset and drag nothing: the pair-plot is a convincing field of noise. That is exactly what made it so dangerous. IBM shipped it in the 1960s, it became the default on a generation of mainframes, and its three-dimensional catastrophe — fifteen planes where there should be millions — quietly biased published results in physics and chemistry before Marsaglia and the spectral test caught it. The lesson Knuth hammers home is that passing the tests you happen to run is not the same as being random; you must run the test that is <em>designed to find the flaw</em>.</p>
+
+      <h2 class="reveal"><span class="num">III · Sinning Well</span>What good randomness costs</h2>
+
+      <p class="reveal">The spectral test does not merely condemn; it <em>guides</em>. Knuth's Table 1 in §3.3.4 ranks multipliers by their spectral figures of merit, and the good constants — MINSTD's <span class="mono">16807</span>, the multipliers inside modern generators — are precisely those chosen to maximize the spacing of the planes in as many dimensions as we can afford to compute. The linear congruential method survives today, in fast simulations and hash functions, wherever its speed is worth more than cryptographic strength, but always with constants that have paid the spectral toll.</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">Where the LCG is not enough — where an adversary must not predict the next bit, or where thousands of parallel streams must not correlate — its descendants take over: the Mersenne Twister with its period of <span class="mono">2¹⁹⁹³⁷−1</span>, the small fast PCG and xoshiro families, the cryptographic generators seeded from true physical entropy. But every one of them is judged by the same unforgiving standard von Neumann named and Knuth formalized: not "does it look random?" but "does it survive the test built to break it?" The illusion of chaos is only as good as the instruments we point at it — and the numbers that will decide whether you can trust the machine's next surprise were, all along, hiding in the planes.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING II · EXHIBIT 2.1<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 2 — §3.2.1, §3.3.4<br/>
+      <a href="index.html">← Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">2.2 The Floating-Point Abyss →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE LOOM OF CHAOS
+   A linear congruential generator  X(n+1) = (a·X(n) + c) mod m  plotted as
+   consecutive pairs. Exact BigInt arithmetic (moduli up to 2^32). The lattice
+   structure — the spectral test by eye — is measured with a grid-occupancy
+   proxy; period and Hull–Dobell full-period are computed exactly.
+   ========================================================================= */
+
+const N = 12000;          // pairs to plot
+const GRIDK = 40;         // occupancy grid resolution
+const cv = document.getElementById('loom');
+const ctx = cv.getContext('2d');
+
+/* ---------- state ---------- */
+let params = { a:7n, c:0n, m:2147483647n, seed:1n };
+let unit = new Float32Array(2*N);   // pair coords in [0,1]
+let nPts = 0;                        // valid pairs generated
+let shown = 0;                       // revealed during weave
+let weaving = false, raf = null;
+let stats = null;
+const logLines = [];
+
+/* ---------- BigInt helpers ---------- */
+function bgcd(a,b){ a=a<0n?-a:a; b=b<0n?-b:b; while(b){ [a,b]=[b,a%b]; } return a; }
+function primeFactors(m){                       // distinct primes of m (m ≤ 2^32)
+  const f=new Set(); let n=m;
+  for(let p=2n; p*p<=n; p++){ if(n%p===0n){ f.add(p); while(n%p===0n) n/=p; } }
+  if(n>1n) f.add(n);
+  return [...f];
+}
+
+/* ---------- generate the sequence ---------- */
+function generate(){
+  const { a,c,m,seed } = params;
+  const Mn = Number(m);
+  let x = ((seed % m) + m) % m;
+  let prevN = Number(x)/Mn;
+  nPts = 0;
+  for(let i=0;i<N;i++){
+    x = (a*x + c) % m;
+    const curN = Number(x)/Mn;
+    unit[2*i] = prevN; unit[2*i+1] = curN;
+    prevN = curN; nPts++;
+  }
+}
+
+/* ---------- exact period (small m) + Hull–Dobell ---------- */
+function analyse(){
+  const { a,c,m,seed } = params;
+  const Mn = Number(m);
+
+  // period: march until a value repeats (cap at m, only when feasible)
+  let period = null, capable = Mn <= (1<<21);
+  if(capable){
+    const seen = new Map(); let x=((seed%m)+m)%m, i=0;
+    while(i <= Mn){
+      const k = x.toString();
+      if(seen.has(k)){ period = i - seen.get(k); break; }
+      seen.set(k,i); x=(a*x+c)%m; i++;
+    }
+  }
+
+  // Hull–Dobell full-period test (applies when c ≠ 0)
+  let hd = null;
+  if(c !== 0n){
+    const cond1 = bgcd(c,m) === 1n;
+    const primes = primeFactors(m);
+    const cond2 = primes.every(p => (a-1n) % p === 0n);
+    const cond3 = (m % 4n !== 0n) || ((a-1n) % 4n === 0n);
+    hd = { full: cond1 && cond2 && cond3, cond1, cond2, cond3 };
+  }
+
+  // grid occupancy (spectral proxy) over shown/all points
+  const grid = new Int32Array(GRIDK*GRIDK);
+  for(let i=0;i<nPts;i++){
+    let gx = (unit[2*i]*GRIDK)|0, gy=(unit[2*i+1]*GRIDK)|0;
+    if(gx>=GRIDK) gx=GRIDK-1; if(gy>=GRIDK) gy=GRIDK-1;
+    grid[gy*GRIDK+gx]++;
+  }
+  let occ=0, sum=0; for(const v of grid){ if(v>0) occ++; sum+=v; }
+  const cells = GRIDK*GRIDK, mean=sum/cells;
+  let varr=0; for(const v of grid) varr += (v-mean)*(v-mean); varr/=cells;
+  const cov = mean>0 ? Math.sqrt(varr)/mean : 0;
+  const occFrac = occ/cells;
+
+  // verdict
+  let verdict;
+  if(period != null && period < Math.min(400, Mn)){
+    verdict = { cls:'warn', word:'DEGENERATE', msg:`period is only ${period} — the stream repeats almost at once.` };
+  } else if(occFrac >= 0.72 && cov <= 0.85){
+    verdict = { cls:'good', word:'WHITE NOISE', msg:`points fill ${(occFrac*100)|0}% of the square evenly — no lattice visible in 2D.` };
+  } else {
+    verdict = { cls:'warn', word:'VISIBLE LATTICE', msg:`points collapse onto few lines (${(occFrac*100)|0}% of the square filled) — the spectral test condemns this.` };
+  }
+
+  stats = { period, capable, hd, occFrac, cov, verdict, Mn };
+}
+
+/* ---------- drawing ---------- */
+let cssW=520, cssH=520, plot=480, ox=20, oy=20;
+function fit(){
+  const rect = cv.getBoundingClientRect();
+  cssW = rect.width; cssH = rect.width;         // keep square
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const margin = 30;
+  plot = Math.min(cssW, cssH) - margin*2;
+  ox = (cssW - plot)/2; oy = (cssH - plot)/2;
+  draw();
+}
+function draw(){
+  ctx.clearRect(0,0,cssW,cssH);
+
+  // frame + axis labels
+  ctx.strokeStyle='rgba(198,166,100,0.45)'; ctx.lineWidth=1;
+  ctx.strokeRect(ox+.5, oy+.5, plot, plot);
+  ctx.fillStyle='rgba(150,168,176,0.75)';
+  ctx.font='11px "IBM Plex Mono", monospace';
+  ctx.textAlign='center';
+  ctx.fillText('Xₙ', ox+plot/2, oy+plot+20);
+  ctx.save(); ctx.translate(ox-16, oy+plot/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Xₙ₊₁', 0, 0); ctx.restore();
+  ctx.textAlign='left'; ctx.fillStyle='rgba(120,138,146,0.6)';
+  ctx.fillText('0', ox-4, oy+plot+14); ctx.fillText('1', ox+plot-4, oy+plot+14);
+
+  // points
+  const count = weaving ? shown : nPts;
+  const sz = plot > 380 ? 1.6 : 1.3;
+  ctx.fillStyle = 'rgba(198,166,100,0.62)';
+  for(let i=0;i<count;i++){
+    const px = ox + unit[2*i]*plot;
+    const py = oy + (1 - unit[2*i+1])*plot;   // flip y
+    ctx.fillRect(px, py, sz, sz);
+  }
+
+  // weaving cursor: last drawn point brighter
+  if(weaving && count>0){
+    const i=count-1;
+    ctx.fillStyle='#fff';
+    ctx.fillRect(ox+unit[2*i]*plot-1, oy+(1-unit[2*i+1])*plot-1, 3, 3);
+  }
+}
+
+/* ---------- readout ---------- */
+function pushLog(html, cls){ logLines.push({html,cls:cls||''}); if(logLines.length>30) logLines.shift(); renderConsole(); }
+function renderConsole(){
+  const c=document.getElementById('console');
+  c.innerHTML = logLines.map(l=>`<div class="cline ${l.cls}">${l.html}</div>`).join('');
+  c.scrollTop=c.scrollHeight;
+}
+function fmt(b){ return b.toString(); }
+function updateReadout(){
+  const { a,c,m,seed } = params;
+  const s = stats;
+  document.getElementById('ptsK').textContent = (weaving?shown:nPts) + ' pts';
+  document.getElementById('statPeriod').textContent =
+    s.period!=null ? (s.period===s.Mn ? 'm (full)' : fmt(BigInt(s.period))) : (s.capable?'—':'≈ large');
+  document.getElementById('statFill').textContent = (s.occFrac*100).toFixed(0) + '%';
+
+  const v = document.getElementById('verdict');
+  v.className = 'verdict ' + s.verdict.cls;
+  v.innerHTML = `<b>${s.verdict.word}</b> — ${s.verdict.msg}`;
+
+  document.getElementById('recur').innerHTML =
+    `X<sub>n+1</sub> = (<span style="color:var(--gold)">${fmt(a)}</span>·X<sub>n</sub> + ${fmt(c)}) mod ${fmt(m)} &nbsp;·&nbsp; X₀=${fmt(seed)}`;
+
+  document.getElementById('statusK').textContent = weaving ? 'weaving' : 'ready';
+}
+
+/* ---------- recompute pipeline ---------- */
+function recompute(logMsg){
+  generate();
+  analyse();
+  if(logMsg) pushLog(logMsg);
+  // period / Hull–Dobell note
+  if(stats.hd){
+    pushLog(stats.hd.full
+      ? '<span class="op">Hull–Dobell</span>: full period m ✓ (gcd(c,m)=1, a−1 hits every prime, 4-rule ok)'
+      : '<span class="op">Hull–Dobell</span>: NOT full period — ' +
+        (!stats.hd.cond1?'gcd(c,m)≠1':'') + (!stats.hd.cond2?' a−1 misses a prime of m':'') + (!stats.hd.cond3?' (4|m but 4∤a−1)':''),
+      stats.hd.full?'small':'warn');
+  } else {
+    pushLog('multiplicative (c=0): max period requires a primitive root — see §3.2.1.2', 'small');
+  }
+  updateReadout(); draw();
+}
+
+/* ---------- weave animation ---------- */
+function startWeave(){
+  weaving = true; shown = 0;
+  document.getElementById('statusK').textContent='weaving';
+  cancelAnimationFrame(raf); raf = requestAnimationFrame(weaveStep);
+}
+function weaveStep(){
+  if(!weaving) return;
+  shown = Math.min(nPts, shown + Math.max(60, (nPts/120)|0));
+  document.getElementById('ptsK').textContent = shown + ' pts';
+  draw();
+  if(shown < nPts){ raf = requestAnimationFrame(weaveStep); }
+  else { weaving = false; document.getElementById('statusK').textContent='ready'; }
+}
+
+/* ---------- inputs ---------- */
+const inA=document.getElementById('inA'), inC=document.getElementById('inC'),
+      inM=document.getElementById('inM'), inSeed=document.getElementById('inSeed'),
+      dial=document.getElementById('dial'), dialA=document.getElementById('dialA');
+
+function parseBig(str, fallback){
+  try{ const b = BigInt(String(str).trim().replace(/[^0-9]/g,'')); return b; }
+  catch(e){ return fallback; }
+}
+function syncFields(){
+  inA.value = fmt(params.a); inC.value = fmt(params.c);
+  inM.value = fmt(params.m); inSeed.value = fmt(params.seed);
+  dialA.textContent = 'a = ' + fmt(params.a);
+}
+function clampParams(){
+  if(params.m < 2n) params.m = 2n;
+  params.a = ((params.a % params.m) + params.m) % params.m;
+  params.c = ((params.c % params.m) + params.m) % params.m;
+  params.seed = ((params.seed % params.m) + params.m) % params.m;
+}
+function setDialFromA(){
+  const t = Number(params.a) <= 1 ? 0 : Math.log(Number(params.a))/Math.log(Number(params.m));
+  dial.value = Math.round(Math.max(0, Math.min(1, t))*1000);
+}
+
+function applyFields(weave){
+  params.a = parseBig(inA.value, params.a);
+  params.c = parseBig(inC.value, params.c);
+  params.m = parseBig(inM.value, params.m);
+  params.seed = parseBig(inSeed.value, params.seed);
+  clampParams(); syncFields(); setDialFromA();
+  recompute('<span class="op">apply</span> a=' + fmt(params.a) + ', c=' + fmt(params.c) + ', m=' + fmt(params.m));
+  if(weave) startWeave();
+}
+
+/* dial: exponential map t∈[0,1] → a∈[1, m-1] */
+let dialPending=false;
+dial.addEventListener('input', ()=>{
+  const t = Number(dial.value)/1000;
+  const Mn = Number(params.m);
+  let a = Math.round(Math.pow(Mn, t));
+  a = Math.max(1, Math.min(Mn-1, a));
+  params.a = BigInt(a);
+  dialA.textContent = 'a = ' + a;
+  inA.value = String(a);
+  if(!dialPending){ dialPending=true; requestAnimationFrame(()=>{ dialPending=false; weaving=false; recompute(); }); }
+});
+
+document.getElementById('applyBtn').addEventListener('click', ()=>applyFields(false));
+document.getElementById('weaveBtn').addEventListener('click', ()=>{ recompute(); startWeave(); });
+[inA,inC,inM,inSeed].forEach(el=> el.addEventListener('keydown', e=>{ if(e.key==='Enter') applyFields(false); }));
+
+document.getElementById('presets').addEventListener('click', e=>{
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  params.a = BigInt(chip.dataset.a); params.c = BigInt(chip.dataset.c);
+  params.m = BigInt(chip.dataset.m); params.seed = BigInt(chip.dataset.seed);
+  clampParams(); syncFields(); setDialFromA();
+  logLines.length=0;
+  recompute('<span class="op">preset</span> ' + chip.textContent.trim());
+  startWeave();
+});
+
+window.addEventListener('resize', fit);
+
+/* ---------- reveal-on-scroll ---------- */
+const io = new IntersectionObserver((entries)=>{ entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } }); },
+  { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(n=>io.observe(n));
+
+/* ---------- boot ---------- */
+syncFields(); setDialFromA();
+pushLog('X(n+1) = (a·X(n) + c) mod m — plot the pairs, judge the lattice.', 'small');
+recompute();
+fit();
+startWeave();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
