@@ -107,6 +107,7 @@ machine Knuth built for it.
 docs/for-newcomers.md          new to Knuth? the primer + how to study
 docs/why-knuth-matters.md      tour of Knuth's algorithms in modern tech
 docs/getting-started.md        setup, repo tour, every command (Windows-aware)
+docs/concrete-mathematics.md   the companion math book, mapped to the course
 course/module-NN-*/README.md   the lesson: theory + stage-by-stage lab guide
 course/module-NN-*/exercises.md your log for Knuth's exercises (with ratings)
 labs/module-NN-*/src/lab.rs    YOUR file — stubs with todo!() to replace
@@ -172,7 +173,14 @@ step labels as comments, **let the tests argue with you**, and then do a few
 - Vols. 1–3 (3rd/2nd ed.), Vol. 4A (2011), Vol. 4B (2022), Addison-Wesley.
 - Knuth's TAOCP page (errata, pre-fascicles toward Vol. 4C, MMIX):
   https://cs.stanford.edu/~knuth/taocp.html
-- *Concrete Mathematics* (Graham–Knuth–Patashnik) expands Module 02's §1.2.
+- *Concrete Mathematics* (Graham–Knuth–Patashnik) is the one companion book to
+  read for a full Knuth experience — it's Module 02's §1.2 grown into a full
+  course. See **[docs/concrete-mathematics.md](docs/concrete-mathematics.md)**.
+
+Section references like **§1.2.3** point into the books by *chapter*: §1–2 →
+Vol. 1, §3–4 → Vol. 2, §5–6 → Vol. 3, §7 → Vol. 4. So §4.5.3 is in Vol. 2 even
+where a Vol. 1 lesson cites it. Full explanation:
+[docs/for-newcomers.md §8](docs/for-newcomers.md#8-reading-taocps-section-numbers).
 
 MMIX, Knuth's machine, is deliberately out of scope here — this course maps
 his MIX-era memory model onto Rust arenas instead (see CONVENTIONS.md).
