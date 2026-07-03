@@ -1,0 +1,684 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing I — The Nature of Information · Exhibit 1.2 — Ariadne's Thread
+  A self-contained, single-file interactive essay on pointers and linked lists,
+  after Donald Knuth's The Art of Computer Programming, Vol. 1, §2.2.
+
+  No build step. No frameworks. No network: fonts are vendored beside this file
+  (./fonts/*.woff2). The instrument — the Memory Untangler — is SVG. Font paths
+  are RELATIVE so the file works served or opened straight from disk.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Memory Untangler — tie pointer-threads through scattered memory and watch a linked list heal itself when a node is deleted." />
+<title>Ariadne's Thread · Exhibit 1.2 · The Museum of Algorithms</title>
+
+<style>
+  /* ---------- vendored fonts (relative, no network) ---------- */
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  /* ------- Title plate ------- */
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(42px,8.5vw,86px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  /* ------- prose ------- */
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  /* reveal-on-scroll */
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* ---------------- THE LAB ---------------- */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.5fr .9fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; }
+  .panel .phead .k{ color:var(--gold); }
+
+  /* memory field (SVG) */
+  .memwrap{ position:relative; }
+  svg#mem{ display:block; width:100%; height:auto; background:
+      radial-gradient(700px 340px at 30% 0%, #10171b 0, #0a0f12 72%); border:1px solid #05090b; border-radius:2px; touch-action:none; }
+  .hintbar{ margin-top:10px; font-size:12px; color:#8496a0; line-height:1.5; }
+  .hintbar b{ color:var(--gold); font-weight:500; }
+
+  /* SVG node styling via classes */
+  .nd-cell{ fill:#182228; stroke:#33454e; stroke-width:1.5; transition:fill .2s, stroke .2s; }
+  .nd-g:hover .nd-cell{ stroke:#5b7079; }
+  .nd-g.selected .nd-cell{ stroke:var(--gold); stroke-width:2.5; }
+  .nd-g.inlist .nd-cell{ fill:#1c2a25; stroke:#3f5a4e; }
+  .nd-g.free .nd-cell{ fill:#141a1e; stroke:#2a343a; stroke-dasharray:4 4; }
+  .nd-g.pulse .nd-cell{ fill:#3a2f18; stroke:var(--gold); stroke-width:2.5; }
+  .nd-div{ stroke:#33454e; stroke-width:1; }
+  .nd-data{ fill:#eef3f5; font-family:var(--display); font-weight:700; font-size:26px; text-anchor:middle; dominant-baseline:central; }
+  .nd-g.free .nd-data{ fill:#4a565d; }
+  .nd-addr{ fill:#7f9099; font-family:var(--mono); font-size:11px; text-anchor:middle; }
+  .nd-nextlbl{ fill:#5f7079; font-family:var(--mono); font-size:8.5px; text-anchor:middle; letter-spacing:.05em; }
+  .nd-freelbl{ fill:#5a666d; font-family:var(--mono); font-size:9px; text-anchor:middle; letter-spacing:.12em; }
+  .nd-port{ fill:#0a0f12; stroke:var(--gold); stroke-width:1.6; cursor:crosshair; }
+  .nd-port:hover{ fill:var(--gold); }
+  .nd-port.armed{ fill:var(--gold); }
+
+  .thread{ fill:none; stroke:var(--gold); stroke-width:2.4; }
+  .thread.rubber{ stroke-dasharray:6 5; opacity:.8; }
+  .thread.head{ stroke:#e0c88a; }
+  .thread-arrow{ fill:var(--gold); }
+  .headpill{ fill:#20160a; stroke:var(--gold); stroke-width:1.5; }
+  .headpill-txt{ fill:var(--gold); font-family:var(--mono); font-size:12px; font-weight:600; text-anchor:middle; dominant-baseline:central; letter-spacing:.1em; }
+  .nullterm{ stroke:#7f9099; stroke-width:2; }
+
+  /* controls */
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn.danger{ border-color:#7a3a34; color:#e79a8f; }
+  .btn.danger:hover{ border-color:#e79a8f; color:#fff; background:#2a1512; }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+  .sep{ width:1px; align-self:stretch; background:var(--lab-line); margin:2px 4px; }
+
+  /* readout */
+  .readout-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .stat{ flex:1; min-width:74px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:9px 11px; }
+  .stat .lbl{ font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#7f9099; }
+  .stat .val{ font-size:20px; color:#eef3f5; margin-top:2px; }
+  .stat .val.gold{ color:var(--gold); }
+  .spell{ font-size:13px; color:#b7c6cd; margin-bottom:12px; word-break:break-word; }
+  .spell b{ color:var(--gold); font-family:var(--display); font-weight:700; font-size:20px; letter-spacing:.12em; }
+  .spell .muted{ color:#6c7d85; }
+
+  .console{ height:236px; overflow-y:auto; font-size:12.5px; line-height:1.55; padding-right:6px; }
+  .console::-webkit-scrollbar{ width:8px; }
+  .console::-webkit-scrollbar-thumb{ background:#2b3a42; border-radius:4px; }
+  .cline{ padding:5px 0; border-bottom:1px dotted #24333a; color:#b7c6cd; }
+  .cline .op{ color:var(--gold); }
+  .cline .addr{ color:#89b4c4; }
+  .cline.warn{ color:#e79a8f; }
+  .cline.good{ color:#a8d5b5; }
+  .cline.small{ color:#7f9099; font-size:11.5px; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <!-- ============ TITLE PLATE ============ -->
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">1.2</div>
+      <p class="eyebrow">Wing I · The Nature of Information</p>
+      <h1>Ariadne's<br/>Thread</h1>
+      <p class="sub">Pointers, linked lists, and the liberation of memory</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> I — Fundamental Algorithms</span>
+        <span><b>SECTION</b> 2.2.1–2.2.3</span>
+        <span><b>c.</b> 1956 · IPL / LISP</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ PROSE + LAB ============ -->
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">In the myth, Theseus walks into the labyrinth to kill the Minotaur and faces a subtler danger than the monster: the maze itself. Its corridors branch and double back until direction is meaningless. Ariadne's gift is not a map — a map would require seeing the whole maze at once — but a single thread, tied at the door and unspooled step by step. To escape, Theseus needs to know only one thing at each chamber: which way the thread leads next. This is the oldest data structure in Western storytelling, and it is exactly a <strong>linked list</strong>.</p>
+
+      <p class="reveal">For the first decade of computing, memory was a street of houses with consecutive numbers, and a sequence of data was a row of adjacent houses. To store "the third item" you computed its address; to insert a new item in the middle, you evicted everyone downstream and marched them one house over. Then, around 1956, Allen Newell, Cliff Shaw, and Herbert Simon — building their <em>Information Processing Language</em> — and soon John McCarthy in LISP, made a move so simple it is easy to miss its radicalism: let each datum carry, alongside its value, the <em>address of its successor</em>. The data no longer needs to live in order. It only needs to point.</p>
+
+      <blockquote class="pull reveal">"Linked memory is the art of letting go of adjacency. Two things are 'next to' each other not because of where they sit, but because one holds the other's address."
+        <cite>— after D. E. Knuth, TAOCP Vol. 1, §2.2</cite></blockquote>
+
+      <h2 class="reveal"><span class="num">I · The Link Field</span>A datum that knows only what comes next</h2>
+
+      <p class="reveal">A <strong>node</strong> is two things welded together: a <em>data field</em> holding the value, and a <em>link field</em> holding the address of the next node — Knuth writes the empty link, the end of the thread, as <span class="mono">Λ</span>. A single distinguished pointer, <span class="mono">HEAD</span>, holds the address of the first node; from there the whole sequence is recoverable by following links until you hit <span class="mono">Λ</span>. The nodes may be scattered anywhere in memory, in any physical order. The logical order lives entirely in the thread.</p>
+
+      <p class="reveal">This trades away one thing and buys another. You lose <em>random access</em>: to reach the fifth item you must walk the first four — there is no arithmetic shortcut, because the successor is <em>stored</em>, not computed. What you gain is that insertion and deletion in the middle cost a single pointer write instead of shifting an entire array. The instrument below is a heap of scattered memory cells. Tie the thread from <span class="mono">HEAD</span> through them and make a list; then cut a node out and watch the thread heal.</p>
+    </section>
+
+    <!-- ============ THE LAB ============ -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 1.2</div>
+            <div class="title">The Memory Untangler</div>
+          </div>
+          <div class="sn">LINKED ALLOCATION · §2.2.3 · single thread, AVAIL list</div>
+        </div>
+
+        <div class="lab-grid">
+
+          <!-- LEFT: the memory field -->
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Memory — scattered cells [ addr · data · link ]</span><span class="k" id="modeReadout">idle</span></div>
+              <div class="memwrap">
+                <svg id="mem" viewBox="0 0 760 480" role="img" aria-label="A field of scattered memory cells connected by pointer threads"></svg>
+              </div>
+              <div class="hintbar">
+                <b>Tie a thread:</b> click a cell's gold port ○, then click the next cell. Start from <b>HEAD</b>.
+                &nbsp;·&nbsp; <b>Select:</b> click a cell body. &nbsp;·&nbsp; <b>Heal:</b> select a cell and press <b>Cut node</b> — its predecessor re-routes around it and the cell returns to AVAIL.
+              </div>
+            </div>
+
+            <div class="controls">
+              <button class="btn primary" id="traverseBtn">▸ Traverse from HEAD</button>
+              <button class="btn danger" id="cutBtn" disabled>✂ Cut node</button>
+              <button class="btn" id="allocBtn">＋ Alloc from AVAIL</button>
+              <div class="sep"></div>
+              <button class="btn" id="autoBtn">Auto-thread</button>
+              <button class="btn" id="scrambleBtn">↺ Scramble (unlink)</button>
+            </div>
+          </div>
+
+          <!-- RIGHT: console -->
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Console — the list, as read from HEAD</span><span class="k" id="statusK">ready</span></div>
+
+              <div class="readout-row">
+                <div class="stat"><div class="lbl">In list</div><div class="val" id="statLen">0</div></div>
+                <div class="stat"><div class="lbl">AVAIL free</div><div class="val" id="statAvail">0</div></div>
+                <div class="stat"><div class="lbl">HEAD</div><div class="val gold" id="statHead">Λ</div></div>
+              </div>
+
+              <div class="spell" id="spell"><span class="muted">Traverse to read the thread…</span></div>
+
+              <div class="console" id="console"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">Every cell holds a value and one link — the address of the next cell. The order you read is the order of the <em>thread</em>, not of the addresses. Cut a node and only one pointer changes: <span class="mono">pred.link ← node.link</span>. The list is healed in O(1); the freed cell rejoins the AVAIL pool.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · The Healing Cut</span>Deletion as a single pointer write</h2>
+
+      <p class="reveal">Here is the move that made linked structures worth their cost. To delete a node <span class="mono">X</span> from the middle of an array you must shift every later element down one slot — <span class="mono">O(n)</span> work, touching memory you had no interest in. To delete <span class="mono">X</span> from a linked list you find its predecessor <span class="mono">P</span> and perform exactly one assignment: <span class="mono">P.link ← X.link</span>. The thread that used to run <span class="mono">P → X → X.next</span> now runs straight from <span class="mono">P</span> to <span class="mono">X.next</span>. Nothing else in memory moves. In the instrument you can watch the pointer's endpoint slide off the doomed node and reattach to its successor: the list heals over the wound.</p>
+
+      <blockquote class="pull reveal">One assignment closes the gap. The deleted cell is not destroyed — it is handed back to the <span class="mono">AVAIL</span> list, the pool of free cells waiting to be used again.</blockquote>
+
+      <p class="reveal">That freed cell is the seed of a second idea. Knuth's storage discipline keeps all unused nodes on their own linked list — the <strong>AVAIL</strong> list. Allocation is "pop a node off AVAIL"; freeing is "push it back on." Both are <span class="mono">O(1)</span> pointer writes. Press <span class="mono">＋ Alloc</span> and a cell is drawn from the free pool and spliced into the thread; cut a node and it returns. But what happens when a program forgets to hand cells back — when the thread is dropped while nodes still float in memory, unreachable and unrecoverable? That question opens the next room, <em>The Specter of Forgetting</em>, and the invention of garbage collection.</p>
+
+      <h2 class="reveal"><span class="num">III · When the Thread Breaks</span>The perils of the pointer</h2>
+
+      <p class="reveal">The pointer's freedom is also its hazard. Follow a link to a node that has already been freed and you have a <strong>dangling pointer</strong> — Theseus tugging a thread that leads to a chamber that no longer exists. Let two links point into the same node and a deletion can sever a piece of the list you meant to keep. Let a node's link, directly or through a chain, point back to an earlier node and you have a <strong>cycle</strong>: a traversal that never reaches <span class="mono">Λ</span> and never stops. The instrument's traversal guards against the last of these — it watches for a chamber it has already visited — because an algorithm that walks a linked structure must always ask not only "where does the thread lead?" but "have I been here before?"</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">Newell, Shaw, and Simon reached for lists because human reasoning is associative — one thought leads to the next — and rigid arrays could not model it. Seventy years later the linked node is everywhere the shape of a computation is not known in advance: the free lists inside every memory allocator, the hash-table chains of Exhibit 3.3, the adjacency lists of every graph, the parse trees of every compiler. All of it descends from one small decision — to store, next to each datum, the address of what comes next — and from a girl at the mouth of a labyrinth, handing over a spool of thread.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING I · EXHIBIT 1.2<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 1 — §2.2.1–2.2.3<br/>
+      <a href="exhibit-1.1-invisible-ruler.html">← 1.1 The Invisible Ruler</a> &nbsp;·&nbsp; <a href="index.html">Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">1.3 The Specter of Forgetting →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE MEMORY UNTANGLER — an SVG linked-list instrument
+   Nodes scattered in a memory field; the user ties pointer-threads from HEAD
+   through them. Deletion re-routes pred.link -> node.link (the healing cut)
+   and returns the cell to the AVAIL free list.
+   ========================================================================= */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const VBW = 760, VBH = 480;
+const NW = 104, NH = 54;          // node cell size
+const PORT_R = 7;                 // link-port radius
+
+const svg = document.getElementById('mem');
+
+/* ---------- fixed scatter of memory slots (deliberately chaotic) ---------- */
+const SLOTS = [
+  { addr:'0x1F', x: 40,  y: 70  },   // 1
+  { addr:'0x0A', x: 300, y: 34  },   // 2
+  { addr:'0x33', x: 588, y: 78  },   // 3
+  { addr:'0x14', x: 150, y: 214 },   // 4
+  { addr:'0x2C', x: 430, y: 176 },   // 5
+  { addr:'0x08', x: 610, y: 262 },   // 6
+  { addr:'0x3B', x: 70,  y: 372 },   // 7
+  { addr:'0x17', x: 336, y: 356 },   // 8
+  { addr:'0x25', x: 560, y: 396 },   // 9
+];
+// The myth spelled ARIADNE, deliberately jumbled across memory:
+//   seq:  A  R  I  A  D  N  E   ->  slot: 4  2  7  5  3  8  6
+const LETTER_SLOT = [ [3,'A'],[1,'R'],[6,'I'],[4,'A'],[2,'D'],[7,'N'],[5,'E'] ]; // slot index (0-based), char
+const CHAIN = [3,1,6,4,2,7,5];    // 0-based slot order of the logical list
+const FREE_SLOTS = [0, 8];        // slots that start on the AVAIL list
+
+/* ---------- state ---------- */
+let nodes = [];             // {id, addr, x, y, ch, next(id|null), free}
+let head = null;            // id | null
+let selected = null;        // id | null
+let linking = null;         // source: id | 'HEAD' | null   (a thread being tied)
+let mouse = { x: 0, y: 0 };
+let heal = null;            // {fromPort:{x,y}, a:{x,y}, b:{x,y}, t, node} during a cut animation
+let pulseId = null;         // node currently pulsed during traversal
+let busy = false;           // animation in progress
+const log = [];             // console lines (newest last)
+const timers = [];          // pending traversal timers
+
+const byId = id => nodes.find(n => n.id === id) || null;
+
+function initState(threaded){
+  nodes = SLOTS.map((s,i) => ({ id:i, addr:s.addr, x:s.x, y:s.y, ch:'', next:null, free:false }));
+  for(const [slot, ch] of LETTER_SLOT) nodes[slot].ch = ch;
+  for(const f of FREE_SLOTS){ nodes[f].free = true; nodes[f].ch = ''; }
+  head = null; selected = null; linking = null; heal = null; pulseId = null;
+  clearTimers();
+  if(threaded){
+    for(let i=0;i<CHAIN.length;i++){
+      const cur = nodes[CHAIN[i]];
+      cur.next = (i < CHAIN.length-1) ? CHAIN[i+1] : null;
+    }
+    head = CHAIN[0];
+  }
+}
+
+/* ---------- geometry: ports ---------- */
+function outPort(id){           // right/link side of a cell (or the HEAD pill)
+  if(id === 'HEAD') return { x: 150, y: 18 };
+  const n = byId(id); return { x: n.x + NW - 15, y: n.y + NH/2 };
+}
+function inPort(id){            // left side of a cell
+  const n = byId(id); return { x: n.x, y: n.y + NH/2 };
+}
+
+/* ---------- SVG helpers ---------- */
+function E(tag, attrs, parent){
+  const el = document.createElementNS(SVGNS, tag);
+  for(const k in attrs) el.setAttribute(k, attrs[k]);
+  if(parent) parent.appendChild(el);
+  return el;
+}
+function threadPath(p0, p1){
+  const dx = Math.max(46, Math.abs(p1.x - p0.x) * 0.45);
+  return `M ${p0.x} ${p0.y} C ${p0.x+dx} ${p0.y}, ${p1.x-dx} ${p1.y}, ${p1.x} ${p1.y}`;
+}
+function arrow(parent, p1, cx, cls){        // arrowhead at p1, pointing from control cx→p1
+  const ang = Math.atan2(p1.y - cx.y, p1.x - cx.x);
+  const a = 8, sp = 0.5;
+  const pts = [
+    [p1.x, p1.y],
+    [p1.x - a*Math.cos(ang - sp), p1.y - a*Math.sin(ang - sp)],
+    [p1.x - a*Math.cos(ang + sp), p1.y - a*Math.sin(ang + sp)],
+  ].map(p => p.join(',')).join(' ');
+  E('polygon', { points: pts, class: cls }, parent);
+}
+
+/* ---------- rendering ---------- */
+let gThreads, gNodes;
+function buildScene(){
+  svg.innerHTML = '';
+  gThreads = E('g', {}, svg);
+  gNodes = E('g', {}, svg);
+}
+
+function renderNodes(){
+  gNodes.innerHTML = '';
+  for(const n of nodes){
+    const inList = isInList(n.id);
+    const cls = 'nd-g' + (n.free ? ' free' : inList ? ' inlist' : '')
+              + (selected === n.id ? ' selected' : '') + (pulseId === n.id ? ' pulse' : '');
+    const g = E('g', { class: cls, transform:`translate(${n.x},${n.y})`, style:'cursor:pointer' }, gNodes);
+
+    E('text', { class:'nd-addr', x: NW/2, y: -8 }, g).textContent = n.addr;
+    E('rect', { class:'nd-cell', x:0, y:0, width:NW, height:NH, rx:5 }, g);
+    E('line', { class:'nd-div', x1:NW-30, y1:0, x2:NW-30, y2:NH }, g);       // data | link divider
+    E('text', { class:'nd-nextlbl', x:NW-15, y:14 }, g).textContent = 'LINK';
+
+    if(n.free){
+      E('text', { class:'nd-freelbl', x:(NW-30)/2, y:NH/2+3 }, g).textContent = 'AVAIL';
+    } else {
+      E('text', { class:'nd-data', x:(NW-30)/2, y:NH/2 }, g).textContent = n.ch || '·';
+    }
+
+    // link port (start tying a thread from here)
+    const armed = (linking === n.id) ? ' armed' : '';
+    const port = E('circle', { class:'nd-port'+armed, cx:NW-15, cy:NH/2, r:PORT_R }, g);
+    port.addEventListener('click', ev => { ev.stopPropagation(); onPortClick(n.id); });
+
+    g.addEventListener('click', () => onNodeClick(n.id));
+  }
+}
+
+function renderThreads(){
+  gThreads.innerHTML = '';
+
+  // HEAD pill + its port
+  const hp = outPort('HEAD');
+  E('rect', { class:'headpill', x: hp.x-58, y: hp.y-13, width: 76, height: 26, rx: 13 }, gThreads);
+  E('text', { class:'headpill-txt', x: hp.x-34, y: hp.y }, gThreads).textContent = 'HEAD';
+  const hport = E('circle', { class:'nd-port'+(linking==='HEAD'?' armed':''), cx: hp.x, cy: hp.y, r: PORT_R }, gThreads);
+  hport.addEventListener('click', ev => { ev.stopPropagation(); onPortClick('HEAD'); });
+
+  // committed threads: HEAD -> head node, and each node -> node.next
+  if(head != null && !healHides('HEAD')) drawThread('HEAD', head, true);
+  for(const n of nodes){
+    if(n.next != null && !healHides(n.id)) drawThread(n.id, n.next, false);
+    else if(!n.free && n.next == null && isInList(n.id)) drawNull(n.id);   // Λ terminator on the tail
+  }
+
+  // healing animation: a thread whose endpoint tweens node -> successor (or retracts)
+  if(heal){
+    const p = { x: heal.a.x + (heal.b.x-heal.a.x)*heal.t, y: heal.a.y + (heal.b.y-heal.a.y)*heal.t };
+    const d = threadPath(heal.fromPort, p);
+    E('path', { class:'thread'+(heal.fromIsHead?' head':''), d }, gThreads);
+    arrow(gThreads, p, { x: p.x-40, y: p.y }, 'thread-arrow');
+  }
+
+  // rubber-band while tying
+  if(linking != null){
+    const p0 = outPort(linking);
+    E('path', { class:'thread rubber', d: threadPath(p0, mouse) }, gThreads);
+  }
+}
+
+function drawThread(srcId, dstId, isHead){
+  const p0 = outPort(srcId), p1 = inPort(dstId);
+  E('path', { class:'thread'+(isHead?' head':''), d: threadPath(p0, p1) }, gThreads);
+  arrow(gThreads, p1, { x: p1.x-40, y: p1.y }, 'thread-arrow');
+}
+function drawNull(id){
+  const p = outPort(id);
+  E('line', { class:'nullterm', x1:p.x, y1:p.y, x2:p.x+18, y2:p.y }, gThreads);
+  E('line', { class:'nullterm', x1:p.x+18, y1:p.y-8, x2:p.x+18, y2:p.y+8 }, gThreads);
+  E('line', { class:'nullterm', x1:p.x+23, y1:p.y-5, x2:p.x+23, y2:p.y+5 }, gThreads);
+  E('line', { class:'nullterm', x1:p.x+28, y1:p.y-2, x2:p.x+28, y2:p.y+2 }, gThreads);
+}
+// during a cut, hide the predecessor's static thread (the heal animation replaces it)
+function healHides(id){ return heal && heal.fromId === id; }
+
+function render(){ renderThreads(); renderNodes(); updateReadout(); }
+
+/* ---------- list queries ---------- */
+function isInList(id){            // reachable from head, cycle-safe
+  let cur = head, guard = 0;
+  const seen = new Set();
+  while(cur != null && guard++ < nodes.length + 2){
+    if(cur === id) return true;
+    if(seen.has(cur)) break;
+    seen.add(cur);
+    cur = byId(cur).next;
+  }
+  return false;
+}
+function predecessorOf(id){ return nodes.find(n => !n.free && n.next === id) || null; }
+function listOrder(){            // ids from head, cycle-safe; {ids, cyclic}
+  const ids = []; const seen = new Set(); let cur = head;
+  while(cur != null){
+    if(seen.has(cur)) return { ids, cyclic:true };
+    seen.add(cur); ids.push(cur); cur = byId(cur).next;
+  }
+  return { ids, cyclic:false };
+}
+
+/* ---------- readout ---------- */
+function pushLog(html, cls){ log.push({ html, cls: cls||'' }); if(log.length > 40) log.shift(); }
+function updateReadout(){
+  const { ids, cyclic } = listOrder();
+  document.getElementById('statLen').textContent = cyclic ? '∞' : ids.length;
+  document.getElementById('statAvail').textContent = nodes.filter(n => n.free).length;
+  document.getElementById('statHead').textContent = head == null ? 'Λ' : byId(head).addr;
+
+  const spell = document.getElementById('spell');
+  if(head == null){ spell.innerHTML = '<span class="muted">HEAD → Λ &nbsp;(empty list — tie a thread from HEAD)</span>'; }
+  else if(cyclic){ spell.innerHTML = '<span class="muted">reads:</span> <b>' + ids.map(i=>byId(i).ch||'·').join(' ') + '</b> <span class="muted">↻ cycle — never reaches Λ</span>'; }
+  else { spell.innerHTML = '<span class="muted">reads:</span> <b>' + ids.map(i=>byId(i).ch||'·').join('') + '</b> <span class="muted">→ Λ</span>'; }
+
+  const c = document.getElementById('console');
+  c.innerHTML = log.map(l => `<div class="cline ${l.cls}">${l.html}</div>`).join('');
+  c.scrollTop = c.scrollHeight;
+
+  document.getElementById('cutBtn').disabled = busy || selected == null || byId(selected).free;
+  document.getElementById('allocBtn').disabled = busy || nodes.every(n => !n.free);
+  document.getElementById('traverseBtn').disabled = busy || head == null;
+  document.getElementById('modeReadout').textContent =
+    linking != null ? `tying from ${linking==='HEAD'?'HEAD':byId(linking).addr}…` : (busy ? 'running…' : 'idle');
+  document.getElementById('statusK').textContent = busy ? 'busy' : 'ready';
+}
+
+/* ---------- interactions ---------- */
+function onPortClick(srcId){
+  if(busy) return;
+  if(linking === srcId){ linking = null; render(); return; }   // click same port cancels
+  linking = srcId;
+  render();
+}
+function onNodeClick(id){
+  if(busy) return;
+  if(linking != null){
+    // complete a thread from `linking` into node `id`
+    if(linking === id){ linking = null; render(); return; }     // can't point to self via its own port
+    const target = byId(id);
+    if(target.free){ target.free = false; }                     // tying into a free cell re-activates it
+    if(linking === 'HEAD'){
+      head = id;
+      pushLog(`<span class="op">tie</span> HEAD → <span class="addr">${target.addr}</span>`);
+    } else {
+      const src = byId(linking);
+      if(src.free) src.free = false;
+      src.next = id;
+      pushLog(`<span class="op">tie</span> <span class="addr">${src.addr}</span>.link → <span class="addr">${target.addr}</span>`);
+    }
+    linking = null;
+    render();
+    return;
+  }
+  // plain select
+  selected = (selected === id) ? null : id;
+  render();
+}
+// click empty canvas cancels a pending thread / selection
+svg.addEventListener('click', () => { if(linking != null){ linking = null; render(); } });
+svg.addEventListener('pointermove', e => {
+  const r = svg.getBoundingClientRect();
+  mouse = { x: (e.clientX - r.left)/r.width*VBW, y: (e.clientY - r.top)/r.height*VBH };
+  if(linking != null) renderThreads();
+});
+
+/* ---------- the healing cut ---------- */
+function cutSelected(){
+  if(busy || selected == null) return;
+  const node = byId(selected);
+  if(node.free) return;
+  const succ = node.next;                 // id | null
+  const pred = predecessorOf(node.id);    // node | null
+  const isHead = head === node.id;
+  if(!isHead && !pred){                    // an orphan (not on the list) — just free it
+    freeNode(node); pushLog(`<span class="op">free</span> orphan <span class="addr">${node.addr}</span> → AVAIL`); selected=null; render(); return;
+  }
+
+  busy = true;
+  const fromId = isHead ? 'HEAD' : pred.id;
+  const fromPort = outPort(fromId);
+  const a = inPort(node.id);                                   // endpoint starts on the doomed node
+  const b = succ != null ? inPort(succ) : { x: fromPort.x + 26, y: fromPort.y };  // → successor, or retract
+  heal = { fromId, fromIsHead:isHead, fromPort, a, b, t:0, node:node.id };
+  updateReadout();
+
+  const who = isHead ? 'HEAD' : `<span class="addr">${pred.addr}</span>.link`;
+  const to  = succ != null ? `<span class="addr">${byId(succ).addr}</span>` : 'Λ';
+  pushLog(`<span class="op">cut</span> <span class="addr">${node.addr}</span> ('${node.ch||'·'}') — reroute ${who} → ${to}`);
+
+  const dur = 720, t0 = performance.now();
+  (function step(now){
+    heal.t = Math.min(1, (now - t0) / dur);
+    renderThreads();
+    if(heal.t < 1){ requestAnimationFrame(step); return; }
+    // commit the single pointer write
+    if(isHead) head = succ; else pred.next = succ;
+    freeNode(node);
+    heal = null; busy = false; selected = null;
+    pushLog(`<span class="op good">healed</span> one pointer write · <span class="addr">${node.addr}</span> returned to AVAIL`, 'good');
+    render();
+  })(t0);
+}
+function freeNode(node){ node.next = null; node.free = true; node.ch = ''; }
+
+/* ---------- allocate from AVAIL & splice in ---------- */
+const NEWCH = ['★','Θ','§','∆','Ω'];
+let allocCount = 0;
+function allocSplice(){
+  if(busy) return;
+  const free = nodes.find(n => n.free);
+  if(!free){ pushLog('<span class="warn">AVAIL exhausted — out of memory (see Exhibit 1.3)</span>','warn'); render(); return; }
+  free.free = false;
+  free.ch = NEWCH[allocCount++ % NEWCH.length];
+  if(head == null){                    // empty list → becomes the head
+    head = free.id; free.next = null;
+    pushLog(`<span class="op">alloc</span> <span class="addr">${free.addr}</span> ('${free.ch}') → HEAD`);
+  } else {
+    const after = (selected != null && !byId(selected).free && isInList(selected)) ? byId(selected) : byId(lastOf());
+    free.next = after.next; after.next = free.id;
+    pushLog(`<span class="op">alloc</span> <span class="addr">${free.addr}</span> ('${free.ch}') spliced after <span class="addr">${after.addr}</span>`);
+  }
+  selected = free.id;
+  render();
+}
+function lastOf(){ const { ids } = listOrder(); return ids[ids.length-1]; }
+
+/* ---------- traversal (cycle-safe, animated) ---------- */
+function clearTimers(){ while(timers.length) clearTimeout(timers.pop()); }
+function traverse(){
+  if(busy || head == null) return;
+  busy = true; pulseId = null; clearTimers();
+  pushLog('<span class="op">traverse</span> start at HEAD', 'small');
+  updateReadout();
+
+  const seen = new Set();
+  let cur = head, i = 0;
+  const spelled = [];
+  const stepDelay = 560;
+
+  function visit(){
+    if(cur == null){                                   // reached Λ
+      pulseId = null; busy = false;
+      pushLog(`reached Λ · read <b style="color:var(--gold)">${spelled.join('')}</b> in ${i} hops`, 'good');
+      render(); return;
+    }
+    if(seen.has(cur)){                                 // cycle guard
+      pulseId = cur; busy = false;
+      pushLog(`<span class="warn">cycle! revisited ${byId(cur).addr} — traversal would never end</span>`, 'warn');
+      render(); return;
+    }
+    const node = byId(cur);
+    if(node.free){                                     // dangling pointer
+      pulseId = null; busy = false;
+      pushLog(`<span class="warn">dangling pointer → ${node.addr} is on AVAIL (freed)</span>`, 'warn');
+      render(); return;
+    }
+    seen.add(cur); pulseId = cur; spelled.push(node.ch || '·');
+    pushLog(`  hop ${i+1}: <span class="addr">${node.addr}</span> = '${node.ch||'·'}' → link ${node.next!=null?byId(node.next).addr:'Λ'}`, 'small');
+    render();
+    i++; cur = node.next;
+    timers.push(setTimeout(visit, stepDelay));
+  }
+  timers.push(setTimeout(visit, 260));
+}
+
+/* ---------- buttons ---------- */
+document.getElementById('traverseBtn').addEventListener('click', traverse);
+document.getElementById('cutBtn').addEventListener('click', cutSelected);
+document.getElementById('allocBtn').addEventListener('click', allocSplice);
+document.getElementById('autoBtn').addEventListener('click', () => {
+  if(busy) return; initState(true); log.length = 0;
+  pushLog('auto-threaded: HEAD → A → R → I → A → D → N → E → Λ', 'small'); render();
+});
+document.getElementById('scrambleBtn').addEventListener('click', () => {
+  if(busy) return; initState(false); log.length = 0;
+  pushLog('memory scrambled — all cells unlinked. Tie the thread from HEAD.', 'small'); render();
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && linking != null){ linking = null; render(); }
+});
+
+/* ---------- reveal-on-scroll ---------- */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } });
+}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(n => io.observe(n));
+
+/* ---------- boot ---------- */
+buildScene();
+initState(true);
+pushLog('auto-threaded from the myth: HEAD → A·R·I·A·D·N·E → Λ', 'small');
+pushLog('Try: select a cell, then Cut node — watch the thread heal.', 'small');
+render();
+</script>

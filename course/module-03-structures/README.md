@@ -14,6 +14,13 @@ end you will have built stacks, queues, singly linked lists with a free-cell
 recycler, a topological sorter, and binary trees in three guises (ordinary,
 reconstructed-from-traversals, and threaded), all on the same memory model.
 
+> **Companion exhibit — _Ariadne's Thread_.** The linked list of stage 2 has a
+> visual twin in the [Museum of Algorithms](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-1.2-ariadnes-thread.html):
+> the _Memory Untangler_, where you tie pointer-threads from HEAD through
+> scattered cells, then cut a node and watch the list heal itself in a single
+> pointer write as the freed cell returns to the AVAIL pool. Open it in a second
+> window — or reach it any time from the **Museum** tab in the top navigation.
+
 ---
 
 ## 1. Two ways to store a sequence
