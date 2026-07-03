@@ -228,7 +228,10 @@ marks especially instructive exercises. Log your attempts in
 
 ## In the real world
 
-Extended Euclid is not a museum piece: it computes the modular inverses inside
+Extended Euclid is not a museum piece — well, it *is* one now: the Museum's
+[Fermat's Clock](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-2.3-fermats-clock.html)
+shows the RSA trapdoor whose private key is exactly the modular inverse your
+stage-3 code computes. It also runs the modular inverses inside
 RSA key generation and elliptic-curve signatures, so a version of your stage-3
 code runs every time your browser opens a TLS connection. Bignum libraries
 (GMP and friends) normalize every rational number with a gcd. And Lamé's

@@ -16,6 +16,15 @@ in grade school, made precise and analyzed — then the divide-and-conquer trick
 that beats them, and finally the probabilistic primality test that showed the
 world randomness belongs in rigorous algorithms.
 
+> **Companion exhibit — _Fermat's Clock_.** The asymmetry this whole module
+> serves — easy to multiply, murderous to factor — is made tactile in the
+> Museum's [Cryptography Gear](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-2.3-fermats-clock.html):
+> attack a public key `N = p·q` by trial division and watch a 32-bit key crack
+> in a second, a 52-digit key report three billion years, and RSA-2048 report a
+> time beyond counting — all on exact BigInt, bounded so the tab never freezes.
+> It also closes the loop to Module 01: the private key is a modular inverse,
+> computed by the extended Euclidean algorithm (§4.5.2).
+
 Throughout, a big number is a nonnegative integer in **radix b = 2³²**, stored
 as a little-endian `Vec<u32>` of *limbs* (Knuth's "digits"), with no trailing
 zero limbs. The empty vector is 0. Working in base 2³² instead of base 10 is the

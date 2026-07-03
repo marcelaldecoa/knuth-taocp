@@ -1,0 +1,532 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing II — The Engine of Chance · Exhibit 2.3 — Fermat's Clock
+  A self-contained, single-file interactive essay on modular arithmetic and the
+  asymmetry of multiplication vs. factoring — the foundation of public-key
+  cryptography. After Donald Knuth's TAOCP Vol. 2, §4.5.4 & §4.5.2.
+
+  No build step. No frameworks. No network: fonts vendored beside this file
+  (./fonts/*.woff2, relative). The Cryptography Gear runs exact BigInt
+  arithmetic; the factoring attack is bounded per animation frame so the tab
+  never freezes, and the time estimates are honestly extrapolated.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Cryptography Gear — multiply two primes in a microsecond, then watch brute-force factoring of the product crawl toward a three-billion-year abyss." />
+<title>Fermat's Clock · Exhibit 2.3 · The Museum of Algorithms</title>
+
+<style>
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(42px,8.5vw,86px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* THE LAB */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.25fr .95fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; }
+  .panel .phead .k{ color:var(--gold); }
+
+  canvas#gear{ display:block; width:100%; height:auto; background:radial-gradient(600px 320px at 50% 42%, #12191e 0, #090d10 78%); border:1px solid #05090b; border-radius:2px; }
+
+  .nline{ margin-top:12px; font-size:12.5px; color:#9fb0b9; word-break:break-all; line-height:1.5; }
+  .nline .lbl{ color:#7f9099; letter-spacing:.12em; text-transform:uppercase; font-size:10.5px; }
+  .nline b{ color:var(--gold); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+
+  .presets{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .chip{ font-family:var(--mono); font-size:11.5px; letter-spacing:.03em; background:transparent; border:1px dashed #46565e; color:#9fb0b9; padding:6px 10px; border-radius:2px; cursor:pointer; }
+  .chip:hover{ border-color:var(--gold); color:var(--gold); border-style:solid; }
+  .chip.good{ border-color:#3a5f52; color:#8fc4a8; } .chip.good:hover{ border-color:#a8d5b5; color:#a8d5b5; }
+  .chip.bad{ border-color:#6a3a40; color:#c98a86; } .chip.bad:hover{ border-color:#e79a8f; color:#e79a8f; }
+
+  .readout-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .stat{ flex:1; min-width:84px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:9px 11px; }
+  .stat .lbl{ font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:#7f9099; }
+  .stat .val{ font-size:18px; color:#eef3f5; margin-top:2px; word-break:break-word; }
+  .stat .val.gold{ color:var(--gold); } .stat .val.warn{ color:#e79a8f; } .stat .val.good{ color:#8fd0a8; }
+
+  .verdict{ padding:11px 13px; border-radius:2px; margin-bottom:12px; font-size:13px; line-height:1.5; border:1px solid; }
+  .verdict.good{ background:rgba(60,110,80,.14); border-color:#3a5f52; color:#bfe0cc; }
+  .verdict.warn{ background:rgba(120,50,50,.16); border-color:#7a3a34; color:#e8c0ba; }
+  .verdict.neutral{ background:rgba(60,80,95,.12); border-color:#3a5560; color:#c2d2da; }
+  .verdict b{ font-family:var(--display); font-weight:700; font-size:17px; letter-spacing:.02em; }
+
+  .ledger{ font-size:12.5px; line-height:1.7; }
+  .ledger .row{ display:flex; justify-content:space-between; gap:10px; border-bottom:1px dotted #24333a; padding:3px 0; }
+  .ledger .row .lk{ color:#8496a0; } .ledger .row .lv{ color:#d7e0e4; text-align:right; word-break:break-all; }
+  .ledger .row .lv.gold{ color:var(--gold); } .ledger .row .lv.warn{ color:#e79a8f; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">2.3</div>
+      <p class="eyebrow">Wing II · The Engine of Chance</p>
+      <h1>Fermat's<br/>Clock</h1>
+      <p class="sub">Modular arithmetic and the one-way street of factoring</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> II — Seminumerical Algorithms</span>
+        <span><b>SECTION</b> 4.5.2, 4.5.4</span>
+        <span><b>1640 · 1977</b> Fermat · RSA</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">Take a clock with twelve hours. Add five hours to ten and you do not get fifteen — you get three, because the clock forgets every full turn. This is <em>modular arithmetic</em>, arithmetic that wraps, and it is the arithmetic in which the modern world keeps its secrets. Pierre de Fermat studied it in the 1640s for the pure pleasure of numbers; three and a half centuries later, three cryptographers at MIT turned one of its quiet asymmetries into the lock on nearly every private message ever sent. The whole edifice rests on a single lopsided fact: some sums on the clock are trivial to do forwards and monstrous to undo.</p>
+
+      <p class="reveal">The lopsided fact is this. Multiply two large prime numbers together and you get their product in the time it takes to blink. But hand someone only that product and ask them to recover the two primes — to <em>factor</em> it — and you have set them a task that can outlast the sun. Multiplication is a one-way street. You can drive down it at once; the return trip, for a number of the right size, takes longer than the universe has existed.</p>
+
+      <blockquote class="pull reveal">"Multiplying is a stroll; factoring is a search of the whole world. The public key is the product, shouted to everyone. The private key is the pair of primes, and finding them again is the labour no one can afford."
+        <cite>— after R. Rivest, A. Shamir &amp; L. Adleman, 1977</cite></blockquote>
+
+      <h2 class="reveal"><span class="num">I · The One-Way Street</span>Easy forward, impossible back</h2>
+
+      <p class="reveal">Below is the workbench of an attacker. Someone — call her Alice — chose two secret primes, multiplied them on her clock, and published only the product <span class="mono">N</span> as her public key. Her two primes are the hidden gears; you, the attacker, see only <span class="mono">N</span>. Your task is to run it backwards: factor <span class="mono">N</span> the most direct way there is, by <em>trial division</em> — testing <span class="mono">N mod d</span> for <span class="mono">d = 2, 3, 5, 7, …</span> until one divides evenly and the secret falls out. For a balanced product of two primes, you must climb roughly to <span class="mono">√N</span> before you succeed.</p>
+
+      <p class="reveal">Start small and it works: a product of two-digit primes cracks before you can read this sentence, and Alice's gears spin open to reveal her secret. Then climb the key sizes. Somewhere around forty digits the estimated time slips past a human lifetime; by fifty-two digits it passes three billion years; and at the two-thousand-bit size that guards real traffic, the estimate is a number with hundreds of digits of its own. The animation is deliberately slowed so you can watch — but the clock in the corner tells the honest time an idealized machine would need, and it is telling you the truth about the abyss.</p>
+    </section>
+
+    <!-- THE LAB -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 2.3</div>
+            <div class="title">The Cryptography Gear</div>
+          </div>
+          <div class="sn">TRIAL-DIVISION ATTACK · exact BigInt · bounded per frame</div>
+        </div>
+
+        <div class="lab-grid">
+          <div>
+            <div class="panel">
+              <div class="phead"><span>The attacker's bench — factor the public key N</span><span class="k" id="gearK">standby</span></div>
+              <canvas id="gear" width="720" height="380" role="img" aria-label="Two hidden prime gears and a factoring clock grinding through trial divisors of the public key"></canvas>
+              <div class="nline"><span class="lbl">Public key N</span> &nbsp;<b id="nDisplay">—</b></div>
+            </div>
+
+            <div class="controls">
+              <button class="btn primary" id="attackBtn">🔓 Attack (factor N)</button>
+              <button class="btn" id="stopBtn" disabled>⏹ Stop</button>
+              <button class="btn" id="resetBtn">↺ New key</button>
+            </div>
+
+            <div class="presets" id="presets">
+              <span style="color:#6c7d85;letter-spacing:.12em;font-size:10.5px;align-self:center;text-transform:uppercase">Key size:</span>
+              <button class="chip good" data-key="toy">13-bit · toy</button>
+              <button class="chip good" data-key="p32">32-bit</button>
+              <button class="chip" data-key="p64">64-bit</button>
+              <button class="chip" data-key="p96">96-bit</button>
+              <button class="chip bad" data-key="p128">128-bit</button>
+              <button class="chip bad" data-key="head">172-bit · 52 digits</button>
+              <button class="chip bad" data-key="rsa">RSA-2048</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="phead"><span>The clock — honest time to factor</span><span class="k" id="statusK">ready</span></div>
+
+              <div class="readout-row">
+                <div class="stat"><div class="lbl">Divisors tried</div><div class="val gold" id="statTried">0</div></div>
+                <div class="stat"><div class="lbl">Progress to √N</div><div class="val" id="statProg">0%</div></div>
+              </div>
+
+              <div class="verdict" id="verdict"><b>—</b></div>
+
+              <div class="ledger" id="ledger"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">Forward — multiply two primes — is a microsecond. Backward — factor the product by trial division — costs about <span class="mono">√N</span> steps. Each extra pair of digits on the key multiplies that labour tenfold. This gulf between the easy direction and the hard one is the trapdoor that public-key cryptography is built on.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · Cleverer Than Brute Force</span>Why fifty digits is not enough</h2>
+
+      <p class="reveal">Trial division is the honest bound, not the last word. If it were, a fifty-digit key — three billion years to break, by the clock above — would be unbreakable, and yet a laptop factors fifty-digit numbers before lunch. The reason is that mathematicians have spent a century inventing ways to <em>not</em> search all the way to <span class="mono">√N</span>. John Pollard's rho method finds a factor in about <span class="mono">N<sup>¼</sup></span> steps by hunting for coincidences in a random walk on the clock; his <span class="mono">p−1</span> method and Hendrik Lenstra's elliptic-curve method exploit the hidden structure of the factors; and the quadratic and general number field sieves — the champions Knuth surveys in §4.5.4 — run in <em>sub-exponential</em> time, faster than any power of the digit count would suggest.</p>
+
+      <blockquote class="pull reveal">The size of a safe key is not set by how slow the dumbest attack is, but by how slow the <em>cleverest known</em> attack is. That is why RSA moved from 512 bits to 1024 to 2048 as the sieves improved — each a race against the mathematicians.</blockquote>
+
+      <p class="reveal">This is the sober correction to the instrument's drama: its "three billion years" is the cost of the naïve climb to <span class="mono">√N</span>, and the naïve climb is not what an adversary would do. Real security is calibrated against the number field sieve, which is why a genuinely safe modulus today is not fifty digits but <em>six hundred</em> — the RSA-2048 preset, a number whose factors have never been found by anyone, and whose owners, having multiplied them once, threw them away on purpose.</p>
+
+      <h2 class="reveal"><span class="num">III · The Oldest Algorithm Guards the Newest Secret</span>Euclid returns</h2>
+
+      <p class="reveal">Here is the turn that closes the circle back to the first room of this museum. To use her key, Alice needs a number <span class="mono">d</span> that undoes her public exponent <span class="mono">e</span> — a <em>modular inverse</em>, the value with <span class="mono">e · d ≡ 1</span> on a clock of size <span class="mono">φ(N)</span>. Computing it is not a matter of searching; it falls out instantly from the <strong>extended Euclidean algorithm</strong> — the very Bézout machinery you turned in <a href="exhibit-1.1-invisible-ruler.html">Exhibit 1.1</a>, which writes the greatest common divisor as <span class="mono">a·s + b·t</span>. Euclid, three hundred years before Christ, supplied the one step that makes RSA usable. The security rests on Fermat's clock; the <em>key generation</em> rests on Euclid's saw. The oldest algorithm we have quietly guards the newest secret we keep.</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">And yet the trapdoor is not eternal. In 1994 Peter Shor showed that a large enough <em>quantum</em> computer could factor in time polynomial in the number of digits — running the return trip up the one-way street as easily as the trip down. No such machine yet exists at the required scale, but its shadow has already changed the field: the next generation of cryptography, the <em>post-quantum</em> schemes, are being built on different hard problems in anticipation. The clock still keeps our secrets tonight. Whether it keeps them a generation from now is the open question at the frontier — and the reason the study of what is easy, what is hard, and what merely <em>looks</em> hard has never mattered more.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING II · EXHIBIT 2.3<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 2 — §4.5.2, §4.5.4<br/>
+      <a href="exhibit-2.2-floating-point-abyss.html">← 2.2 The Floating-Point Abyss</a> &nbsp;·&nbsp; <a href="index.html">Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">Wing III →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE CRYPTOGRAPHY GEAR
+   Factor a public modulus N = p·q by trial division. Exact BigInt arithmetic.
+   The attack is bounded to BUDGET divisors per animation frame so the browser
+   never freezes; small keys crack live, large ones crawl while the "clock"
+   reports the honest brute-force time  √N ÷ REF_RATE.
+   ========================================================================= */
+
+const REF_RATE = 1e9;                 // trial divisions/sec on an idealized fast core
+const YEAR = 3.15576e7;               // seconds/year
+const UNIVERSE_YR = 1.38e10;          // age of the universe, years
+const BUDGET = 500;                   // divisors tested per frame (freeze guard)
+const STOP_CAP = 2_000_000;           // give up the live search after this many
+
+/* real semiprimes (primes verified by Miller–Rabin at build time) */
+const KEYS = {
+  toy : { label:'13-bit toy',   N:'7747' },
+  p32 : { label:'32-bit',       N:'3605401001' },
+  p64 : { label:'64-bit',       N:'9232623366166676393' },
+  p96 : { label:'96-bit',       N:'79307629076518051529410635397' },
+  p128: { label:'128-bit',      N:'340623673206716739034990797413320854247' },
+  head: { label:'172-bit · 52 digits', N:'8986567076228686058174537808206369107321965897697417' },
+  rsa : { label:'RSA-2048', N:'72713263660449766426608472549507391910999231006859839072293277211930474062452754509693703175926555293299615412074270543861769008088604572463948342869508637021419474076427241206437944938376717240291129686364152028622782491945894451364135712261571383558808703167081686346497045755967398069366992898030168308085098559582843816772258602263910259133671934564438982063849511121697778862791296691950879450821665603693404093689645576589810135058847874922080166662467942228935619294716300005564094267097802497494642226217159676730431035475645945723594751978451697187882317482448505456079644582555439964854034323118653808958761' },
+};
+
+/* ---------- BigInt integer sqrt ---------- */
+function isqrt(n){ if(n<2n) return n; let x=n, y=(x+1n)/2n; while(y<x){ x=y; y=(x + n/x)/2n; } return x; }
+
+/* ---------- state ---------- */
+let keyName='p32';
+let N=0n, sqrtN=1n, sqrtNnum=1, ndigits=1;
+let d=2n, tried=0, running=false, cracked=null, gaveUp=false;
+let raf=null, startT=0, browserRate=0;
+let gearAngle=0;
+
+/* ---------- canvas ---------- */
+const cv=document.getElementById('gear');
+const ctx=cv.getContext('2d');
+const LW=720, LH=380;
+let cssW=LW, cssH=LH;
+function fit(){
+  const r=cv.getBoundingClientRect(); cssW=r.width; cssH=r.width*(LH/LW);
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+  ctx.setTransform(dpr*cssW/LW,0,0,dpr*cssH/LW,0,0);
+  draw();
+}
+
+/* draw a gear: circle + teeth */
+function gear(x,y,r,teeth,angle,fill,stroke,lw){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(angle);
+  ctx.beginPath();
+  for(let i=0;i<teeth;i++){
+    const a0=i/teeth*Math.PI*2, a1=(i+0.5)/teeth*Math.PI*2, a2=(i+1)/teeth*Math.PI*2;
+    const ro=r, ri=r*0.86;
+    ctx.lineTo(Math.cos(a0)*ro, Math.sin(a0)*ro);
+    ctx.lineTo(Math.cos(a1)*ro, Math.sin(a1)*ro);
+    ctx.lineTo(Math.cos(a1)*ri, Math.sin(a1)*ri);
+    ctx.lineTo(Math.cos(a2)*ri, Math.sin(a2)*ri);
+  }
+  ctx.closePath();
+  ctx.fillStyle=fill; ctx.fill(); ctx.strokeStyle=stroke; ctx.lineWidth=lw; ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,r*0.30,0,Math.PI*2); ctx.strokeStyle=stroke; ctx.stroke();
+  ctx.restore();
+}
+
+function progressFrac(){
+  if(cracked) return 1;
+  const p = sqrtNnum>0 ? Number(d)/sqrtNnum : 0;
+  return Math.max(0, Math.min(1, p));
+}
+
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+
+  // two hidden prime gears (top-left) — the secret
+  const revealed = cracked && cracked.factor;
+  const gy=70;
+  gear(120, gy, 40, 12, gearAngle, revealed?'#2a3f34':'#1a2228', revealed?'#8fd0a8':'#3a4650', 1.6);
+  gear(196, gy, 30, 10, -gearAngle*1.2+0.3, revealed?'#2a3f34':'#1a2228', revealed?'#8fd0a8':'#3a4650', 1.6);
+  ctx.fillStyle=revealed?'#8fd0a8':'#6c7d85'; ctx.font='700 15px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(revealed?trunc(cracked.factor,7):'?', 120, gy);
+  ctx.fillText(revealed?trunc(cracked.cofactor,7):'?', 196, gy);
+  ctx.fillStyle='#7f9099'; ctx.font='10px "IBM Plex Mono",monospace';
+  ctx.fillText('p', 120, gy+52); ctx.fillText('q', 196, gy+46);
+  ctx.textAlign='left';
+  ctx.fillStyle=revealed?'#8fd0a8':'#5f7079';
+  ctx.fillText(revealed?"Alice's secret — recovered":"Alice's secret primes (hidden)", 250, gy);
+  ctx.fillStyle='#5f7079';
+  ctx.fillText('multiply →  microseconds', 250, gy+18);
+  ctx.fillText('factor  →  see the clock', 250, gy+34);
+
+  // the factoring clock (centre-lower)
+  const cx=LW*0.5, cy=248, R=104;
+  // rim
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.strokeStyle='#2b3a42'; ctx.lineWidth=6; ctx.stroke();
+  // progress arc
+  const frac=progressFrac();
+  ctx.beginPath(); ctx.arc(cx,cy,R,-Math.PI/2,-Math.PI/2+frac*Math.PI*2);
+  ctx.strokeStyle=cracked?'#8fd0a8':(gaveUp?'#e79a8f':'#C6A664'); ctx.lineWidth=6; ctx.stroke();
+  // ticks
+  for(let i=0;i<60;i++){ const a=i/60*Math.PI*2; const r0=R-11, r1=(i%5===0)?R-20:R-15;
+    ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*r0, cy+Math.sin(a)*r0); ctx.lineTo(cx+Math.cos(a)*r1, cy+Math.sin(a)*r1);
+    ctx.strokeStyle='rgba(120,138,146,0.3)'; ctx.lineWidth=1; ctx.stroke(); }
+  // hand
+  const ha=-Math.PI/2+frac*Math.PI*2;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(ha)*(R-24), cy+Math.sin(ha)*(R-24));
+  ctx.strokeStyle=cracked?'#8fd0a8':'#C6A664'; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fillStyle='#C6A664'; ctx.fill();
+
+  // centre readout: current divisor and N mod d
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='#eef3f5'; ctx.font='600 20px "IBM Plex Mono",monospace';
+  ctx.fillText('d = '+trunc(d,10), cx, cy-14);
+  if(cracked){
+    ctx.fillStyle='#8fd0a8'; ctx.font='13px "IBM Plex Mono",monospace';
+    ctx.fillText('N mod d = 0  ✓', cx, cy+12);
+  } else {
+    const rmod = Number(N % d);
+    ctx.fillStyle='#9fb0b9'; ctx.font='13px "IBM Plex Mono",monospace';
+    ctx.fillText('N mod d = '+rmod, cx, cy+12);
+  }
+  ctx.fillStyle='#6c7d85'; ctx.font='10px "IBM Plex Mono",monospace';
+  ctx.fillText((frac*100 < 0.001 && frac>0 ? '≈0' : (frac*100).toPrecision(3))+'% of the way to √N', cx, cy+30);
+
+  // verdict stamp
+  ctx.textAlign='right'; ctx.font='700 20px "Cormorant Garamond",serif';
+  if(cracked){ ctx.fillStyle='#8fd0a8'; ctx.fillText('CRACKED', LW-16, 28); }
+  else if(gaveUp){ ctx.fillStyle='#e79a8f'; ctx.fillText('INFEASIBLE', LW-16, 28); }
+  else if(running){ ctx.fillStyle='#C6A664'; ctx.fillText('SEARCHING…', LW-16, 28); }
+}
+function trunc(b, keep){ const s=b.toString(); return s.length<=keep? s : s.slice(0,keep-1)+'…'; }
+function truncMid(s, head, tail){ return s.length<=head+tail+3? s : s.slice(0,head)+'…'+s.slice(-tail)+' ('+s.length+' digits)'; }
+
+/* ---------- time formatting (honest brute-force ETA) ---------- */
+function etaSeconds(){ return sqrtNnum / REF_RATE; }   // √N ÷ rate
+function fmtTime(secs){
+  if(!isFinite(secs)) return 'beyond counting';
+  const yr=secs/YEAR;
+  if(secs<1e-6) return (secs*1e9).toFixed(0)+' ns';
+  if(secs<1e-3) return (secs*1e6).toFixed(1)+' µs';
+  if(secs<1)    return (secs*1e3).toFixed(1)+' ms';
+  if(secs<60)   return secs.toFixed(1)+' s';
+  if(secs<3600) return (secs/60).toFixed(1)+' min';
+  if(secs<86400)return (secs/3600).toFixed(1)+' hours';
+  if(yr<1)      return (secs/86400).toFixed(1)+' days';
+  if(yr<1e4)    return Math.round(yr).toLocaleString('en-US')+' years';
+  if(yr<1e6)    return (yr/1e3).toFixed(1)+' thousand years';
+  if(yr<1e9)    return (yr/1e6).toFixed(1)+' million years';
+  if(yr<1e12)   return (yr/1e9).toFixed(2)+' billion years';
+  return yr.toExponential(2).replace('e+','×10^')+' years';
+}
+function universeCompare(secs){
+  const yr=secs/YEAR; if(!isFinite(yr)) return 'more times than the universe has seconds';
+  const x=yr/UNIVERSE_YR;
+  if(x<1) return null;
+  if(x<1e6) return '≈ '+Math.round(x).toLocaleString('en-US')+'× the age of the universe';
+  return '≈ '+x.toExponential(1).replace('e+','×10^')+' × the age of the universe';
+}
+
+/* ---------- readout ---------- */
+function verdict(){
+  const v=document.getElementById('verdict');
+  const secs=etaSeconds(), cmp=universeCompare(secs);
+  if(cracked){
+    v.className='verdict good';
+    v.innerHTML=`<b>CRACKED</b> — recovered the primes in ${tried.toLocaleString('en-US')} trial divisions`+
+      (browserRate?` (${(browserRate/1e6).toFixed(1)}M div/s in your browser)`:'')+`. Alice's secret is yours.`;
+  } else if(gaveUp){
+    v.className='verdict warn';
+    v.innerHTML=`<b>INFEASIBLE</b> — gave up after ${STOP_CAP.toLocaleString('en-US')} divisors, `+
+      `${(progressFrac()*100).toExponential(1)}% of the way. Brute force would need <b>${fmtTime(secs)}</b>`+(cmp?` (${cmp})`:'')+`.`;
+  } else if(running){
+    v.className='verdict neutral';
+    v.innerHTML=`<b>SEARCHING…</b> climbing toward √N ≈ ${truncMid(sqrtN.toString(),8,4)}. Brute-force estimate: <b>${fmtTime(secs)}</b>.`;
+  } else {
+    const crackableLive = sqrtNnum <= 4e6;   // smaller prime within the live-search cap
+    v.className='verdict '+(crackableLive?'good':'warn');
+    v.innerHTML= crackableLive
+      ? `<b>${fmtTime(secs)}</b> to brute-force on a fast core — and small enough to crack live right here. Press Attack.`
+      : `<b>${fmtTime(secs)}</b> to brute-force by trial division`+(cmp?` — ${cmp}`:'')+`. Press Attack and watch the clock barely move.`;
+  }
+}
+function ledger(){
+  const secs=etaSeconds();
+  const rows=[
+    ['public key N', truncMid(N.toString(),12,6), ''],
+    ['key size', ndigits+' digits · ~'+Math.round(ndigits*3.3219)+' bits', ''],
+    ['√N (divisors to search)', truncMid(sqrtN.toString(),10,4), 'gold'],
+    ['assumed attack rate', REF_RATE.toExponential(0)+' div/s', ''],
+    ['brute-force time (√N ÷ rate)', fmtTime(secs), secs<5?'':'warn'],
+    ['divisors tried so far', tried.toLocaleString('en-US'), ''],
+  ];
+  document.getElementById('ledger').innerHTML = rows.map(([k,v,c])=>`<div class="row"><span class="lk">${k}</span><span class="lv ${c}">${v}</span></div>`).join('');
+}
+function updateReadout(){
+  document.getElementById('statTried').textContent=tried.toLocaleString('en-US');
+  const f=progressFrac()*100;
+  document.getElementById('statProg').textContent=(f>0&&f<0.001)?'≈0%':(f<1?f.toPrecision(2):f.toFixed(0))+'%';
+  document.getElementById('nDisplay').textContent=truncMid(N.toString(),22,10);
+  document.getElementById('statusK').textContent= running?'attacking':(cracked?'cracked':(gaveUp?'gave up':'ready'));
+  document.getElementById('gearK').textContent= running?'grinding…':(cracked?'secret revealed':'standby');
+  verdict(); ledger();
+}
+
+/* ---------- attack loop (bounded per frame) ---------- */
+function startAttack(){
+  if(running||cracked) return;
+  running=true; gaveUp=false; startT=performance.now();
+  document.getElementById('attackBtn').disabled=true;
+  document.getElementById('stopBtn').disabled=false;
+  raf=requestAnimationFrame(attackFrame);
+}
+function stopAttack(){
+  running=false;
+  document.getElementById('attackBtn').disabled=cracked?true:false;
+  document.getElementById('stopBtn').disabled=true;
+  cancelAnimationFrame(raf); updateReadout(); draw();
+}
+function attackFrame(ts){
+  gearAngle += 0.06;
+  let budget=BUDGET;
+  while(budget-- > 0){
+    if(N % d === 0n){ cracked={ factor:d, cofactor:N/d }; running=false; break; }
+    d = (d===2n) ? 3n : d+2n;
+    tried++;
+    if(d*d > N){ cracked={ factor:N, cofactor:1n, prime:true }; running=false; break; } // N prime (not for our semiprimes)
+    if(tried >= STOP_CAP){ gaveUp=true; running=false; break; }
+  }
+  browserRate = tried / ((performance.now()-startT)/1000 || 1);
+  updateReadout(); draw();
+  if(running){ raf=requestAnimationFrame(attackFrame); }
+  else {
+    document.getElementById('attackBtn').disabled = cracked?true:false;
+    document.getElementById('stopBtn').disabled=true;
+    document.getElementById('gearK').textContent= cracked?'secret revealed':'standby';
+  }
+}
+
+/* ---------- load a key ---------- */
+function loadKey(name){
+  keyName=name; const k=KEYS[name];
+  N=BigInt(k.N); sqrtN=isqrt(N); sqrtNnum=Number(sqrtN); ndigits=k.N.length;
+  d=2n; tried=0; running=false; cracked=null; gaveUp=false;
+  document.getElementById('attackBtn').disabled=false;
+  document.getElementById('stopBtn').disabled=true;
+  updateReadout(); draw();
+}
+
+/* ---------- gentle idle spin so the gears feel alive ---------- */
+function idle(){ if(!running){ gearAngle+=0.004; draw(); } requestAnimationFrame(idle); }
+
+/* ---------- wiring ---------- */
+document.getElementById('attackBtn').addEventListener('click', startAttack);
+document.getElementById('stopBtn').addEventListener('click', stopAttack);
+document.getElementById('resetBtn').addEventListener('click', ()=>{ stopAttack(); loadKey(keyName); });
+document.getElementById('presets').addEventListener('click', e=>{
+  const c=e.target.closest('.chip'); if(!c) return;
+  stopAttack(); loadKey(c.dataset.key);
+});
+window.addEventListener('resize', fit);
+
+/* ---------- reveal-on-scroll ---------- */
+const io=new IntersectionObserver((es)=>{ es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } }); },
+  { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(n=>io.observe(n));
+
+/* ---------- boot ---------- */
+loadKey('p32');
+fit();
+idle();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
