@@ -9,6 +9,11 @@
 > This lesson is self-contained: you can complete the module without the
 > book. If you own Vol. 1, read the sections above alongside — the lesson
 > tells you where each idea lives.
+>
+> **Companion:** this §1.2 is exactly what *Concrete Mathematics*
+> (Graham–Knuth–Patashnik) expands into a whole course. If any tool here
+> whets your appetite, [../../docs/concrete-mathematics.md](../../docs/concrete-mathematics.md)
+> maps the two together.
 
 Module 01 ended with a promise: T(m, n), the division count of Euclid's
 algorithm, was your first *cost function*, and we said Module 02 would build

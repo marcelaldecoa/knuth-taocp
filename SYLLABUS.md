@@ -9,7 +9,9 @@ self-contained, book optional.
 > (a book-optional primer + how to study), then
 > [docs/getting-started.md](docs/getting-started.md) for setup and commands.
 > [docs/why-knuth-matters.md](docs/why-knuth-matters.md) tours where these
-> algorithms live in modern technology.
+> algorithms live in modern technology, and
+> [docs/concrete-mathematics.md](docs/concrete-mathematics.md) is the companion
+> book for the mathematics (Module 02's §1.2, grown into a full course).
 
 The mathematics deepens gradually; nothing beyond comfortable undergraduate
 discrete math is assumed, and the lessons build the rest (induction → sums →

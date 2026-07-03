@@ -111,6 +111,8 @@ SYLLABUS.md                      all 22 modules and 94 stages, in order
 CONVENTIONS.md                   the contract every module satisfies (for authors)
 docs/for-newcomers.md            ← start here if Knuth is new to you
 docs/getting-started.md          ← this file
+docs/why-knuth-matters.md        tour of Knuth's algorithms in modern tech
+docs/concrete-mathematics.md     the companion math book, mapped to the course
 docs/toolkit.md                  the proof techniques the course builds, module by module
 docs/dashboard.html              a visual progress map (open in a browser)
 

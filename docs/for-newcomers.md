@@ -196,10 +196,41 @@ remove an ambiguity.
   that replaced a zoo of clashing symbols.
 
 If you ever want to go deeper on this machinery, *Concrete Mathematics*
-(Graham–Knuth–Patashnik) is the companion volume that builds it patiently; the
-course's Module 02 gives you the working subset you actually need.
+(Graham–Knuth–Patashnik) is the companion volume that builds it patiently — see
+**[Concrete Mathematics: the companion volume](concrete-mathematics.md)** for how
+it maps onto this course. Module 02 gives you the working subset you actually
+need.
 
-## 8. Ready?
+## 8. Reading TAOCP's section numbers
+
+Throughout the lessons — and throughout Knuth's books — a reference like
+**§1.2.3**, **§5.2.1**, or **Algorithm 4.5.2B** points to a numbered section of
+TAOCP. The number tells you exactly where to look, *across* the volumes, because
+TAOCP is numbered by **chapter**, and the chapters are split into volumes:
+
+| A section starting with… | is in chapter… | which is in… |
+|---|---|---|
+| §1, §2 | 1 (Basic Concepts), 2 (Information Structures) | **Vol. 1** |
+| §3, §4 | 3 (Random Numbers), 4 (Arithmetic) | **Vol. 2** |
+| §5, §6 | 5 (Sorting), 6 (Searching) | **Vol. 3** |
+| §7 | 7 (Combinatorial Searching) | **Vol. 4** (4A, 4B, 4C…) |
+
+So **§1.2.3** is Vol. 1, and **§4.5.3** — Euclid's average-case analysis, cited
+back in Module 01 — is Vol. 2, Chapter 4, *even though Module 01 itself teaches
+§1.1*. Section numbers nest as deep as they need to: §7.2.2.2 reads as chapter
+7 → 7.2 → 7.2.2 → 7.2.2.2 (satisfiability, Vol. 4B).
+
+An **algorithm** is named by its section plus a letter: *Algorithm 1.1E* is the
+fifth algorithm displayed in §1.1 (Euclid's); *Algorithm 5.2.2Q* is quicksort in
+§5.2.2. Its steps inherit that letter — E1, E2, E3 — which is why this course
+asks you to keep those labels as comments in your code.
+
+Every lesson also states its exact home in a **Source** header at the top, so
+you can open the book to the right page before you begin. You never need the
+books here — but this is how to find any citation if you own them, or on
+[Knuth's TAOCP page](https://cs.stanford.edu/~knuth/taocp.html).
+
+## 9. Ready?
 
 - Set up your machine and learn the commands: **[Getting started](getting-started.md)**.
 - Then open **[the Module 01 lesson](../course/module-01-algorithms/README.md)**
@@ -207,5 +238,8 @@ course's Module 02 gives you the working subset you actually need.
 - Curious where it all goes? The **[Syllabus](../SYLLABUS.md)** maps all 22
   modules; **[docs/toolkit.md](toolkit.md)** maps the proof techniques and
   engineering judgment the journey builds in you.
+- Want to go deeper on the mathematics? **[Concrete Mathematics](concrete-mathematics.md)**
+  is the one companion book worth reading — Module 02's §1.2, grown into a full
+  course.
 
 Welcome. Euclid is waiting.
