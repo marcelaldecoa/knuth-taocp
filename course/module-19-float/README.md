@@ -24,6 +24,15 @@ the theorems that make numerical computing trustworthy: the fundamental
 rounding bound, the non-associativity of `+`, and why Kahan's summation
 recovers the bits everyone else throws away.
 
+> **Companion exhibit — _The Floating-Point Abyss_.** That Patriot missile is
+> not a metaphor here: the Museum's
+> [Catastrophe Simulator](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-2.2-floating-point-abyss.html)
+> lets you set the bits used to store `0.1` and the hours of uptime, then watch
+> the accumulated chopping error drift the clock until the interceptor misses —
+> and flip _chop_ to _round_ to see the same precision, spent more wisely, save
+> the day. It reproduces the real figures from the 1991 Dhahran failure
+> (≈9.5×10⁻⁸ s per tick, 0.34 s of drift over 100 hours) on live IEEE-754.
+
 ---
 
 ## 1. Positional fractions and the normalized form

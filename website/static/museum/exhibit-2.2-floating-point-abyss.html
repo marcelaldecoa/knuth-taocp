@@ -1,0 +1,536 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing II — The Engine of Chance · Exhibit 2.2 — The Floating-Point Abyss
+  A self-contained, single-file interactive essay on machine arithmetic and
+  rounding, dramatised by the 1991 Patriot missile clock-drift failure —
+  after Donald Knuth's TAOCP Vol. 2, §4.2.
+
+  No build step. No frameworks. No network: fonts vendored beside this file
+  (./fonts/*.woff2, relative). The Catastrophe Simulator runs on real IEEE-754
+  doubles, so every number here is exact and reproducible.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Catastrophe Simulator — how storing 0.1 in too few bits drifts the Patriot missile's clock until it misses, and how precision corrects the universe." />
+<title>The Floating-Point Abyss · Exhibit 2.2 · The Museum of Algorithms</title>
+
+<style>
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(40px,8vw,82px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* THE LAB */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.28fr .95fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; }
+  .panel .phead .k{ color:var(--gold); }
+
+  canvas#scope{ display:block; width:100%; height:auto; background:linear-gradient(180deg,#0a1016 0,#0b0f13 60%,#0e0b0a 100%); border:1px solid #05090b; border-radius:2px; }
+
+  .sliders{ margin-top:16px; display:flex; flex-direction:column; gap:14px; }
+  .srow{ padding:11px 13px; background:rgba(0,0,0,.3); border:1px solid var(--lab-line); border-radius:2px; }
+  .srow .slabel{ display:flex; justify-content:space-between; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#8496a0; margin-bottom:8px; }
+  .srow .slabel b{ color:var(--gold); font-size:14px; letter-spacing:0; text-transform:none; }
+  input[type=range]{ width:100%; accent-color:var(--gold); }
+  .srow .snote{ font-size:11px; color:#6c7d85; margin-top:6px; word-break:break-word; }
+  .srow .snote code{ color:#89b4c4; }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+  .seg{ display:inline-flex; border:1px solid var(--lab-line); border-radius:2px; overflow:hidden; }
+  .seg .btn{ border:0; border-radius:0; } .seg .btn+.btn{ border-left:1px solid var(--lab-line); }
+  .btn.on{ border-color:var(--gold); color:var(--gold); }
+
+  .presets{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .chip{ font-family:var(--mono); font-size:11.5px; letter-spacing:.03em; background:transparent; border:1px dashed #46565e; color:#9fb0b9; padding:6px 10px; border-radius:2px; cursor:pointer; }
+  .chip:hover{ border-color:var(--gold); color:var(--gold); border-style:solid; }
+  .chip.bad{ border-color:#6a3a40; color:#c98a86; } .chip.bad:hover{ border-color:#e79a8f; color:#e79a8f; }
+  .chip.good{ border-color:#3a5f52; color:#8fc4a8; } .chip.good:hover{ border-color:#a8d5b5; color:#a8d5b5; }
+
+  .readout-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .stat{ flex:1; min-width:88px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:9px 11px; }
+  .stat .lbl{ font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:#7f9099; }
+  .stat .val{ font-size:18px; color:#eef3f5; margin-top:2px; }
+  .stat .val.gold{ color:var(--gold); } .stat .val.warn{ color:#e79a8f; }
+
+  .verdict{ padding:11px 13px; border-radius:2px; margin-bottom:12px; font-size:13px; line-height:1.5; border:1px solid; }
+  .verdict.good{ background:rgba(60,110,80,.14); border-color:#3a5f52; color:#bfe0cc; }
+  .verdict.warn{ background:rgba(120,50,50,.16); border-color:#7a3a34; color:#e8c0ba; }
+  .verdict b{ font-family:var(--display); font-weight:700; font-size:17px; letter-spacing:.02em; }
+
+  .ledger{ font-size:12.5px; line-height:1.7; }
+  .ledger .row{ display:flex; justify-content:space-between; gap:10px; border-bottom:1px dotted #24333a; padding:3px 0; }
+  .ledger .row .lk{ color:#8496a0; } .ledger .row .lv{ color:#d7e0e4; text-align:right; }
+  .ledger .row .lv.gold{ color:var(--gold); } .ledger .row .lv.warn{ color:#e79a8f; }
+  .binline{ font-size:11.5px; color:#7f9099; margin-top:10px; word-break:break-all; }
+  .binline .cut{ color:#e79a8f; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">2.2</div>
+      <p class="eyebrow">Wing II · The Engine of Chance</p>
+      <h1>The Floating-<br/>Point Abyss</h1>
+      <p class="sub">Machine arithmetic and the catastrophes of rounding</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> II — Seminumerical Algorithms</span>
+        <span><b>SECTION</b> 4.2</span>
+        <span><b>25 Feb</b> 1991 · Dhahran</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">On the night of 25 February 1991, an Iraqi Scud missile arced toward an American barracks in Dhahran, Saudi Arabia. A Patriot battery was on watch, its radar sweeping the sky, its software ready to compute an intercept. It never fired. The Scud struck the barracks and killed twenty-eight soldiers. The missile that failed was not out of fuel or out of range. It was defeated by a number a binary computer cannot hold: one tenth.</p>
+
+      <p class="reveal">A computer stores numbers in a finite string of bits, so it can represent only finitely many of the infinitely many reals. The representable values form a grid, and any number falling between two grid points must be nudged to the nearest one — or, worse, simply chopped down. Most of the time the nudge is invisibly small. But <span class="mono">0.1</span>, so innocent in decimal, is an <em>infinitely repeating fraction in binary</em> — <span class="mono">0.0001100110011…</span> — and no finite register can hold it exactly. Every computer that ever printed <span class="mono">0.1</span> was rounding.</p>
+
+      <blockquote class="pull reveal">"The catastrophe was not one large error. It was one tiny error — the missing tail of 0.1 — added to itself three and a half million times."
+        <cite>— after the U.S. GAO report, IMTEC-92-26</cite></blockquote>
+
+      <h2 class="reveal"><span class="num">I · The Grid Between the Reals</span>Why one tenth is unrepresentable</h2>
+
+      <p class="reveal">The Patriot kept time by counting tenths of a second in an integer register, incremented ten times a second by the system clock. To turn that count into seconds for its targeting equations it multiplied by its stored value of <span class="mono">0.1</span>. That value lived in a 24-bit register, which held <span class="mono">0.1</span> chopped to twenty-three binary places — the value <span class="mono">0.00011001100110011001100</span>, short of the truth by about <span class="mono">0.000000095</span> of a second. One tick, the error is nothing. But the battery in Dhahran had been running continuously for roughly a hundred hours, and the counter had ticked about <strong>three and a half million times</strong>. The errors did not cancel; the chop always fell the same way, so they <em>accumulated</em>, and the system's clock had drifted about a third of a second behind reality.</p>
+
+      <p class="reveal">A third of a second is nothing to a person and everything to an anti-missile system. A Scud closes at roughly <span class="mono">1,676</span> metres per second, so a <span class="mono">0.34</span>-second error placed the target more than half a kilometre from where the Patriot expected it — far outside the narrow "range gate" the radar searches to confirm a track. The system looked in the wrong patch of sky, found nothing, and stood down. Set the two dials below and watch the abyss open: too few bits, too many hours, and the interceptor misses. Add precision, and the universe is corrected.</p>
+    </section>
+
+    <!-- THE LAB -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 2.2</div>
+            <div class="title">The Catastrophe Simulator</div>
+          </div>
+          <div class="sn">IEEE-754 · exact &amp; reproducible · Patriot range-gate model</div>
+        </div>
+
+        <div class="lab-grid">
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Intercept scope — range gate vs. true target</span><span class="k" id="scopeK">standby</span></div>
+              <canvas id="scope" width="720" height="380" role="img" aria-label="A radar scope showing an incoming Scud, the Patriot's range gate, and whether the drift places the target outside it"></canvas>
+            </div>
+
+            <div class="sliders">
+              <div class="srow">
+                <div class="slabel"><span>Precision — fraction bits stored for 0.1</span><b id="bitsLbl">23 bits</b></div>
+                <input id="bits" type="range" min="8" max="52" value="23" />
+                <div class="snote" id="bitsNote"></div>
+              </div>
+              <div class="srow">
+                <div class="slabel"><span>Uptime — hours running continuously</span><b id="hoursLbl">100 h</b></div>
+                <input id="hours" type="range" min="0" max="120" step="1" value="100" />
+                <div class="snote" id="hoursNote"></div>
+              </div>
+            </div>
+
+            <div class="controls">
+              <button class="btn primary" id="runBtn">▸ Run intercept</button>
+              <div class="seg" id="modeSeg">
+                <button class="btn on" data-mode="chop">Chop (Patriot)</button>
+                <button class="btn" data-mode="round">Round (IEEE)</button>
+              </div>
+            </div>
+
+            <div class="presets" id="presets">
+              <span style="color:#6c7d85;letter-spacing:.12em;font-size:10.5px;align-self:center;text-transform:uppercase">Presets:</span>
+              <button class="chip bad" data-bits="23" data-hours="100" data-mode="chop">Dhahran · 24-bit · 100 h</button>
+              <button class="chip good" data-bits="23" data-hours="8" data-mode="chop">Same rig · after 8 h</button>
+              <button class="chip good" data-bits="52" data-hours="100" data-mode="round">Double precision · 100 h</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Ledger — where the tenths went</span><span class="k" id="statusK">ready</span></div>
+
+              <div class="readout-row">
+                <div class="stat"><div class="lbl">Clock drift</div><div class="val gold" id="statDrift">—</div></div>
+                <div class="stat"><div class="lbl">Miss distance</div><div class="val" id="statMiss">—</div></div>
+              </div>
+
+              <div class="verdict" id="verdict"><b>—</b></div>
+
+              <div class="ledger" id="ledger"></div>
+              <div class="binline" id="binline"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">The range gate forgives about one tenth of a second of timing uncertainty — roughly <span class="mono">167 m</span> of Scud flight. It is a bitter irony that one tenth of a second is exactly the quantity the machine could not represent. When the accumulated drift exceeds that tolerance, the true target falls outside the gate and the intercept fails.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · Small Errors, Faithfully Repeated</span>The arithmetic of accumulation</h2>
+
+      <p class="reveal">The moral of Dhahran is not that computers are imprecise — a single rounding of <span class="mono">0.1</span> is smaller than a proton is to a person. The moral is that error has a <em>direction</em> and a <em>memory</em>. Because the Patriot always chopped <span class="mono">0.1</span> downward, every one of its three and a half million ticks erred the same way, and the mistakes marched in step instead of cancelling. This is the difference between <strong>rounding</strong> and <strong>chopping</strong> that Knuth dissects in §4.2.2: round-to-nearest, the IEEE default, scatters its errors in both directions so they tend to cancel; truncation biases them, and bias accumulates without bound. Flip the simulator from <em>Chop</em> to <em>Round</em> at the same 24 bits and watch the drift shrink — the same precision, spent more wisely.</p>
+
+      <blockquote class="pull reveal">Precision buys you time, not safety. Doubling the bits pushes the abyss further away; it does not fill it. Only reasoning about the error does that.</blockquote>
+
+      <p class="reveal">Knuth devotes the whole of §4.2 to this reasoning — how floating-point addition is not associative, how subtracting nearly equal numbers annihilates significant digits (<em>catastrophic cancellation</em>), how to bound the error of a computation before it runs. The engineers had, in fact, found the Patriot bug and shipped a fix; it reached Dhahran the day <em>after</em> the strike. In the interim the field advice was brutally simple and exactly right: reboot the system often, so the counter never has time to drift. It is the oldest workaround in computing, and it was a confession that nobody had reasoned about the error in time.</p>
+
+      <h2 class="reveal"><span class="num">III · Living at the Edge</span>The abyss is always there</h2>
+
+      <p class="reveal">Every scientific simulation, every bank ledger, every physics engine and neural network runs at the lip of this abyss. The remedies are a craft of their own: <strong>Kahan summation</strong>, which recovers the lost low-order bits when adding a long series; arbitrary-precision and <em>exact rational</em> arithmetic, which refuse to round at all; interval arithmetic, which carries rigorous error bars through every operation; and above all William Kahan's IEEE-754 standard of 1985, which at least made the rounding <em>predictable</em>, identical on every conforming machine — the reason this very simulator gives you the same numbers it gives everyone else.</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">The next room escapes the abyss entirely. Where floating point approximates the continuum and pays in accumulated error, <em>modular</em> and exact integer arithmetic work in a finite world where every operation is precise — the arithmetic of primes and cryptography, where a single wrong bit is not a drifting missile but a broken key. But the lesson of the Patriot travels with us: the machine will always tell you a number. Whether that number is <em>true</em> is a question only you can be trusted to ask.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING II · EXHIBIT 2.2<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 2 — §4.2 · U.S. GAO/IMTEC-92-26<br/>
+      <a href="exhibit-2.1-loom-of-chaos.html">← 2.1 The Illusion of Chaos</a> &nbsp;·&nbsp; <a href="index.html">Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">2.3 Fermat's Clock →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE CATASTROPHE SIMULATOR
+   The 1991 Patriot clock-drift failure, modelled on real IEEE-754 doubles.
+   The Patriot stored 0.1 truncated to 24 fractional binary bits; over ~100h
+   (~3.6M ticks) the biased chop accumulated ~0.34s of clock lag, ~570m of
+   range-gate error, and the intercept failed. Every number here is exact.
+   ========================================================================= */
+
+const SCUD_V   = 1676;    // m/s — Scud closing speed (~Mach 5)
+const GATE_HALF= 167;     // m   — range-gate half-width ≈ 0.1s of flight
+const TICK     = 0.1;     // s   — one clock tick (one tenth of a second)
+
+/* ---------- numeric core (pure, reproducible) ---------- */
+function storedTenth(bits, round){
+  const scale = Math.pow(2, bits);           // exact for bits ≤ 52
+  const n = round ? Math.round(0.1*scale) : Math.floor(0.1*scale);
+  return n/scale;
+}
+function compute(bits, hours, round){
+  const stored   = storedTenth(bits, round);
+  const errPerTick = 0.1 - stored;           // s of error per tenth (chop → +, round → ±)
+  const uptimeS  = hours*3600;
+  const ticks    = Math.round(uptimeS/TICK); // integer tick count
+  const drift    = ticks*errPerTick;         // s the clock is wrong by
+  const absDrift = Math.abs(drift);
+  const miss     = SCUD_V*absDrift;          // m the target is displaced
+  const hit      = miss <= GATE_HALF;
+  return { stored, errPerTick, uptimeS, ticks, drift, absDrift, miss, hit, bits, hours, round };
+}
+function binExpansion(bits){                  // 0.1 in binary, cut at `bits` places
+  let s='0.', x=0.1;
+  const shown = Math.min(bits, 30);
+  for(let i=0;i<shown;i++){ x*=2; const b=Math.floor(x); s+=b; x-=b; }
+  return { kept:s, more: bits>shown };
+}
+
+/* ---------- state ---------- */
+let bits=23, hours=100, round=false;
+let R = compute(bits, hours, round);
+let anim = null;   // {t0, phase} while an intercept plays
+
+/* ---------- canvas ---------- */
+const cv = document.getElementById('scope');
+const ctx = cv.getContext('2d');
+const LW=720, LH=380;
+let cssW=LW, cssH=LH;
+function fit(){
+  const rect=cv.getBoundingClientRect();
+  cssW=rect.width; cssH=rect.width*(LH/LW);
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+  ctx.setTransform(dpr*cssW/LW,0,0,dpr*cssH/LW,0,0);
+  draw();
+}
+
+/* scene geometry (logical units) */
+const BATTERY = { x:70, y:LH-46 };
+const INTERCEPT = { x:LW*0.44, y:LH*0.44 };
+const ENTRY = { x:LW-46, y:44 };
+const M2PX = 0.17;                              // metres → pixels for the offset
+
+function dirFromEntry(){
+  const dx=INTERCEPT.x-ENTRY.x, dy=INTERCEPT.y-ENTRY.y, L=Math.hypot(dx,dy);
+  return { x:dx/L, y:dy/L };
+}
+
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+
+  // ground + city
+  ctx.fillStyle='#171210'; ctx.fillRect(0, LH-30, LW, 30);
+  ctx.strokeStyle='rgba(198,166,100,0.15)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,LH-30); ctx.lineTo(LW,LH-30); ctx.stroke();
+  // faint range rings from battery
+  ctx.strokeStyle='rgba(90,120,130,0.12)';
+  for(let r=120;r<820;r+=120){ ctx.beginPath(); ctx.arc(BATTERY.x,BATTERY.y,r,Math.PI,Math.PI*2); ctx.stroke(); }
+
+  const d = dirFromEntry();
+  const p = anim ? anim.p : 1;                 // scud approach progress
+  // scud position: from ENTRY toward INTERCEPT, continuing past on a miss
+  const sx = ENTRY.x + (INTERCEPT.x-ENTRY.x)*p;
+  const sy = ENTRY.y + (INTERCEPT.y-ENTRY.y)*p;
+
+  // trail
+  ctx.strokeStyle='rgba(198,166,100,0.30)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(ENTRY.x,ENTRY.y); ctx.lineTo(sx,sy); ctx.stroke(); ctx.setLineDash([]);
+
+  // range gate: centred up-range of the true intercept by the drift
+  const off = R.miss*M2PX;
+  const gx = INTERCEPT.x - d.x*off, gy = INTERCEPT.y - d.y*off;
+  const gh = GATE_HALF*M2PX;
+  const showGate = !anim || anim.phase!=='incoming';
+  if(showGate){
+    ctx.strokeStyle = R.hit ? 'rgba(120,200,160,0.9)' : 'rgba(231,154,143,0.9)';
+    ctx.lineWidth=1.6; ctx.setLineDash([5,4]);
+    ctx.strokeRect(gx-gh*1.5, gy-gh, gh*3, gh*2); ctx.setLineDash([]);
+    ctx.fillStyle = R.hit ? 'rgba(120,200,160,0.7)':'rgba(231,154,143,0.7)';
+    ctx.font='10px "IBM Plex Mono", monospace'; ctx.textAlign='center';
+    ctx.fillText('RANGE GATE', gx, gy-gh-6);
+
+    // dimension line between gate centre and true target
+    if(off>4){
+      ctx.strokeStyle='rgba(150,168,176,0.5)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(INTERCEPT.x,INTERCEPT.y); ctx.stroke();
+      ctx.fillStyle='#c8d2d6'; ctx.textAlign='center';
+      ctx.fillText('Δ '+Math.round(R.miss)+' m', (gx+INTERCEPT.x)/2, (gy+INTERCEPT.y)/2 - 6);
+    }
+  }
+
+  // the interceptor / outcome
+  if(anim && anim.phase==='resolve'){
+    if(R.hit){
+      // interceptor rises from battery to intercept, then burst
+      const q=anim.q;
+      const ix=BATTERY.x+(INTERCEPT.x-BATTERY.x)*Math.min(1,q);
+      const iy=BATTERY.y+(INTERCEPT.y-BATTERY.y)*Math.min(1,q);
+      ctx.strokeStyle='#8fd0d0'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(BATTERY.x,BATTERY.y); ctx.lineTo(ix,iy); ctx.stroke();
+      if(q>=1) burst(INTERCEPT.x,INTERCEPT.y, (anim.q-1), '#C6A664');
+    } else {
+      // scud continues to the ground → impact flash
+      if(anim.p>=1) burst(sx, LH-30, anim.q, '#e79a8f');
+    }
+  }
+
+  // the Scud (unless destroyed on a hit)
+  const destroyed = anim && anim.phase==='resolve' && R.hit && anim.q>=1;
+  if(!destroyed){
+    ctx.save();
+    ctx.translate(sx,sy); ctx.rotate(Math.atan2(d.y,d.x));
+    ctx.fillStyle='#e8e0d0'; ctx.beginPath();
+    ctx.moveTo(9,0); ctx.lineTo(-7,-4); ctx.lineTo(-7,4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  // battery
+  ctx.fillStyle='#2a3a42'; ctx.strokeStyle='#4a8f8f'; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(BATTERY.x-14,BATTERY.y); ctx.lineTo(BATTERY.x+14,BATTERY.y);
+  ctx.lineTo(BATTERY.x+9,BATTERY.y-14); ctx.lineTo(BATTERY.x-9,BATTERY.y-14); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#7f9099'; ctx.font='9px "IBM Plex Mono", monospace'; ctx.textAlign='center';
+  ctx.fillText('PATRIOT', BATTERY.x, BATTERY.y+13);
+
+  // verdict stamp
+  if(!anim || anim.phase==='resolve'){
+    ctx.font='700 22px "Cormorant Garamond", serif'; ctx.textAlign='right';
+    ctx.fillStyle = R.hit ? '#8fd0a8' : '#e79a8f';
+    ctx.fillText(R.hit?'INTERCEPT':'MISS', LW-16, 30);
+  }
+}
+function burst(x,y,prog,color){
+  const r = 6 + prog*46, a = Math.max(0, 1-prog);
+  ctx.globalAlpha=a; ctx.strokeStyle=color; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x,y,r*0.55,0,Math.PI*2); ctx.stroke();
+  ctx.globalAlpha=1;
+}
+
+/* ---------- run intercept animation ---------- */
+let raf=null;
+function runIntercept(){
+  cancelAnimationFrame(raf);
+  anim = { p:0, q:0, phase:'incoming', t0:performance.now() };
+  document.getElementById('scopeK').textContent='tracking…';
+  document.getElementById('runBtn').disabled=true;
+  raf=requestAnimationFrame(stepAnim);
+}
+function stepAnim(ts){
+  const e=(ts-anim.t0)/1000;
+  if(anim.phase==='incoming'){
+    anim.p=Math.min(1, e/1.6);
+    if(anim.p>=1){ anim.phase='acquire'; anim.t0=ts; }
+  } else if(anim.phase==='acquire'){
+    if((ts-anim.t0)/1000 > 0.5){ anim.phase='resolve'; anim.t0=ts; }
+  } else if(anim.phase==='resolve'){
+    const r=(ts-anim.t0)/1000;
+    if(R.hit){ anim.q=Math.min(2, r/0.6); }
+    else { anim.p=Math.min(1.35, 1 + r/1.2); anim.q=Math.max(0, (anim.p-1)/0.35*2); }
+    if(r>1.8){ endAnim(); return; }
+  }
+  draw();
+  raf=requestAnimationFrame(stepAnim);
+}
+function endAnim(){
+  anim=null; draw();
+  document.getElementById('scopeK').textContent = R.hit?'intercepted':'target lost';
+  document.getElementById('runBtn').disabled=false;
+}
+
+/* ---------- readout ---------- */
+function fnum(x, d){ return x.toLocaleString('en-US',{maximumFractionDigits:d, minimumFractionDigits:d}); }
+function sci(x){ return x.toExponential(3); }
+function updateReadout(){
+  R = compute(bits, hours, round);
+
+  document.getElementById('bitsLbl').textContent = bits + ' bits';
+  document.getElementById('hoursLbl').textContent = hours + ' h';
+  const be = binExpansion(bits);
+  document.getElementById('bitsNote').innerHTML =
+    'stored 0.1 = <code>'+R.stored.toPrecision(12)+'</code> · error/tick <code>'+sci(R.errPerTick)+'</code> s';
+  document.getElementById('hoursNote').innerHTML =
+    '= <code>'+R.ticks.toLocaleString('en-US')+'</code> ticks of one tenth of a second';
+
+  document.getElementById('statDrift').textContent = fnum(R.absDrift,3)+' s';
+  const md=document.getElementById('statMiss'); md.textContent = fnum(R.miss,0)+' m';
+  md.className = 'val ' + (R.hit?'':'warn');
+
+  const v=document.getElementById('verdict');
+  v.className='verdict '+(R.hit?'good':'warn');
+  v.innerHTML = R.hit
+    ? `<b>INTERCEPT</b> — drift ${fnum(R.absDrift,3)} s places the target ${fnum(R.miss,0)} m off, inside the ±${GATE_HALF} m gate.`
+    : `<b>MISS</b> — drift ${fnum(R.absDrift,3)} s throws the target ${fnum(R.miss,0)} m off, outside the ±${GATE_HALF} m gate. The Scud gets through.`;
+
+  document.getElementById('ledger').innerHTML = [
+    ['stored value of 0.1', R.stored.toPrecision(12), R.round?'':'warn'],
+    ['true 0.1 minus stored', sci(R.errPerTick)+' s', ''],
+    ['clock ticks ('+hours+' h)', R.ticks.toLocaleString('en-US'), ''],
+    ['accumulated clock drift', fnum(R.absDrift,4)+' s', 'gold'],
+    ['Scud speed', SCUD_V+' m/s', ''],
+    ['target displacement', fnum(R.miss,1)+' m', R.hit?'':'warn'],
+    ['range-gate half-width', '±'+GATE_HALF+' m', ''],
+  ].map(([k,vv,cls])=>`<div class="row"><span class="lk">${k}</span><span class="lv ${cls}">${vv}</span></div>`).join('');
+
+  document.getElementById('binline').innerHTML =
+    '0.1₂ = <span>'+be.kept+'</span><span class="cut">'+(be.more?'…  ✂ (rest discarded)':'')+'</span>';
+
+  document.getElementById('scopeK').textContent = anim?document.getElementById('scopeK').textContent:'standby';
+  if(!anim) draw();
+}
+
+/* ---------- inputs ---------- */
+const bitsEl=document.getElementById('bits'), hoursEl=document.getElementById('hours');
+bitsEl.addEventListener('input', ()=>{ bits=+bitsEl.value; updateReadout(); });
+hoursEl.addEventListener('input', ()=>{ hours=+hoursEl.value; updateReadout(); });
+document.getElementById('runBtn').addEventListener('click', runIntercept);
+document.getElementById('modeSeg').addEventListener('click', e=>{
+  const b=e.target.closest('button[data-mode]'); if(!b) return;
+  round = b.dataset.mode==='round';
+  [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.classList.toggle('on', x===b));
+  updateReadout();
+});
+document.getElementById('presets').addEventListener('click', e=>{
+  const c=e.target.closest('.chip'); if(!c) return;
+  bits=+c.dataset.bits; hours=+c.dataset.hours; round = c.dataset.mode==='round';
+  bitsEl.value=bits; hoursEl.value=hours;
+  [...document.querySelectorAll('#modeSeg button')].forEach(x=>x.classList.toggle('on', x.dataset.mode===c.dataset.mode));
+  updateReadout(); runIntercept();
+});
+window.addEventListener('resize', fit);
+
+/* ---------- reveal-on-scroll ---------- */
+const io=new IntersectionObserver((es)=>{ es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } }); },
+  { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(n=>io.observe(n));
+
+/* ---------- boot ---------- */
+updateReadout();
+fit();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
