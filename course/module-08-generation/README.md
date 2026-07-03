@@ -4,6 +4,8 @@
 > §7.2.1.1 (Gray binary code), §7.2.1.2 (permutations: lexicographic and plain
 > changes), §7.2.1.3 (combinations), and §7.2.1.4 (integer partitions).
 > **Lab:** `labs/module-08-generation` · **Grade it:** `./grade 8`
+> **Concrete Mathematics companion:** Chapters 5 (Binomial Coefficients) and 6
+> (Special Numbers) — the combinatorics this module generates — see [../../docs/concrete-mathematics.md](../../docs/concrete-mathematics.md).
 >
 > This lesson is self-contained: you can complete the module without the book.
 > If you own Vol. 4A, read §7.2.1 alongside — it is the heart of the "Generating

@@ -241,5 +241,7 @@ books here — but this is how to find any citation if you own them, or on
 - Want to go deeper on the mathematics? **[Concrete Mathematics](concrete-mathematics.md)**
   is the one companion book worth reading — Module 02's §1.2, grown into a full
   course.
+- Keep the **[Glossary](glossary.md)** handy — every recurring convention
+  (ratings, §-references, step labels, notation, `LAMBDA`, "mems") in one place.
 
 Welcome. Euclid is waiting.

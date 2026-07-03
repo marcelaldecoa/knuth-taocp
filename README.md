@@ -108,6 +108,7 @@ docs/for-newcomers.md          new to Knuth? the primer + how to study
 docs/why-knuth-matters.md      tour of Knuth's algorithms in modern tech
 docs/getting-started.md        setup, repo tour, every command (Windows-aware)
 docs/concrete-mathematics.md   the companion math book, mapped to the course
+docs/glossary.md               ratings, §-refs, step labels, notation — defined once
 course/module-NN-*/README.md   the lesson: theory + stage-by-stage lab guide
 course/module-NN-*/exercises.md your log for Knuth's exercises (with ratings)
 labs/module-NN-*/src/lab.rs    YOUR file — stubs with todo!() to replace
@@ -166,7 +167,9 @@ optional equipment for TAOCP), **implement stage by stage** keeping Knuth's
 step labels as comments, **let the tests argue with you**, and then do a few
 **exercises** from the lesson's curated table, logging them in the module's
 `exercises.md`. Knuth's rating scale: 00 trivial · 20 an hour · 30 hours+ ·
-40 term project · 50 open research problem; ▶ marks the instructive ones.
+40 term project · 50 open research problem; ▶ marks the instructive ones. Every
+recurring convention — ratings, §-references, step labels, notation — is defined
+once in **[docs/glossary.md](docs/glossary.md)**.
 
 ## Source texts (optional but wonderful)
 

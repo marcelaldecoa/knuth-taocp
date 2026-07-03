@@ -4,6 +4,8 @@
 > §4.3.1 (classical algorithms), §4.3.3 (faster multiplication), §4.5.2
 > (analysis of Euclid / binary gcd), §4.5.4 (primality testing).
 > **Lab:** `labs/module-05-arithmetic` · **Grade it:** `./grade 5`
+> **Concrete Mathematics companion:** Chapter 4 (Number Theory) — gcd, modular
+> arithmetic, and primality, in depth — see [../../docs/concrete-mathematics.md](../../docs/concrete-mathematics.md).
 >
 > Self-contained: complete it without the book.
 

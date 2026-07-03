@@ -5,6 +5,9 @@
 > Theorem 3.2.1.2A), §3.3.1 (the chi-square test), §3.4.2 (random sampling
 > and shuffling).
 > **Lab:** `labs/module-04-random` · **Grade it:** `./grade 4`
+> **Concrete Mathematics companion:** Chapter 8 (Discrete Probability) for
+> expectation and randomized analysis, Chapter 4 for the number theory behind
+> full-period generators — see [../../docs/concrete-mathematics.md](../../docs/concrete-mathematics.md).
 >
 > Self-contained: you can complete the module without the book. If you own
 > Vol. 2, read §3.2.1 and §3.3.1 first — this lesson tells you where to look.
