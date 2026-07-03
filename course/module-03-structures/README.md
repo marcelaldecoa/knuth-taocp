@@ -563,7 +563,11 @@ stage 1 is a bona fide interview classic with a Catalan-number answer.
 ## 10. Where this leads
 
 - The **AVAIL free list** is the seed of dynamic storage allocation (§2.5) and
-  of every real allocator you will ever use.
+  of every real allocator you will ever use. When a program *forgets* to return
+  cells, the machine must reclaim them itself — garbage collection (§2.3.5). See
+  it run in the Museum's [_The Specter of Forgetting_](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-1.3-specter-of-forgetting.html):
+  allocate until the heap chokes, then a mark-and-sweep radar traces the live
+  objects from the roots and burns the forgotten ones to dust.
 - **Topological sort** underlies build systems, spreadsheet recalculation, and
   instruction scheduling; the DAG machinery returns throughout Vol. 1 §2.3.4.
 - **Binary trees** are the backbone of Vol. 3: binary search trees, balanced
