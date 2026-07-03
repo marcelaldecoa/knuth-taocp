@@ -40,8 +40,8 @@ recovered as `r = yq - zq*q`, which automatically carries the divisor's sign,
 reproducing all four rows of §3.2's table. Division by zero is handled as
 Knuth defines it (§1.2.4's `y mod 0 = y`): `$X = 0, rR = $Y`, no trap.
 
-MULU is the other arm with state beyond $X: it widens both operands to u128,
-writes the low half to $X and the high half to rH — and signed MUL pointedly
+MULU is the other arm with state beyond \$X: it widens both operands to u128,
+writes the low half to \$X and the high half to rH — and signed MUL pointedly
 does *not* touch rH, matching the fascicle. The shift arms encode "no mod-64
 reduction" explicitly (`if zv >= 64 { 0 }`, with SR filling the sign), because
 Rust's `<<`/`>>` on a count ≥ 64 is undefined-ish and x86 would silently mask
@@ -75,10 +75,10 @@ out.
 
 There is no new code here; the stage is the payoff of getting stages 1–3
 honest. The EUCLID source maps Algorithm E's three steps onto seven tetras —
-DIV's two outputs ($X quotient, rR remainder) absorb step E1's two results,
+DIV's two outputs (\$X quotient, rR remainder) absorb step E1's two results,
 `GET $3,rR` lifts the remainder, `BZ` is step E2, and `ADD $x,$y,0` is MMIX's
-register-copy idiom (the immediate form, opcode 0x21, because $0 is not a
-hardwired zero). Running it on (544, 119) gives 17 in $1 at exactly 22 oops
+register-copy idiom (the immediate form, opcode 0x21, because \$0 is not a
+hardwired zero). Running it on (544, 119) gives 17 in \$1 at exactly 22 oops
 and 0 mems, because each of the T = 4 divisions costs a fixed six-instruction
 pass except the last (three) plus the halting TRAP: 6T − 2. That closed form
 is Module 01's Lamé bound turned into an assertable machine cost — the

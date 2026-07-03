@@ -138,8 +138,8 @@ When a stage is green, the pass message points you to that module's
 the "compare with Knuth's answer" step. Each module also ships graduated
 `hints.md` (three levels, gentlest first) that `--hint` surfaces.
 
-Prefer a visual map? Open [`docs/dashboard.html`](docs/dashboard.html) in a
-browser: every module and stage grouped by volume, with a personal
+Prefer a visual map? The [course website](https://marcelaldecoa.github.io/knuth-taocp/)
+opens on every module and stage grouped by volume, with a personal
 click-to-track progress meter (saved in your browser; `./grade` remains the
 authoritative record).
 

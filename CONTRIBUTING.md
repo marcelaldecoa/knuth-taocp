@@ -56,7 +56,8 @@ enforced by `./grade verify`:
    stage is green.
 
 Stages are registered in `grader/src/manifest.rs` — the single source of truth.
-The mirror in `docs/dashboard.html` should be kept in step.
+The course website reads `website/src/data/manifest.json`, regenerated from it
+with `./grade manifest`; the `manifest-drift` CI check enforces they stay in step.
 
 Full details, including test-design rules and the flagship-bench option, are in
 [CONVENTIONS.md](CONVENTIONS.md). **Module 01 is the exemplar — when in doubt,
@@ -82,8 +83,8 @@ spoon-feeding to a Module 08 stub, or vice versa.
       precisely (`Vol. 3, §5.2.3, Algorithm H`).
 - [ ] New relative links point at files that exist (the link check will catch
       you, but check first).
-- [ ] If you added a stage, `grader/src/manifest.rs` and `docs/dashboard.html`
-      both know about it.
+- [ ] If you added a stage, update `grader/src/manifest.rs`, then regenerate the
+      website map: `./grade manifest > website/src/data/manifest.json`.
 - [ ] Prose matches the surrounding voice: precise, book-optional, no reproduced
       book text at length.
 
