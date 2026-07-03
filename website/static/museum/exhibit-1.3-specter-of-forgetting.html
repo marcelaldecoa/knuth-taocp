@@ -1,0 +1,635 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing I — The Nature of Information · Exhibit 1.3 — The Specter of Forgetting
+  A self-contained, single-file interactive essay on dynamic allocation and
+  garbage collection, after Donald Knuth's TAOCP Vol. 1, §2.3.5 & §2.5.
+
+  No build step. No frameworks. No network: fonts vendored beside this file
+  (./fonts/*.woff2, relative paths). Instrument: the Mark-and-Sweep Radar,
+  a <canvas> heap with a tracing collector.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Mark-and-Sweep Radar — allocate until the heap chokes, then trace live objects from the roots and sweep the forgotten ones into dust." />
+<title>The Specter of Forgetting · Exhibit 1.3 · The Museum of Algorithms</title>
+
+<style>
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(40px,8vw,80px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* THE LAB */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.5fr .9fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; }
+  .panel .phead .k{ color:var(--gold); }
+
+  canvas#heap{ display:block; width:100%; height:auto; background:radial-gradient(700px 360px at 50% 40%, #10171b 0, #080c0f 78%); border:1px solid #05090b; border-radius:2px; cursor:pointer; }
+  .hintbar{ margin-top:10px; font-size:12px; color:#8496a0; line-height:1.5; }
+  .hintbar b{ color:var(--gold); font-weight:500; }
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; margin-top:8px; font-size:11px; color:#8496a0; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .sw{ width:11px; height:11px; border-radius:2px; display:inline-block; }
+  .sw.live{ background:#2f6f6f; } .sw.gc{ background:#6a3a40; } .sw.free{ background:#182228; border:1px dashed #33454e; } .sw.mark{ background:var(--gold); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn.collect{ background:#2a1512; border-color:#7a3a34; color:#e79a8f; font-weight:600; }
+  .btn.collect:hover{ border-color:#e79a8f; color:#fff; }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+  .sep{ width:1px; align-self:stretch; background:var(--lab-line); margin:2px 4px; }
+
+  .readout-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .stat{ flex:1; min-width:70px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:9px 11px; }
+  .stat .lbl{ font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:#7f9099; }
+  .stat .val{ font-size:20px; color:#eef3f5; margin-top:2px; }
+  .stat .val.live{ color:#5fb3b3; } .stat .val.gc{ color:#e79a8f; } .stat .val.gold{ color:var(--gold); }
+
+  .meter{ height:14px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; overflow:hidden; display:flex; margin-bottom:12px; }
+  .meter .mlive{ background:#2f6f6f; height:100%; } .meter .mgc{ background:#6a3a40; height:100%; }
+
+  .console{ height:210px; overflow-y:auto; font-size:12.5px; line-height:1.55; padding-right:6px; }
+  .console::-webkit-scrollbar{ width:8px; } .console::-webkit-scrollbar-thumb{ background:#2b3a42; border-radius:4px; }
+  .cline{ padding:5px 0; border-bottom:1px dotted #24333a; color:#b7c6cd; }
+  .cline .op{ color:var(--gold); } .cline .addr{ color:#89b4c4; }
+  .cline.warn{ color:#e79a8f; } .cline.good{ color:#a8d5b5; } .cline.small{ color:#7f9099; font-size:11.5px; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <!-- TITLE PLATE -->
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">1.3</div>
+      <p class="eyebrow">Wing I · The Nature of Information</p>
+      <h1>The Specter<br/>of Forgetting</h1>
+      <p class="sub">Dynamic allocation and the invention of garbage collection</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> I — Fundamental Algorithms</span>
+        <span><b>SECTION</b> 2.3.5, 2.5</span>
+        <span><b>c.</b> 1959 · McCarthy, LISP</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">In the last room you learned the discipline of the free list: every cell you take from <span class="mono">AVAIL</span>, you promise to give back. It is a gentleman's agreement with the machine, and like all such agreements it depends on nobody ever forgetting. But programs forget. A pointer is overwritten, a local variable goes out of scope, a thread of the list is dropped — and somewhere in memory a node still sits, fully allocated, holding its data, connected to nothing. You can no longer reach it, so you can no longer free it. It is not destroyed and it is not usable. It simply <em>haunts</em> the heap.</p>
+
+      <p class="reveal">This is the specter of forgetting, and for a while it seemed to be the price of dynamic memory. Then, in 1959, John McCarthy hit a wall building LISP — a language whose every operation cons-es new cells into being — and asked a question that reframed the whole problem. Instead of trusting the programmer to remember which cells are dead, why not let the machine <em>discover</em> it? An object is worth keeping if and only if the running program can still reach it. Everything else, however it came to be, is garbage. Reclaiming it automatically he called <strong>garbage collection</strong>.</p>
+
+      <blockquote class="pull reveal">"Nothing in the heap is alive or dead in itself. A cell is alive precisely when the program can still find its way to it — liveness is reachability, and nothing more."
+        <cite>— after J. McCarthy (1960) &amp; D. E. Knuth, §2.3.5</cite></blockquote>
+
+      <h2 class="reveal"><span class="num">I · Roots &amp; Reachability</span>What it means to be alive</h2>
+
+      <p class="reveal">The running program touches memory through a small, known set of handles: the machine registers, the variables on the stack, the global cells. Knuth calls these the <strong>roots</strong>. Anything the program can ever use, it must be able to reach by starting at a root and following pointers. So define an object to be <em>live</em> if it is reachable from some root, and <em>garbage</em> otherwise. This definition is exact, it is decidable, and — crucially — it does not care <em>how</em> a cell became unreachable. A forgotten node and a deliberately discarded one look identical to the collector: neither can be reached, so both may be reclaimed.</p>
+
+      <p class="reveal">In the instrument below, the six boxes along the top are the roots. Each allocation drops a new object into the heap and wires it into the reachable structure. Then drop a root, or cut a link, and watch objects go dark — still occupying memory, but severed from every root. Keep allocating and the heap fills with the living and the forgotten alike, until it chokes. Then trigger the collector.</p>
+    </section>
+
+    <!-- THE LAB -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 1.3</div>
+            <div class="title">The Mark-and-Sweep Radar</div>
+          </div>
+          <div class="sn">TRACING COLLECTOR · §2.3.5 · roots → mark → sweep</div>
+        </div>
+
+        <div class="lab-grid">
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Heap — roots on top, cells below</span><span class="k" id="phaseK">idle</span></div>
+              <canvas id="heap" width="760" height="540" role="img" aria-label="A heap of memory cells traced from the roots by a mark-and-sweep collector"></canvas>
+              <div class="legend">
+                <span><i class="sw live"></i> live (reachable)</span>
+                <span><i class="sw gc"></i> garbage (unreachable)</span>
+                <span><i class="sw mark"></i> marking</span>
+                <span><i class="sw free"></i> free</span>
+              </div>
+              <div class="hintbar">
+                <b>Allocate</b> objects until the heap chokes; <b>drop</b> a reference (or click a root box) to orphan a subgraph into garbage. Then hit <b>⚡ Collect</b>: the radar traces every live cell from the roots (<b>mark</b>) and burns the rest to dust (<b>sweep</b>).
+              </div>
+            </div>
+
+            <div class="controls">
+              <button class="btn primary" id="allocBtn">＋ Allocate</button>
+              <button class="btn" id="dropBtn">✖ Drop reference</button>
+              <button class="btn" id="fillBtn">⛁ Fill heap</button>
+              <div class="sep"></div>
+              <button class="btn collect" id="collectBtn">⚡ Collect (Mark &amp; Sweep)</button>
+              <button class="btn" id="resetBtn">↺ Reset</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Console — the collector's ledger</span><span class="k" id="statusK">ready</span></div>
+
+              <div class="readout-row">
+                <div class="stat"><div class="lbl">Used</div><div class="val" id="statUsed">0</div></div>
+                <div class="stat"><div class="lbl">Live</div><div class="val live" id="statLive">0</div></div>
+                <div class="stat"><div class="lbl">Garbage</div><div class="val gc" id="statGarb">0</div></div>
+              </div>
+              <div class="meter" title="live vs garbage vs free"><div class="mlive" id="mLive" style="width:0%"></div><div class="mgc" id="mGc" style="width:0%"></div></div>
+
+              <div class="console" id="console"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">Mark-and-sweep runs in two phases over the whole heap. <em>Mark:</em> a trace from the roots paints every reachable cell gold. <em>Sweep:</em> a linear pass reclaims every cell the trace never reached — the forgotten — and clears the marks for next time. Cost is proportional to the heap, and the world stops while it runs.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · Mark, then Sweep</span>The two-phase exorcism</h2>
+
+      <p class="reveal">McCarthy's collector, refined by Knuth in §2.3.5, is disarmingly simple. <strong>Mark:</strong> give every cell a spare mark bit, initially clear. Starting from the roots, trace the pointer graph — depth-first or breadth-first — and set the mark bit of every cell you visit. When the trace is exhausted, every live cell is marked and every garbage cell is not. <strong>Sweep:</strong> walk the entire heap linearly from one end to the other; every marked cell you clear (ready for next time) and keep; every unmarked cell you return to the free list. Two passes, and the specter is banished.</p>
+
+      <blockquote class="pull reveal">The genius is in the accounting: the collector never has to know why a cell died. Unreachable is unreachable. It reclaims the deliberate discard and the honest mistake with the same indifferent sweep.</blockquote>
+
+      <p class="reveal">The bill comes in two forms. The sweep touches the whole heap, so a collection costs time proportional to <em>all</em> of memory, not just the garbage — and while the collector traces and sweeps, the mutator (your program) must hold still, lest the pointer graph shift underfoot. This is the dreaded <em>stop-the-world</em> pause. For McCarthy's interactive LISP it meant an unpredictable hitch mid-computation; for a modern web browser it is the difference between a smooth animation and a stutter. Half a century of research on garbage collection is, in one sentence, the war against that pause.</p>
+
+      <h2 class="reveal"><span class="num">III · The Long Lineage</span>Everything after the sweep</h2>
+
+      <p class="reveal">Mark-and-sweep was the first answer, not the last. <strong>Reference counting</strong> (George Collins, 1960) takes the opposite tack: give each cell a tally of how many pointers aim at it, adjust the tally on every assignment, and free a cell the instant its count hits zero — no pause, but a fatal blind spot, for a cycle of cells that point only at each other keeps every count above zero and never dies. <strong>Copying collectors</strong> (Marvin Minsky, then Cheney's elegant 1970 algorithm) evacuate the live objects to a fresh region and abandon the old one wholesale, compacting the heap for free. <strong>Generational</strong> collectors exploit a deep empirical truth — most objects die young — by collecting the nursery often and the elders rarely. Tri-color marking makes the trace <em>concurrent</em>, shrinking the pause toward zero.</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">Every managed runtime you have ever used — the JVM, the .NET CLR, Go, Python, and the JavaScript engine interpreting this very page — is running a descendant of McCarthy's idea, tracing liveness from roots so that you never have to remember to free a thing. The gentleman's agreement of the AVAIL list has been quietly automated away. The specter of forgetting still stalks the heap; we have simply built a machine to walk the corridors, lantern in hand, and lay to rest whatever the program can no longer find.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING I · EXHIBIT 1.3<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 1 — §2.3.5, §2.5<br/>
+      <a href="exhibit-1.2-ariadnes-thread.html">← 1.2 Ariadne's Thread</a> &nbsp;·&nbsp; <a href="index.html">Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">Wing II →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE MARK-AND-SWEEP RADAR
+   A heap of cells wired into a pointer graph from a root set. Allocate until
+   the heap chokes; drop references to manufacture garbage; then a tracing
+   collector marks everything reachable from the roots and sweeps the rest.
+   ========================================================================= */
+
+const cv = document.getElementById('heap');
+const ctx = cv.getContext('2d');
+const LOGW = 760, LOGH = 540;                 // logical canvas units
+
+const COLS = 13, ROWS = 8, NCELL = COLS*ROWS;
+const NROOT = 6;
+const MAXREF = 2;
+
+/* layout */
+const ROOT_Y = 30, ROOT_H = 34, ROOT_W = 104;
+const HEAP_TOP = 108, HEAP_BOT = LOGH - 24, HEAP_L = 24, HEAP_R = LOGW - 24;
+const strideX = (HEAP_R - HEAP_L) / COLS;
+const strideY = (HEAP_BOT - HEAP_TOP) / ROWS;
+const CELL = Math.min(strideX, strideY) - 8;
+
+/* ---------- state ---------- */
+let cells = [];    // {i,col,row,cx,cy,alloc,val,refs:[i]}
+let roots = [];    // {r,x,y,index:null}
+let phase = 'idle';// 'idle'|'mark'|'sweep'
+let oom = false;
+const log = [];
+let allocSeq = 0;
+
+/* collection animation state */
+let markLayers = [], markedSet = new Set(), layersShown = 0;
+let radarAngle = 0, sweepCursor = -1, particles = [], reclaimedN = 0;
+let animStart = 0, raf = null;
+
+const rint = n => Math.floor(Math.random()*n);
+
+function initHeap(){
+  cells = [];
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const i = r*COLS + c;
+    cells.push({ i, col:c, row:r,
+      cx: HEAP_L + c*strideX + strideX/2,
+      cy: HEAP_TOP + r*strideY + strideY/2,
+      alloc:false, val:0, refs:[] });
+  }
+  roots = [];
+  const gap = (LOGW - NROOT*ROOT_W) / (NROOT+1);
+  for(let k=0;k<NROOT;k++) roots.push({ r:k, x: gap + k*(ROOT_W+gap), y: ROOT_Y, index:null });
+  phase='idle'; oom=false; allocSeq=0;
+  markLayers=[]; markedSet=new Set(); layersShown=0; radarAngle=0; sweepCursor=-1; particles=[]; reclaimedN=0;
+}
+
+/* ---------- graph ---------- */
+function reachable(){
+  const seen = new Set();
+  const q = [];
+  for(const rt of roots) if(rt.index!=null && cells[rt.index].alloc && !seen.has(rt.index)){ seen.add(rt.index); q.push(rt.index); }
+  while(q.length){
+    const i = q.shift();
+    for(const j of cells[i].refs) if(cells[j].alloc && !seen.has(j)){ seen.add(j); q.push(j); }
+  }
+  return seen;
+}
+function bfsLayers(){
+  const seen = new Set(), layers = [];
+  let frontier = [];
+  for(const rt of roots) if(rt.index!=null && cells[rt.index].alloc && !seen.has(rt.index)){ seen.add(rt.index); frontier.push(rt.index); }
+  while(frontier.length){
+    layers.push(frontier.slice());
+    const next = [];
+    for(const i of frontier) for(const j of cells[i].refs) if(cells[j].alloc && !seen.has(j)){ seen.add(j); next.push(j); }
+    frontier = next;
+  }
+  return { layers, seen };
+}
+const freeCount = () => cells.reduce((a,c)=> a + (c.alloc?0:1), 0);
+const usedCount = () => NCELL - freeCount();
+
+/* ---------- mutations ---------- */
+function allocate(quiet){
+  if(phase!=='idle') return false;
+  const free = cells.filter(c=>!c.alloc);
+  if(!free.length){ oom = true; if(!quiet) pushLog('<span class="warn">OUT OF MEMORY — heap full. Much of it may be forgotten garbage. Press ⚡ Collect.</span>','warn'); render(); return false; }
+  const f = free[rint(free.length)];
+  f.alloc = true; f.val = ++allocSeq; f.refs = [];
+
+  const reach = [...reachable()];
+  const emptyRoot = roots.find(rt=>rt.index==null);
+  if(reach.length===0){ (emptyRoot||roots[0]).index = f.i; }
+  else if(emptyRoot && Math.random()<0.34){ emptyRoot.index = f.i; }
+  else {
+    const p = reach[rint(reach.length)];
+    if(cells[p].refs.length < MAXREF) cells[p].refs.push(f.i);
+    else (emptyRoot||roots[0]).index = f.i;
+  }
+  if(reach.length>0 && Math.random()<0.32){         // share some structure
+    const q = reach[rint(reach.length)];
+    if(q!==f.i && f.refs.length<MAXREF && !f.refs.includes(q)) f.refs.push(q);
+  }
+  if(!quiet) pushLog(`<span class="op">alloc</span> obj #${f.val} → cell <span class="addr">${addr(f.i)}</span>`);
+  oom = false; render(); return true;
+}
+
+function dropReference(quiet){
+  if(phase!=='idle') return;
+  const usedRoots = roots.filter(rt=>rt.index!=null);
+  const edged = cells.filter(c=>c.alloc && c.refs.length>0);
+  const pool = [];
+  usedRoots.forEach(rt=>pool.push({t:'root',rt}));
+  edged.forEach(c=>pool.push({t:'edge',c}));
+  if(!pool.length){ if(!quiet) pushLog('nothing to drop — heap is empty','small'); return; }
+  const before = reachable().size;
+  const ch = pool[rint(pool.length)];
+  if(ch.t==='root'){ if(!quiet) pushLog(`<span class="op">drop</span> root R${ch.rt.r} (was → ${addr(ch.rt.index)})`); ch.rt.index = null; }
+  else { const gone = ch.c.refs.pop(); if(!quiet) pushLog(`<span class="op">drop</span> link ${addr(ch.c.i)} ✕→ ${addr(gone)}`); }
+  const after = reachable().size;
+  const newG = before - after;
+  if(!quiet && newG>0) pushLog(`  → ${newG} object(s) severed from the roots — now garbage`, 'small');
+  render();
+}
+
+function fillHeap(){
+  if(phase!=='idle') return;
+  let n=0;
+  while(freeCount()>0 && n<NCELL+5){ allocate(true); n++; if(n%4===0) dropReference(true); }
+  oom = freeCount()===0;
+  const g = usedCount() - reachable().size;
+  pushLog(`<span class="op">fill</span> allocated to capacity — ${usedCount()} used, ${g} already garbage`, oom?'warn':'');
+  if(oom) pushLog('<span class="warn">the heap chokes. the specter has filled it. ⚡ Collect to reclaim.</span>','warn');
+  render();
+}
+
+function addr(i){ return '0x' + (0x40 + i).toString(16).toUpperCase(); }
+
+/* ---------- the collector ---------- */
+function collect(){
+  if(phase!=='idle') return;
+  const used = usedCount();
+  if(used===0){ pushLog('heap empty — nothing to collect','small'); return; }
+  const { layers, seen } = bfsLayers();
+  markLayers = layers; markedSet = seen; layersShown = 0;
+  reclaimedN = 0; sweepCursor = -1; particles = [];
+  phase = 'mark'; animStart = performance.now();
+  pushLog(`<span class="op">⚡ collect</span> — MARK: tracing from ${roots.filter(r=>r.index!=null).length} roots…`);
+  updateReadout();
+  startLoop();
+}
+
+function finishCollect(){
+  // clear marks, drop dangling edges to freed cells, recompute
+  for(const c of cells) if(!c.alloc) c.refs = [];
+  for(const c of cells) c.refs = c.refs.filter(j=>cells[j].alloc);
+  phase='idle'; oom=false;
+  const live = usedCount();
+  pushLog(`<span class="op good">swept</span> reclaimed ${reclaimedN} cell(s) · retained ${live} live`, 'good');
+  render();
+}
+
+/* ---------- animation loop ---------- */
+function startLoop(){ if(!raf) raf = requestAnimationFrame(loop); }
+function loop(ts){
+  raf = null;
+  const t = ts - animStart;
+
+  if(phase==='mark'){
+    radarAngle = t / 560;
+    const per = 230;
+    layersShown = Math.min(markLayers.length, Math.floor(t/per)+1);
+    if(t > markLayers.length*per + 260){
+      phase='sweep'; animStart=ts; sweepCursor=-1;
+      pushLog(`  MARK complete — ${markedSet.size} live cell(s) painted. SWEEP…`, 'small');
+    }
+  } else if(phase==='sweep'){
+    const target = Math.floor(t/14);
+    while(sweepCursor < target && sweepCursor < NCELL-1){
+      sweepCursor++;
+      const c = cells[sweepCursor];
+      if(c.alloc && !markedSet.has(c.i)){ spawnDust(c); c.alloc=false; c.val=0; c.refs=[]; reclaimedN++; }
+    }
+    if(sweepCursor >= NCELL-1){ finishCollect(); }
+  }
+
+  updateParticles();
+  draw();
+
+  if(phase!=='idle' || particles.length){ raf = requestAnimationFrame(loop); }
+  else { draw(); }
+}
+
+/* ---------- particles (digital dust) ---------- */
+function spawnDust(c){
+  const n = 12;
+  for(let k=0;k<n;k++){
+    const a = Math.random()*Math.PI*2, sp = 0.4 + Math.random()*1.7;
+    particles.push({ x:c.cx, y:c.cy, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 0.4,
+      life:1, decay:0.012+Math.random()*0.02, r:1+Math.random()*2,
+      gold: Math.random()<0.5 });
+  }
+}
+function updateParticles(){
+  for(const p of particles){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.03; p.vx*=0.99; p.life-=p.decay; }
+  particles = particles.filter(p=>p.life>0);
+}
+
+/* ---------- drawing ---------- */
+let cssW=LOGW, cssH=LOGH;
+function fit(){
+  const rect = cv.getBoundingClientRect();
+  cssW = rect.width; cssH = rect.width * (LOGH/LOGW);
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
+  ctx.setTransform(dpr*cssW/LOGW, 0, 0, dpr*cssH/LOGH, 0, 0);   // map logical → device
+  draw();
+}
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function draw(){
+  const reach = (phase==='idle') ? reachable() : markedSet;
+  const showingMarked = new Set();
+  if(phase!=='idle') for(let L=0; L<layersShown; L++) for(const i of markLayers[L]) showingMarked.add(i);
+
+  ctx.clearRect(0,0,LOGW,LOGH);
+
+  // edges (drawn first, under cells)
+  for(const c of cells){
+    if(!c.alloc) continue;
+    for(const j of c.refs){
+      if(!cells[j].alloc) continue;
+      const lit = (phase!=='idle') ? (showingMarked.has(c.i)&&showingMarked.has(j)) : (reach.has(c.i)&&reach.has(j));
+      ctx.strokeStyle = lit ? 'rgba(198,166,100,0.55)' : (reach.has(c.i)? 'rgba(95,179,179,0.28)' : 'rgba(106,58,64,0.30)');
+      ctx.lineWidth = lit ? 1.6 : 1;
+      ctx.beginPath(); ctx.moveTo(c.cx,c.cy); ctx.lineTo(cells[j].cx,cells[j].cy); ctx.stroke();
+    }
+  }
+
+  // radar sweep during mark
+  if(phase==='mark'){
+    const ccx=(HEAP_L+HEAP_R)/2, ccy=(HEAP_TOP+HEAP_BOT)/2, R=Math.hypot(HEAP_R-HEAP_L,HEAP_BOT-HEAP_TOP)/2;
+    const g = ctx.createRadialGradient(ccx,ccy,0,ccx,ccy,R);
+    g.addColorStop(0,'rgba(198,166,100,0.10)'); g.addColorStop(1,'rgba(198,166,100,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.moveTo(ccx,ccy);
+    ctx.arc(ccx,ccy,R,radarAngle-0.35,radarAngle+0.02); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(198,166,100,0.5)'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(ccx,ccy); ctx.lineTo(ccx+Math.cos(radarAngle)*R, ccy+Math.sin(radarAngle)*R); ctx.stroke();
+  }
+
+  // roots
+  for(const rt of roots){
+    const used = rt.index!=null && cells[rt.index].alloc;
+    ctx.fillStyle = used ? '#20160a' : '#0a0f12';
+    ctx.strokeStyle = used ? '#C6A664' : '#33454e';
+    ctx.lineWidth = 1.4; rr(rt.x, rt.y, ROOT_W, ROOT_H, 5); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = used ? '#C6A664' : '#6c7d85';
+    ctx.font = '600 12px "IBM Plex Mono", monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(used ? ('R'+rt.r+' → '+addr(rt.index)) : ('R'+rt.r+' → Λ'), rt.x+ROOT_W/2, rt.y+ROOT_H/2);
+    if(used){ // pointer line from root to its cell
+      const tc = cells[rt.index];
+      ctx.strokeStyle='rgba(198,166,100,0.4)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(rt.x+ROOT_W/2, rt.y+ROOT_H); ctx.lineTo(tc.cx, tc.cy); ctx.stroke();
+    }
+  }
+
+  // cells
+  for(const c of cells){
+    const x=c.cx-CELL/2, y=c.cy-CELL/2;
+    const isMarked = (phase!=='idle') && showingMarked.has(c.i);
+    const isLive = reach.has(c.i);
+    const sweeping = (phase==='sweep') && c.i===sweepCursor;
+
+    if(!c.alloc){
+      ctx.fillStyle='#0e1418'; ctx.strokeStyle='#22303726'; ctx.setLineDash([3,3]);
+      rr(x,y,CELL,CELL,4); ctx.fill();
+      ctx.strokeStyle='rgba(51,69,78,0.5)'; ctx.stroke(); ctx.setLineDash([]);
+      continue;
+    }
+    if(isMarked){
+      ctx.fillStyle='#4a3c18'; ctx.strokeStyle='#C6A664'; ctx.lineWidth=2;
+      ctx.shadowColor='rgba(198,166,100,0.8)'; ctx.shadowBlur=14;
+    } else if(phase!=='idle' && !isLive){          // during collect, unmarked = doomed
+      ctx.fillStyle='#2a1418'; ctx.strokeStyle='#6a3a40'; ctx.lineWidth=1.4; ctx.shadowBlur=0;
+    } else if(isLive){
+      ctx.fillStyle='#1c3535'; ctx.strokeStyle='#4a8f8f'; ctx.lineWidth=1.4; ctx.shadowBlur=0;
+    } else {                                        // idle garbage — the specter
+      ctx.fillStyle='#2a1a1e'; ctx.strokeStyle='#6a3a40'; ctx.lineWidth=1.4; ctx.shadowBlur=0;
+    }
+    rr(x,y,CELL,CELL,4); ctx.fill(); ctx.stroke(); ctx.shadowBlur=0;
+
+    ctx.fillStyle = isMarked ? '#f0e0b6' : isLive ? '#8fd0d0' : '#a86a6e';
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(String(c.val), c.cx, c.cy);
+
+    if(sweeping){ ctx.strokeStyle='#e79a8f'; ctx.lineWidth=2; rr(x-2,y-2,CELL+4,CELL+4,5); ctx.stroke(); }
+  }
+
+  // sweep cursor guide
+  if(phase==='sweep' && sweepCursor>=0 && sweepCursor<NCELL){
+    const c=cells[sweepCursor];
+    ctx.strokeStyle='rgba(231,154,143,0.35)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(HEAP_L, c.cy+strideY/2); ctx.lineTo(HEAP_R, c.cy+strideY/2); ctx.stroke();
+  }
+
+  // particles
+  for(const p of particles){
+    ctx.globalAlpha = Math.max(0,p.life);
+    ctx.fillStyle = p.gold ? '#C6A664' : '#8a5a5e';
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* ---------- readout ---------- */
+function pushLog(html, cls){ log.push({html, cls:cls||''}); if(log.length>40) log.shift(); renderConsole(); }
+function renderConsole(){
+  const c=document.getElementById('console');
+  c.innerHTML = log.map(l=>`<div class="cline ${l.cls}">${l.html}</div>`).join('');
+  c.scrollTop = c.scrollHeight;
+}
+function updateReadout(){
+  const used = usedCount();
+  const live = reachable().size;
+  const garb = used - live;
+  document.getElementById('statUsed').textContent = used + '/' + NCELL;
+  document.getElementById('statLive').textContent = live;
+  document.getElementById('statGarb').textContent = garb;
+  document.getElementById('mLive').style.width = (live/NCELL*100)+'%';
+  document.getElementById('mGc').style.width = (garb/NCELL*100)+'%';
+  document.getElementById('phaseK').textContent = phase==='idle' ? (oom?'heap full':'idle') : phase.toUpperCase()+'…';
+  document.getElementById('statusK').textContent = phase==='idle' ? (oom?'choked':'ready') : 'collecting';
+  const running = phase!=='idle';
+  document.getElementById('allocBtn').disabled = running;
+  document.getElementById('dropBtn').disabled = running || used===0;
+  document.getElementById('fillBtn').disabled = running || freeCount()===0;
+  document.getElementById('collectBtn').disabled = running || used===0;
+  document.getElementById('resetBtn').disabled = running;
+}
+function render(){ updateReadout(); draw(); }
+
+/* ---------- interactions ---------- */
+document.getElementById('allocBtn').addEventListener('click', ()=>allocate(false));
+document.getElementById('dropBtn').addEventListener('click', ()=>dropReference(false));
+document.getElementById('fillBtn').addEventListener('click', fillHeap);
+document.getElementById('collectBtn').addEventListener('click', collect);
+document.getElementById('resetBtn').addEventListener('click', ()=>{ if(phase!=='idle') return; initHeap(); log.length=0; pushLog('heap reset — fresh arena, all cells free','small'); render(); });
+
+// click a root box to drop that root (orphan its subgraph)
+cv.addEventListener('click', e=>{
+  if(phase!=='idle') return;
+  const rect = cv.getBoundingClientRect();
+  const x = (e.clientX-rect.left)/rect.width*LOGW, y=(e.clientY-rect.top)/rect.height*LOGH;
+  for(const rt of roots){
+    if(x>=rt.x && x<=rt.x+ROOT_W && y>=rt.y && y<=rt.y+ROOT_H && rt.index!=null){
+      const before = reachable().size;
+      pushLog(`<span class="op">drop</span> root R${rt.r} (clicked) — was → ${addr(rt.index)}`);
+      rt.index = null;
+      const newG = before - reachable().size;
+      if(newG>0) pushLog(`  → ${newG} object(s) orphaned into garbage`, 'small');
+      render(); return;
+    }
+  }
+});
+
+window.addEventListener('resize', fit);
+
+/* ---------- reveal-on-scroll ---------- */
+const io = new IntersectionObserver((entries)=>{ entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } }); },
+  { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(n=>io.observe(n));
+
+/* ---------- boot ---------- */
+initHeap();
+pushLog('heap ready — 104 cells, 6 roots. Allocate objects, then drop references to make garbage.','small');
+pushLog('When the heap chokes, press ⚡ Collect to trace live objects and sweep the rest.','small');
+for(let k=0;k<10;k++) allocate(true);          // seed a small live structure
+dropReference(true); dropReference(true);      // and a little garbage to see
+render();
+fit();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
