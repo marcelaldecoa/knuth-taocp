@@ -19,6 +19,12 @@ silently corrupted a decade of published simulations. By the end of this
 module you will compute the test *exactly* — integer arithmetic, no
 approximations — and issue the same verdicts Knuth's Table 1 does.
 
+> **Companion exhibit — _The Illusion of Chaos_.** Before you compute the test,
+> *see* it: the Museum's [Loom of Chaos](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-2.1-loom-of-chaos.html)
+> plots an LCG's pairs (Xₙ, Xₙ₊₁) so the lattice of parallel lines is visible to
+> the eye — few coarse stripes for a bad multiplier, dense white noise for a
+> good one. Load its RANDU preset to meet the generator this module condemns.
+
 ---
 
 ## 1. Random numbers fall mainly in the planes

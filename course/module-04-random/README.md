@@ -22,6 +22,15 @@ algorithms that *consume* randomness correctly (shuffling and reservoir
 sampling) — plus the counting arguments that prove the good ones fair and the
 plausible-looking ones biased.
 
+> **Companion exhibit — _The Illusion of Chaos_.** The linear congruential
+> generator you build here has an interactive twin in the
+> [Museum of Algorithms](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-2.1-loom-of-chaos.html):
+> the _Loom of Chaos_ plots consecutive pairs (Xₙ, Xₙ₊₁) and lets you drag a
+> "spectral dial" on the multiplier — a few coarse stripes for a bad `a`,
+> dissolving into white noise for a good one. It runs exact BigInt arithmetic
+> and shows the Hull–Dobell full-period verdict live. Reach it from the
+> **Museum** tab in the top navigation.
+
 ---
 
 ## 1. Pseudo-randomness: the caveat (§3.1)
