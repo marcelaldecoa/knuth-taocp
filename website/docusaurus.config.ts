@@ -117,6 +117,14 @@ const config: Config = {
           label: 'Handbook',
         },
         {
+          // The Museum of Algorithms: self-contained single-file HTML exhibits
+          // served from website/static/museum/. `pathname://` links straight to
+          // the static file, bypassing the SPA router and strict link checker.
+          to: 'pathname:///museum/',
+          label: 'Museum',
+          position: 'left',
+        },
+        {
           href: 'https://github.com/marcelaldecoa/knuth-taocp',
           label: 'GitHub',
           position: 'right',
