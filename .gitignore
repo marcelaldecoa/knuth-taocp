@@ -23,3 +23,10 @@ target
 # Grader progress (local, per-student)
 .taocp/
 Cargo.lock
+
+# Website (Docusaurus)
+website/node_modules/
+website/build/
+website/.docusaurus/
+# Generated from src/data/manifest.json by scripts/gen-sidebar.mjs (prebuild).
+website/sidebars.ts

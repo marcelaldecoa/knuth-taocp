@@ -1,0 +1,32 @@
+name: manifest-drift
+
+# The website reads website/src/data/manifest.json to build its sidebar and
+# course map. That file is generated from grader/src/manifest.rs (the single
+# source of truth) via `./grade manifest`. This guard fails if the two drift,
+# so the site map can never lie about the curriculum.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'grader/**'
+      - 'website/src/data/manifest.json'
+  pull_request:
+    paths:
+      - 'grader/**'
+      - 'website/src/data/manifest.json'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Regenerate and diff
+        run: |
+          cargo run -q -p grader -- manifest > /tmp/manifest.json
+          if ! diff -u website/src/data/manifest.json /tmp/manifest.json; then
+            echo "::error::website/src/data/manifest.json is stale. Run: cargo run -q -p grader -- manifest > website/src/data/manifest.json"
+            exit 1
+          fi
+          echo "manifest.json is in sync with grader/src/manifest.rs"
