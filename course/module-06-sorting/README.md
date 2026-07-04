@@ -20,6 +20,15 @@ each one does and match the count to a theorem. The unifying object is the
 sorted, explains exactly why insertion sort is slow, and reappears disguised
 as "runs" when we get to merging.
 
+> **Companion exhibit — _The Sound of Order_.** The six sorts of this module
+> race and sing in the Museum's
+> [Algorithmic Maestro](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-3.1-sound-of-order.html):
+> each is sonified (value → pitch) so bubble sort drones through its ~n²/2
+> comparisons while quicksort and merge finish in ~n·log n and resolve into a
+> rising scale. A "Race all six" mode runs them on one shuffled array so the
+> quadratic-vs-log-linear gulf (§5.3.1's lower bound) is visible and audible at
+> once.
+
 Throughout, one running example — **Knuth's sixteen numbers** —
 
 ```
