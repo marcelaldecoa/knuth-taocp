@@ -27,30 +27,28 @@ recovers the bits everyone else throws away.
 > **Companion exhibit — _The Floating-Point Abyss_.** That Patriot missile is
 > not a metaphor here: the Museum's
 > [Catastrophe Simulator](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-2.2-floating-point-abyss.html)
-> lets you set the bits used to store `0.1` and the hours of uptime, then watch
+> lets you set the bits used to store $0.1$ and the hours of uptime, then watch
 > the accumulated chopping error drift the clock until the interceptor misses —
 > and flip _chop_ to _round_ to see the same precision, spent more wisely, save
 > the day. It reproduces the real figures from the 1991 Dhahran failure
-> (≈9.5×10⁻⁸ s per tick, 0.34 s of drift over 100 hours) on live IEEE-754.
+> ($\approx 9.5 \times 10^{-8}$ s per tick, 0.34 s of drift over 100 hours) on live IEEE-754.
 
 ---
 
 ## 1. Positional fractions and the normalized form
 
-Fix a base `b` (we use `b = 2`) and a precision `p` (we use `p = 53`, matching
+Fix a base $b$ (we use $b = 2$) and a precision $p$ (we use $p = 53$, matching
 IEEE 754 binary64). A **floating-point number** is a value
 
-```text
-    x = (-1)^s · f · b^e
-```
+$$x = (-1)^s \cdot f \cdot b^e$$
 
-where `s ∈ {0,1}` is the sign, `e` is an integer **exponent**, and `f` is the
-**significand** (Knuth calls it the *fraction*), a p-digit base-b number. The
-"floating" point is that `e` slides the radix point to wherever the value needs
-it: the same p significant digits describe `6.022·10²³` and `1.602·10⁻¹⁹`.
+where $s \in \{0,1\}$ is the sign, $e$ is an integer **exponent**, and $f$ is the
+**significand** (Knuth calls it the *fraction*), a $p$-digit base-$b$ number. The
+"floating" point is that $e$ slides the radix point to wherever the value needs
+it: the same $p$ significant digits describe $6.022 \cdot 10^{23}$ and $1.602 \cdot 10^{-19}$.
 
-Two different (f, e) pairs can denote the same value — `0.5 = 1·2⁻¹ =
-0.1·2⁰` — so we impose a canonical form. A nonzero number is **normalized**
+Two different (f, e) pairs can denote the same value — $0.5 = 1 \cdot 2^{-1} =
+0.1 \cdot 2^0$ — so we impose a canonical form. A nonzero number is **normalized**
 when its leading significand digit is nonzero; in binary that means the leading
 bit is 1. We store the 53-bit significand as an *integer* `frac` with its
 leading 1 pinned at bit 52:
@@ -74,13 +72,13 @@ same exponent differ by exactly one ulp.
    from a 52-bit field. Our `from_f64` restores that `1`; `to_f64` strips it.
 
 Zero is special: it has no nonzero leading digit, so it can't be normalized.
-We represent it as `frac == 0`, and keep the sign bit so that `+0` and `−0` are
-distinguishable (they matter at the boundary of underflow and for `1/x`).
+We represent it as `frac == 0`, and keep the sign bit so that $+0$ and $-0$ are
+distinguishable (they matter at the boundary of underflow and for $1/x$).
 
 The classic cautionary example lives here already. **One tenth has no finite
-binary expansion**: `1/10 = 0.0001100110011…₂`, the block `0011` repeating
-forever, exactly as `1/3 = 0.333…` never terminates in decimal. So `from_f64(0.1)`
-cannot equal `1/10`; it is the *nearest 53-bit number* to `1/10`, off by less
+binary expansion**: $1/10 = 0.0001100110011\ldots_2$, the block `0011` repeating
+forever, exactly as $1/3 = 0.333\ldots$ never terminates in decimal. So `from_f64(0.1)`
+cannot equal $1/10$; it is the *nearest 53-bit number* to $1/10$, off by less
 than half a ulp. Every "floating-point is broken" bug report traces back to
 this one fact.
 
@@ -106,7 +104,7 @@ then for a normal number
 
 so our `frac = 2^52 + m` and our `exp = E − 1023 − 52 = E − 1075`. Going back,
 `E = exp + 1075` and `m = frac − 2^52 = frac & (2^52 − 1)`. The three reserved
-patterns — `E = 0` (zero and subnormals) and `E = 2047` (∞ and NaN) — mark the
+patterns — `E = 0` (zero and subnormals) and `E = 2047` ($\infty$ and NaN) — mark the
 edges of the representable world; we handle zero and treat the rest as out of
 scope for this finite model.
 

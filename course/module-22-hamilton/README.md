@@ -28,7 +28,7 @@ you will understand *why* no fifth, fast, always-correct way is known.
 
 ## 1. Two questions that look the same and aren't
 
-Let `G` be a graph on `n` vertices.
+Let $G$ be a graph on $n$ vertices.
 
 - An **Eulerian** trail uses **every edge** exactly once; an Eulerian circuit
   is a closed one. (Königsberg's bridges, 1736 — the birth of graph theory.)
@@ -41,7 +41,7 @@ Euler settled his question completely and cheaply:
 > vertex has even degree; it has an Eulerian trail iff exactly zero or two
 > vertices have odd degree.
 
-You can *check* that condition in one pass over the vertices — **O(n + m)**
+You can *check* that condition in one pass over the vertices — $O(n + m)$
 time — and Hierholzer's algorithm even *constructs* the trail in linear time.
 Eulerianness is a local, countable property.
 
@@ -79,8 +79,8 @@ changes.
 
 ### Algorithm H (Hamiltonian path/cycle by backtracking)
 
-State: a partial simple path `x₀ x₁ … x_{l−1}` and a `used[]` flag per vertex.
-The "level" `l` is the path's length.
+State: a partial simple path $x_0 x_1 \ldots x_{l-1}$ and a `used[]` flag per vertex.
+The "level" $l$ is the path's length.
 
 ```text
 H1. [Initialize.]  Pick a start s (for a path, try each s in turn; for a
@@ -97,14 +97,14 @@ H5. [Backtrack.]   When the candidates at level l are exhausted, remove the
 ```
 
 The bracketed **assertion** that makes it correct: *at every entry to H2,
-`x₀ … x_{l−1}` is a simple path in G.* Advancing preserves it (H3 only admits an
+$x_0 \ldots x_{l-1}$ is a simple path in $G$.* Advancing preserves it (H3 only admits an
 unused neighbor); backtracking restores the earlier state exactly (H5 undoes
 what H4 did). That "state restoration is exact" invariant is the beating heart
 of all backtracking ↩ Module 09.
 
-### A hand trace: does the 4-cycle `C₄` have a Hamiltonian cycle?
+### A hand trace: does the 4-cycle $C_4$ have a Hamiltonian cycle?
 
-Vertices `0,1,2,3`; edges `0–1, 1–2, 2–3, 3–0`. Fix `s = 0`.
+Vertices `0,1,2,3`; edges `0–1, 1–2, 2–3, 3–0`. Fix $s = 0$.
 
 | l | path so far | endpoint | unused neighbors | action |
 |---|---|---|---|---|
@@ -119,14 +119,14 @@ H2 would reject and H5 would backtrack to try the other branch (`0 3 2 1`).
 ### Counting, and why we divide by two
 
 `count_hamiltonian_cycles` fixes the start at vertex 0 and counts *directed*
-closed walks `0 → … → 0`. Every undirected cycle is walked in **two**
+closed walks $0 \to \ldots \to 0$. Every undirected cycle is walked in **two**
 directions, so the undirected count is (directed count)/2. Two anchors the
 tests pin down:
 
-- **Complete graph `Kₙ`.** From the fixed start, the remaining `n−1` vertices
-  can appear in any order, all edges present, so there are `(n−1)!` directed
-  cycles and **`(n−1)!/2`** undirected ones. (K₅: `4!/2 = 12`.)
-- **Cycle graph `Cₙ`.** Only two directed walks (clockwise, counter-clockwise),
+- **Complete graph $K_n$.** From the fixed start, the remaining $n-1$ vertices
+  can appear in any order, all edges present, so there are $(n-1)!$ directed
+  cycles and **$(n-1)!/2$** undirected ones. ($K_5$: $4!/2 = 12$.)
+- **Cycle graph $C_n$.** Only two directed walks (clockwise, counter-clockwise),
   so exactly **1** undirected cycle — itself.
 
 ### Pruning: how real solvers survive
@@ -134,7 +134,7 @@ tests pin down:
 Plain Algorithm H already works, but its search tree can explode. The classic
 prunes (state them; you will implement stronger ones in the exercises):
 
-1. **Degree ≥ 2 for cycles.** A vertex with fewer than two neighbors cannot lie
+1. **Degree $\ge 2$ for cycles.** A vertex with fewer than two neighbors cannot lie
    on any cycle — reject immediately.
 2. **Endpoint reachability.** After committing a partial path, if some unused
    vertex has *all* its neighbors already used (and it is not the vertex we
@@ -182,8 +182,8 @@ W4. [Choose.]      Move to the v minimizing (d(v), v)  [ties -> smaller
 ```
 
 Note what is **missing**: there is no backtracking. Algorithm W commits to each
-greedy step forever. That makes it blazingly fast — O(board²) moves, each
-looking at ≤ 8 neighbors — but it is a *heuristic*, not an algorithm in Knuth's
+greedy step forever. That makes it blazingly fast — $O(\text{board}^2)$ moves, each
+looking at $\le 8$ neighbors — but it is a *heuristic*, not an algorithm in Knuth's
 strict sense (§1.1's finiteness-and-definiteness bar ↩ Module 01): it can walk
 into a dead end and simply give up.
 
@@ -200,10 +200,10 @@ full tours from almost every start.
 ### Why it sometimes fails — the honest story
 
 "Usually" is not "always." With the deterministic tie-break above, the greedy
-walk completes a `5×5` tour from a corner and even from the center — yet it gets
+walk completes a $5 \times 5$ tour from a corner and even from the center — yet it gets
 **stuck starting from square 2** of that same board, *even though a full tour
 from square 2 provably exists* (a backtracking search finds one). The same
-happens on `8×8` from square 24. The heuristic made a locally sensible choice
+happens on $8 \times 8$ from square 24. The heuristic made a locally sensible choice
 that was globally fatal, and, having no backtracking, it cannot recover.
 
 That is the lesson, stated bluntly: **a heuristic is a bet, not a proof.** When
@@ -211,7 +211,7 @@ Warnsdorff succeeds it is wonderful; when it fails it tells you nothing about
 whether a tour exists. Real systems pair heuristics like this with a fallback
 (backtracking, or a smarter tie-break) precisely because of this gap.
 
-> **A rigorous aside — parity forbids some starts entirely.** Colour the `5×5`
+> **A rigorous aside — parity forbids some starts entirely.** Colour the $5 \times 5$
 > board like a checkerboard: 13 squares of one colour, 12 of the other. A
 > knight always steps to the opposite colour, so a 25-square tour alternates
 > colours and must *begin and end on the majority colour* (13 of them). The 12
@@ -229,64 +229,64 @@ Sometimes the graph has so much structure that a Hamiltonian cycle can be
 written down with no search at all. The cleanest example ties this finale
 straight back to where combinatorial generation began.
 
-The **`d`-dimensional hypercube** `Q_d` has the `2^d` binary strings of length
-`d` as vertices, with an edge between two strings iff they **differ in exactly
-one bit**. A Hamiltonian cycle on `Q_d` is therefore a cyclic listing of all
-`d`-bit strings in which *each string differs from the next in a single bit* —
+The **$d$-dimensional hypercube** $Q_d$ has the $2^d$ binary strings of length
+$d$ as vertices, with an edge between two strings iff they **differ in exactly
+one bit**. A Hamiltonian cycle on $Q_d$ is therefore a cyclic listing of all
+$d$-bit strings in which *each string differs from the next in a single bit* —
 which is precisely the definition of a **cyclic Gray code**. The two ideas are
 not analogous; they are *the same object* seen from two angles:
 
-> "Generate all `n`-bit strings, changing one bit at a time" (Module 08's
-> reflected Gray code) **=** "walk a Hamiltonian cycle on the hypercube `Q_n`"
+> "Generate all $n$-bit strings, changing one bit at a time" (Module 08's
+> reflected Gray code) **=** "walk a Hamiltonian cycle on the hypercube $Q_n$"
 > (this module).
 
-The reflected binary Gray code you built in Module 08 is `g(k) = k ⊕ ⌊k/2⌋`
-(i.e. `k ^ (k >> 1)`), for `k = 0, 1, …, 2^d − 1`. `gray_code_cycle(d)` emits
+The reflected binary Gray code you built in Module 08 is $g(k) = k \oplus \lfloor k/2 \rfloor$
+(i.e. `k ^ (k >> 1)`), for $k = 0, 1, \ldots, 2^d - 1$. `gray_code_cycle(d)` emits
 exactly that sequence, and it *is* our Hamiltonian cycle.
 
-### Theorem and proof: `g` is a Hamiltonian cycle on `Q_d`
+### Theorem and proof: $g$ is a Hamiltonian cycle on $Q_d$
 
-> **Theorem.** The sequence `G_d = g(0), g(1), …, g(2^d − 1)` lists every vertex
-> of `Q_d` exactly once, and consecutive vertices — *including the wrap-around
-> from the last back to the first* — differ in exactly one bit. Hence `G_d` is a
-> Hamiltonian cycle on `Q_d`.
+> **Theorem.** The sequence $G_d = g(0), g(1), \ldots, g(2^d - 1)$ lists every vertex
+> of $Q_d$ exactly once, and consecutive vertices — *including the wrap-around
+> from the last back to the first* — differ in exactly one bit. Hence $G_d$ is a
+> Hamiltonian cycle on $Q_d$.
 
-*Proof (induction on `d`, mirroring the "reflect and prefix" construction).*
+*Proof (induction on $d$, mirroring the "reflect and prefix" construction).*
 
-**Base `d = 1`.** `G_1 = 0, 1`. Two vertices; `0→1` flips one bit and the wrap
-`1→0` flips one bit. ✓
+**Base $d = 1$.** $G_1 = 0, 1$. Two vertices; $0 \to 1$ flips one bit and the wrap
+$1 \to 0$ flips one bit. ✓
 
-**Step.** Assume `G_{d−1}` is a Hamiltonian cycle on `Q_{d−1}` listing all
-`2^{d−1}` shorter strings with single-bit steps. The reflected construction
-builds `G_d` in two halves:
+**Step.** Assume $G_{d-1}$ is a Hamiltonian cycle on $Q_{d-1}$ listing all
+$2^{d-1}$ shorter strings with single-bit steps. The reflected construction
+builds $G_d$ in two halves:
 
-1. **First half:** prefix a `0` to each string of `G_{d−1}`, in order.
-2. **Second half:** prefix a `1` to each string of `G_{d−1}` in **reverse**
+1. **First half:** prefix a $0$ to each string of $G_{d-1}$, in order.
+2. **Second half:** prefix a $1$ to each string of $G_{d-1}$ in **reverse**
    order (the "reflection").
 
 Check the three claims.
 
-- *All vertices once.* The first half is exactly the `2^{d−1}` strings starting
-  `0…`, each once (by the hypothesis); the second half is the `2^{d−1}` strings
-  starting `1…`, each once. Together: all `2^d` strings, no repeats. ✓
-- *Steps within a half* flip a single bit among the low `d−1` positions (that is
+- *All vertices once.* The first half is exactly the $2^{d-1}$ strings starting
+  $0\ldots$, each once (by the hypothesis); the second half is the $2^{d-1}$ strings
+  starting $1\ldots$, each once. Together: all $2^d$ strings, no repeats. ✓
+- *Steps within a half* flip a single bit among the low $d-1$ positions (that is
   the hypothesis, applied forward in the first half and backward — still
   single-bit — in the second) and never touch the new top bit. ✓
-- *The two seams.* At the **middle seam**, the first half ends at `0·w` where `w`
-  is `G_{d−1}`'s last string, and the second half begins at `1·w` (same `w`,
-  because the reflection starts from `G_{d−1}`'s last string). These differ only
-  in the top bit. ✓ At the **wrap-around**, `G_d` ends at `1·u` where `u` is
-  `G_{d−1}`'s *first* string, and `G_d` begins at `0·u`. Again a single top-bit
+- *The two seams.* At the **middle seam**, the first half ends at $0 \cdot w$ where $w$
+  is $G_{d-1}$'s last string, and the second half begins at $1 \cdot w$ (same $w$,
+  because the reflection starts from $G_{d-1}$'s last string). These differ only
+  in the top bit. ✓ At the **wrap-around**, $G_d$ ends at $1 \cdot u$ where $u$ is
+  $G_{d-1}$'s *first* string, and $G_d$ begins at $0 \cdot u$. Again a single top-bit
   difference. ✓
 
-All three hold, so `G_d` is a Hamiltonian cycle on `Q_d`. ∎
+All three hold, so $G_d$ is a Hamiltonian cycle on $Q_d$. ∎
 
-The reflection is doing something beautiful: it *doubles* a cycle on `Q_{d−1}`
-into a cycle on `Q_d`, using the single new bit to stitch the two copies at both
+The reflection is doing something beautiful: it *doubles* a cycle on $Q_{d-1}$
+into a cycle on $Q_d$, using the single new bit to stitch the two copies at both
 their ends. That is the same doubling that makes the code "reflected."
 
-`hypercube_neighbors(d, v)` (flip each of the `d` low bits) and
-`is_hamiltonian_cycle_on_hypercube` (all `2^d` vertices once, cyclic single-bit
+`hypercube_neighbors(d, v)` (flip each of the $d$ low bits) and
+`is_hamiltonian_cycle_on_hypercube` (all $2^d$ vertices once, cyclic single-bit
 steps) let you *verify* the theorem computationally in stage 3 — and confirm
 that the Module-08 formula and the Module-22 hypercube tell one story.
 

@@ -25,20 +25,20 @@ reconstructed-from-traversals, and threaded), all on the same memory model.
 
 ## 1. Two ways to store a sequence
 
-Suppose you must store the sequence (x₁, x₂, …, xₙ) and support insertion and
+Suppose you must store the sequence $(x_1, x_2, \ldots, x_n)$ and support insertion and
 deletion in the middle. There are exactly two classical representations, and
 the whole chapter turns on their trade-off.
 
 **Sequential allocation (§2.2.2).** Put the items in consecutive locations:
 `X[1], X[2], …`. The successor of `X[i]` is *computed* — it is `X[i+1]`, no
-storage needed to say so. Random access is O(1). But inserting into the middle
-must shift everything after it: O(n) work, and the block has a fixed size fixed
+storage needed to say so. Random access is $O(1)$. But inserting into the middle
+must shift everything after it: $O(n)$ work, and the block has a fixed size fixed
 in advance.
 
 **Linked allocation (§2.2.3).** Give each item its own *node* carrying the item
 (`INFO`) and the address of the next node (`LINK`). The successor is *stored*,
 costing one extra field per node. Now insertion and deletion in the middle are
-O(1) pointer surgery — but you lose O(1) random access (you must walk the
+$O(1)$ pointer surgery — but you lose $O(1)$ random access (you must walk the
 links), and you pay the memory for the links.
 
 Knuth's slogan: **sequential storage trades flexibility for density; linked
@@ -53,7 +53,7 @@ is an address. The faithful — and idiomatic — Rust translation is an
 
 - a node "lives at address `p`" means it is stored at index `p` of a `Vec`;
 - a link is a plain `usize`, an index into that `Vec`;
-- the **null link Λ** (Knuth's "points nowhere") is a reserved value. We use
+- the **null link $\Lambda$** (Knuth's "points nowhere") is a reserved value. We use
   `LAMBDA = usize::MAX`, which is never a valid index, so index 0 stays an
   ordinary usable cell. (MIX used 0 = Λ and thereby wasted location 0.)
 
@@ -140,7 +140,7 @@ fn stack_permutable(perm: &[usize]) -> bool {
 ```
 
 **Theorem (§2.2.1).** A permutation is obtainable through one stack **iff** it
-avoids the pattern **3-1-2**: there are no positions i < j < k with
+avoids the pattern **3-1-2**: there are no positions $i < j < k$ with
 `perm[j] < perm[k] < perm[i]`.
 
 *Why the pattern is fatal.* Say `perm[i]` is the large value `c`, and later two
@@ -149,16 +149,16 @@ smaller values `a < b` appear in the order a-then-b (that is `perm[j]=a`,
 must have entered the siding, and `c` entered *first* (it has the earliest
 position but the input arrives in increasing value, so… — careful: positions
 are output order). The clean statement is the one the tests use, and the
-smallest instance is n = 3: of the 6 orders, exactly **312** is unobtainable.
+smallest instance is $n = 3$: of the 6 orders, exactly **312** is unobtainable.
 
-**Counting.** The number of obtainable permutations of n cars is the **Catalan
+**Counting.** The number of obtainable permutations of $n$ cars is the **Catalan
 number**
 
-    C_n = (1/(n+1)) · binom(2n, n),     C_0,C_1,… = 1, 1, 2, 5, 14, 42, 132, …
+$$C_n = \frac{1}{n+1} \binom{2n}{n}, \qquad C_0, C_1, \ldots = 1, 1, 2, 5, 14, 42, 132, \ldots$$
 
-For n = 3 that is C₃ = 5 (all but 312); for n = 4, C₄ = 14 of the 24 orders.
-The lab verifies this count exhaustively for n ≤ 6. Catalan numbers count a
-staggering number of things — and one of them, the number of binary trees on n
+For $n = 3$ that is $C_3 = 5$ (all but 312); for $n = 4$, $C_4 = 14$ of the 24 orders.
+The lab verifies this count exhaustively for $n \le 6$. Catalan numbers count a
+staggering number of things — and one of them, the number of binary trees on $n$
 nodes, returns in §5.
 
 ---
@@ -166,7 +166,7 @@ nodes, returns in §5.
 ## 3. Linked allocation and the AVAIL list (§2.2.3)
 
 Now give each list node two fields, `INFO` and `LINK`, and let a list be a
-chain of nodes ending in Λ. The operations that made linked storage worth its
+chain of nodes ending in $\Lambda$. The operations that made linked storage worth its
 overhead:
 
 ```text
@@ -174,7 +174,7 @@ insert after P:   Q <= AVAIL;  INFO(Q) <- Y;  LINK(Q) <- LINK(P);  LINK(P) <- Q.
 delete after P:   Q <- LINK(P);  LINK(P) <- LINK(Q);  AVAIL <= Q.
 ```
 
-Both are O(1). The mysterious `AVAIL` is the heart of §2.2.3.
+Both are $O(1)$. The mysterious `AVAIL` is the heart of §2.2.3.
 
 ### Where do nodes come from? The AVAIL stack
 
@@ -208,10 +208,10 @@ program that repeatedly deletes one node and inserts another never grows.
 
 ## 4. Topological sorting — Algorithm 2.2.3T (§2.2.3)
 
-A **partial order** on objects {1, …, n} is a set of relations j ≺ k
-("j precedes k") that is transitive and has no cycles. A **topological sort**
-(a *linear extension*) arranges all n objects in a line so that every relation
-points forward: if j ≺ k then j appears before k. Knuth's application is
+A **partial order** on objects $\{1, \ldots, n\}$ is a set of relations $j \prec k$
+("$j$ precedes $k$") that is transitive and has no cycles. A **topological sort**
+(a *linear extension*) arranges all $n$ objects in a line so that every relation
+points forward: if $j \prec k$ then $j$ appears before $k$. Knuth's application is
 sorting the entries of a glossary, or the modules of a program, so each is
 defined before it is used.
 
@@ -236,7 +236,7 @@ T8. [End.]             If all n objects were output, that is a topological
 
 Knuth threads the queue *through the COUNT array itself* (the QLINK trick: a
 zero-count object's slot is reused as its queue link), so the whole algorithm
-runs in O(n + m) time and O(n) space with no extra allocation, where m is the
+runs in $O(n + m)$ time and $O(n)$ space with no extra allocation, where $m$ is the
 number of relations. Our version uses a `VecDeque` of indices — the same FIFO,
 spelled more plainly.
 
@@ -248,7 +248,7 @@ scanned in the order the input listed them (T6). FIFO does the rest.
 
 Take objects 1..7 with these eight relations, listed in this input order:
 
-    1≺2,  1≺3,  2≺4,  3≺4,  4≺5,  4≺6,  5≺7,  6≺7
+$$1 \prec 2, \quad 1 \prec 3, \quad 2 \prec 4, \quad 3 \prec 4, \quad 4 \prec 5, \quad 4 \prec 6, \quad 5 \prec 7, \quad 6 \prec 7$$
 
 pictured as a DAG (a diamond that splits at 1, rejoins at 4, splits again,
 rejoins at 7):
@@ -291,10 +291,10 @@ rejoins at 7):
 **1 2 3 4 5 6 7**. Verify by eye: every one of the eight relations points
 left-to-right in that line. ✓
 
-Had we added the relation 7≺1, object 1 would start with COUNT 1, no object
+Had we added the relation $7 \prec 1$, object 1 would start with COUNT 1, no object
 would have count zero, the queue would be empty at T4, nothing is output, and
 T8 reports a cycle → `None`. The lab checks exactly this: a valid extension
-always satisfies every relation, and any cycle (including a self-loop j ≺ j)
+always satisfies every relation, and any cycle (including a self-loop $j \prec j$)
 yields `None`.
 
 ---
@@ -310,15 +310,15 @@ and the root is set explicitly.
 
 ### Counting binary trees: Catalan again
 
-**Theorem.** The number of distinct binary trees with n nodes is the Catalan
-number C_n.
+**Theorem.** The number of distinct binary trees with $n$ nodes is the Catalan
+number $C_n$.
 
-*Proof.* Let bₙ be that number, b₀ = 1. A nonempty tree splits into a root, a
-left subtree of some size k, and a right subtree of size n−1−k. Summing over k,
+*Proof.* Let $b_n$ be that number, $b_0 = 1$. A nonempty tree splits into a root, a
+left subtree of some size $k$, and a right subtree of size $n-1-k$. Summing over $k$,
 
-    bₙ = Σ_{k=0}^{n−1} b_k · b_{n−1−k},
+$$b_n = \sum_{k=0}^{n-1} b_k \cdot b_{n-1-k},$$
 
-the Catalan recurrence. Its solution is C_n = binom(2n,n)/(n+1). ∎
+the Catalan recurrence. Its solution is $C_n = \binom{2n}{n}/(n+1)$. ∎
 
 So the very count that governed stack-permutable permutations governs tree
 shapes — no coincidence: a stack trace of a traversal *is* a way of encoding
@@ -372,7 +372,7 @@ left subtrees we have entered but whose own value we have not yet visited*.
 T3 descends left, stacking each node we pass so we can return to visit it; T4
 pops the nearest such node when the left descent bottoms out (`P = Λ`); T5
 visits it and turns right. Because each node is pushed once and popped once, the
-traversal is O(n) time, and the stack's maximum depth equals the tree's height.
+traversal is $O(n)$ time, and the stack's maximum depth equals the tree's height.
 
 `preorder` is the same skeleton but visits a node *when pushing* it (T3), not
 when popping. `postorder` can be done with a two-stack trick: a "root, right,
@@ -394,8 +394,8 @@ and inorder, rebuild, and check all three traversals match the original.
 
 ## 6. Threaded binary trees — Algorithm 2.3.1S (§2.3.1)
 
-Look at an n-node binary tree: it has 2n links, of which n − 1 are used to bind
-the tree together, leaving **n + 1 null links** wasted. A. J. Perlis and
+Look at an $n$-node binary tree: it has $2n$ links, of which $n - 1$ are used to bind
+the tree together, leaving **$n + 1$ null links** wasted. A. J. Perlis and
 C. Thornton's idea (§2.3.1): replace each null link with a **thread** — a
 tagged link to where a stackless traversal would want to go next.
 
@@ -420,14 +420,14 @@ S3. [Done.]            Q is the inorder successor of P.
 Why it works: if P's right link is a thread, it points *straight at* the
 successor — done. Otherwise the successor is the leftmost node of P's right
 subtree, and S2 walks left links (real ones only; a left *thread* stops it)
-down to it. No stack, no recursion, O(1) extra space — the promise threads were
+down to it. No stack, no recursion, $O(1)$ extra space — the promise threads were
 invented to keep.
 
 Iterating S from the head until it returns to the head reproduces the ordinary
-inorder walk. And it is genuinely **O(n)** overall even though one `successor`
-call may cost O(height): across a full traversal, each of the n + 1 successor
+inorder walk. And it is genuinely **$O(n)$** overall even though one `successor`
+call may cost $O(\text{height})$: across a full traversal, each of the $n + 1$ successor
 calls follows `RLINK` once, and each *real* left link is descended exactly once,
-so the total number of link-follows is at most **2n + 2**. The lab measures
+so the total number of link-follows is at most **$2n + 2$**. The lab measures
 this count directly (15 follows for the 9-node expression tree) — a concrete,
 checkable proof of linearity.
 

@@ -26,9 +26,9 @@ structures in all of computing.
 
 ## 1. The backtrack paradigm (§7.2.2)
 
-We want all sequences x₁x₂…x_n where each x_l comes from a domain D_l and the
+We want all sequences $x_1 x_2 \ldots x_n$ where each $x_l$ comes from a domain $D_l$ and the
 whole sequence satisfies some property. Backtracking organizes the search as a
-tree: at *level* l we have committed to x₁…x_{l−1}, and we try each value of x_l
+tree: at *level* $l$ we have committed to $x_1 \ldots x_{l-1}$, and we try each value of $x_l$
 in turn. Knuth's generic **Algorithm B** (backtrack):
 
 ```text
@@ -44,17 +44,17 @@ B5. [Backtrack.]   Set x_l to its next candidate; if none remain, decrease l.
 
 The single most important idea: **cost is measured in tree nodes, not leaves.**
 A good property test prunes whole subtrees near the root, so the tree explored
-can be astronomically smaller than the D₁×…×D_n cartesian product. The art of
+can be astronomically smaller than the $D_1 \times \cdots \times D_n$ cartesian product. The art of
 backtracking is choosing the variable order and the pruning test so the tree
 stays small.
 
 ### Running example: n queens
 
-Place n queens on an n×n board, none attacking another. One queen per row, so
-x_l = the column of the queen in row l; the domain is {0,…,n−1}. The property
-test: queens in rows r < l must differ from x_l in column *and* in diagonal —
+Place $n$ queens on an $n \times n$ board, none attacking another. One queen per row, so
+$x_l$ = the column of the queen in row $l$; the domain is $\{0,\ldots,n-1\}$. The property
+test: queens in rows $r < l$ must differ from $x_l$ in column *and* in diagonal —
 
-    x_r ≠ x_l   and   |x_l − x_r| ≠ |l − r|.
+$$x_r \ne x_l \quad\text{and}\quad |x_l - x_r| \ne |l - r|.$$
 
 Here is the search tree for **n = 4** (columns 0–3), pruned by the test. Only
 the branches that survive to depth 2 are drawn in full:
@@ -68,15 +68,15 @@ row0: q@3 ── (mirror of q@0) ✗
 ```
 
 Two solutions — matching the known count. The full sequence of counts is
-1, 1, 0, 0, 2, 10, 4, 40, 92, 352, 724, … (OEIS A000170); n = 2 and n = 3 have
+1, 1, 0, 0, 2, 10, 4, 40, 92, 352, 724, … (OEIS A000170); $n = 2$ and $n = 3$ have
 none. You'll reproduce this exactly in stage 1.
 
 ### How big is the tree? (Knuth's estimator — a gem)
 
 You often want to *predict* the running time of a backtrack search without
 running it. Knuth's 1975 idea (§7.2.2): take a single **random** walk from the
-root — at each node, count its children c, pick one uniformly, and multiply the
-running product of the c's. The expected value of that product, over random
+root — at each node, count its children $c$, pick one uniformly, and multiply the
+running product of the $c$'s. The expected value of that product, over random
 walks, is *exactly* the number of nodes in the tree. A handful of random probes
 estimates the cost of a search that might take years to run in full. It is the
 Monte Carlo method applied to a deterministic tree, and it is astonishingly
@@ -86,8 +86,8 @@ effective in practice.
 
 ## 2. Bitwise backtracking — Walker's method (stage 2)
 
-For n queens the three constraints — column, "down" diagonal (constant r+c),
-"up" diagonal (constant r−c) — are each a *set* of forbidden values. Represent
+For n queens the three constraints — column, "down" diagonal (constant $r+c$),
+"up" diagonal (constant $r-c$) — are each a *set* of forbidden values. Represent
 each set as a bitmask in a machine word. At a given row let
 
     cols       = columns used by earlier queens
@@ -111,10 +111,10 @@ go(cols, diag_down, diag_up):
     return total
 ```
 
-Why the shifts? A down-diagonal has constant r+c; moving to row r+1 raises every
-threatened column by 1, i.e. a left shift. An up-diagonal has constant r−c; it
+Why the shifts? A down-diagonal has constant $r+c$; moving to row $r+1$ raises every
+threatened column by 1, i.e. a left shift. An up-diagonal has constant $r-c$; it
 lowers by 1, a right shift. Same tree as Algorithm B, but each node costs a few
-bitwise ops instead of a loop — enough to push n = 13, 14 into reach (73712 and
+bitwise ops instead of a loop — enough to push $n = 13, 14$ into reach (73712 and
 365596 solutions). This is Knuth's beloved style: the algorithm and the machine
 word fit each other like a glove.
 
@@ -153,7 +153,7 @@ fast. That is what dancing links delivers.
 Store the 1s of the matrix as nodes in a sparse, **circular, doubly linked
 mesh**: every node has left/right neighbours (its option's other items) and
 up/down neighbours (its column's other options). Each column has a *header*
-node, and the headers hang off a *root* header h:
+node, and the headers hang off a *root* header $h$:
 
 ```text
         h ── C0 ── C1 ── C2 ── C3 ──┐   (header list, circular)
@@ -165,7 +165,7 @@ node, and the headers hang off a *root* header h:
             ...   ...   ...
 ```
 
-To **remove** a node x from a doubly linked list:
+To **remove** a node $x$ from a doubly linked list:
 
 ```text
     right[left[x]] <- right[x]
@@ -173,7 +173,7 @@ To **remove** a node x from a doubly linked list:
 ```
 
 Now here is the trick that names the method. We did *not* change `x`'s own
-links. So x still remembers exactly where it belongs, and to **put it back**:
+links. So $x$ still remembers exactly where it belongs, and to **put it back**:
 
 ```text
     right[left[x]] <- x
@@ -198,8 +198,8 @@ between a Sudoku solving in microseconds and one taking seconds.
 
 ### Trace: Knuth's example
 
-Items a…g (0…6), options {c,e}, {a,d,g}, {b,c,f}, {a,d,f}, {b,g}, {d,e,g}. The
-MRV rule and the dance grind out the *unique* cover {a,d,f}+{b,g}+{c,e} (option
+Items $a \ldots g$ ($0 \ldots 6$), options $\{c,e\}$, $\{a,d,g\}$, $\{b,c,f\}$, $\{a,d,f\}$, $\{b,g\}$, $\{d,e,g\}$. The
+MRV rule and the dance grind out the *unique* cover $\{a,d,f\}+\{b,g\}+\{c,e\}$ (option
 indices 0, 3, 4). Stage 3 checks that, plus that solving twice gives the same
 answer — proof that uncover restored the structure bit for bit.
 
@@ -212,16 +212,16 @@ families of constraints, each of which must hold **exactly once**:
 
 | Constraint family | Count | "covered exactly once" means |
 |---|---|---|
-| cell (r,c) is filled | 81 | each cell holds exactly one digit |
-| row r has digit d | 81 | each digit appears once per row |
-| column c has digit d | 81 | once per column |
-| box b has digit d | 81 | once per 3×3 box |
+| cell $(r,c)$ is filled | 81 | each cell holds exactly one digit |
+| row $r$ has digit $d$ | 81 | each digit appears once per row |
+| column $c$ has digit $d$ | 81 | once per column |
+| box $b$ has digit $d$ | 81 | once per $3 \times 3$ box |
 
-That's **324 items**. Each candidate placement (r, c, d) is an **option**
-touching exactly four items: cell(r,c), row(r,d), col(c,d), box(b,d). A full
-grid ⇔ an exact cover. Givens are handled by only offering the one forced option
+That's **324 items**. Each candidate placement $(r, c, d)$ is an **option**
+touching exactly four items: $\text{cell}(r,c)$, $\text{row}(r,d)$, $\text{col}(c,d)$, $\text{box}(b,d)$. A full
+grid $\iff$ an exact cover. Givens are handled by only offering the one forced option
 for a clued cell. Feed it to your `ExactCover`, take the first solution, decode
-each chosen option back to (r, c, d), and you have solved Sudoku — with the
+each chosen option back to $(r, c, d)$, and you have solved Sudoku — with the
 identical engine that solved the toy example. That reuse is the whole point of
 reducing problems to exact cover.
 
@@ -233,9 +233,9 @@ Open `labs/module-09-backtrack/src/lab.rs`.
 
 - **Stage 1 — `count_queens_solutions`, `first_queens_solution`.** Write the
   recursive backtracker with the column/diagonal property test. Keep the B1–B5
-  labels as comments. Convention: n = 0 has one (empty) solution.
+  labels as comments. Convention: $n = 0$ has one (empty) solution.
 - **Stage 2 — `count_queens_bitwise`.** The three-mask recursion above. Use
-  `u32` masks (n ≤ 31) and `free & free.wrapping_neg()` for the low bit.
+  `u32` masks ($n \le 31$) and `free & free.wrapping_neg()` for the low bit.
 - **Stage 3 — `ExactCover`.** The big one. Recommended representation: parallel
   `Vec<usize>` arrays `left, right, up, down, col` plus `size` (per column) and
   `node_option` (which option each node belongs to). Node 0 is the root; nodes
@@ -273,11 +273,11 @@ Ratings: 00 immediate · 20 an hour · 30 hours · 40 term project · 50 open.
 
 | Ex. | Rating | Statement (paraphrased) |
 |---|---|---|
-| 7.2.2–1 | 10 | How many nodes does the n-queens tree have for n = 4? Draw it. |
+| 7.2.2–1 | 10 | How many nodes does the n-queens tree have for $n = 4$? Draw it. |
 | ▶7.2.2–5 | 22 | Add the "all solutions" vs "one solution" distinction to Algorithm B; where do they differ? |
 | 7.2.2.1–8 | 26 | Show that cover/uncover are exact inverses; prove the structure is restored. |
 | ▶7.2.2.1–? | 30 | Extend `ExactCover` with *secondary* items (columns that may be covered at most once, not exactly once) — the "XC" variant. |
-| 7.2.2.1–? | 35 | Implement Knuth's random-probe tree-size estimator and compare its prediction to the true n-queens tree for n ≤ 12. |
+| 7.2.2.1–? | 35 | Implement Knuth's random-probe tree-size estimator and compare its prediction to the true n-queens tree for $n \le 12$. |
 
 ## Why it's done this way
 

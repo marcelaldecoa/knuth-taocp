@@ -5,55 +5,54 @@
 > **Lab:** `labs/module-16-spectral-hd` · **Grade it:** `./grade 16`
 >
 > This module extends **module 12**, which built the spectral test for
-> t = 2 and t = 3. The lesson below recaps what it needs, but read module
+> $t = 2$ and $t = 3$. The lesson below recaps what it needs, but read module
 > 12's lesson first — its lattice theorem, dual vectors, and certified
 > search are assumed vocabulary here. If you own Vol. 2, this module is
 > Algorithm S itself, simplified but honest: the same reduce-then-enumerate
 > architecture, the same exact arithmetic, the same certification logic.
 
-Module 12 ended with a verdict machine that stops at t = 3. That is not
+Module 12 ended with a verdict machine that stops at $t = 3$. That is not
 where simulations stop: a particle-transport code draws direction *and*
 energy *and* time-of-flight; a numerical integrator in six dimensions
 consumes 6-tuples. RANDU was condemned by its triples — but a generator
-can be fine at t = 3 and collapse at t = 5, and Knuth's Table 1 grades
-every multiplier through t = 6 or beyond for exactly that reason. By the
-end of this module you will compute ν_t and μ_t **exactly** for
-2 ≤ t ≤ 6, reproduce the Table-1-style verdicts for four real generators,
+can be fine at $t = 3$ and collapse at $t = 5$, and Knuth's Table 1 grades
+every multiplier through $t = 6$ or beyond for exactly that reason. By the
+end of this module you will compute $\nu_t$ and $\mu_t$ **exactly** for
+$2 \le t \le 6$, reproduce the Table-1-style verdicts for four real generators,
 and — the deeper prize — implement the reduce-then-enumerate architecture
 that underlies every modern lattice computation, from generator vetting
 to cryptanalysis.
 
 The quantity is unchanged from module 12:
 
-    ν_t² = min { u₁² + ... + u_t² :
-                 u₁ + a·u₂ + ... + a^{t-1}·u_t ≡ 0 (mod m),  u ≠ 0 },
+$$\nu_t^2 = \min\{\, u_1^2 + \cdots + u_t^2 : u_1 + a u_2 + \cdots + a^{t-1} u_t \equiv 0 \pmod{m},\ u \ne 0 \,\},$$
 
 the squared length of the shortest nonzero vector of the dual lattice;
-the widest gap between adjacent hyperplanes covering the t-tuple point
-set is m/ν_t.
+the widest gap between adjacent hyperplanes covering the $t$-tuple point
+set is $m/\nu_t$.
 
 ---
 
 ## 1. Recap — and why higher dimensions are a different animal
 
-Module 12 solved t = 2 and t = 3 with two ad-hoc weapons:
+Module 12 solved $t = 2$ and $t = 3$ with two ad-hoc weapons:
 
-- **t = 2: Gauss–Lagrange reduction.** A greedy "subtract the best
+- **$t = 2$: Gauss–Lagrange reduction.** A greedy "subtract the best
   multiple of the shorter vector" loop that provably ends at a shortest
   vector. The optimality proof leaned on the quadratic-form inequality
-  α² − |αβ| + β² ≥ 1 — a rank-2 miracle.
-- **t = 3: a certified plane scan.** Choose (u₂, u₃) freely, pin u₁ to
-  its centered residue, scan a square of side 2B, and grow B until
-  B² ≥ best. Cost ≈ B², with B ≈ ν_3 ≤ 2^{1/6}·m^{1/3} — a few thousand
-  for m ≈ 2³¹. Cheap.
+  $\alpha^2 - |\alpha\beta| + \beta^2 \ge 1$ — a rank-2 miracle.
+- **$t = 3$: a certified plane scan.** Choose $(u_2, u_3)$ freely, pin $u_1$ to
+  its centered residue, scan a square of side $2B$, and grow $B$ until
+  $B^2 \ge \text{best}$. Cost $\approx B^2$, with $B \approx \nu_3 \le 2^{1/6} m^{1/3}$ — a few thousand
+  for $m \approx 2^{31}$. Cheap.
 
 Both weapons break at higher t, for different and instructive reasons.
 
-**The scan explodes.** The same centered-residue scan at dimension t
-costs B^{t-1} with B ≈ ν_t ≈ m^{1/t}. At t = 6, m = 2³¹ − 1 that is
-(2·46 + 1)⁵ ≈ 7×10⁹ norm evaluations for a *single* multiplier — and
+**The scan explodes.** The same centered-residue scan at dimension $t$
+costs $B^{t-1}$ with $B \approx \nu_t \approx m^{1/t}$. At $t = 6$, $m = 2^{31} - 1$ that is
+$(2 \cdot 46 + 1)^5 \approx 7 \times 10^9$ norm evaluations for a *single* multiplier — and
 squaring the modulus doubles the exponent's pain. The polynomial got the
-wrong variable: exponential in t, and t is what we are increasing.
+wrong variable: exponential in $t$, and $t$ is what we are increasing.
 
 **Greedy stops being optimal.** At rank 2, a locally reduced basis is
 globally shortest. At rank 3 and above it is not: you can size-reduce
@@ -67,7 +66,7 @@ NP-hard since van Emde Boas 1981). Nobody knows a polynomial algorithm,
 and lattice cryptography is a bet that none exists.
 
 **Knuth's answer — and this module's architecture.** Algorithm S handles
-t up to 8 by refusing to choose between the weapons and instead
+$t$ up to 8 by refusing to choose between the weapons and instead
 composing them:
 
 1. **Reduce** the basis by cheap, exact, unimodular transformations.
@@ -76,71 +75,75 @@ composing them:
 2. **Enumerate** integer combinations of the reduced basis inside a box
    whose edges are *certified* to contain every candidate shorter than
    the best vector seen. Because the basis is reduced, the box is tiny —
-   for our four benchmark generators at t = 6, between 9 and 729
+   for our four benchmark generators at $t = 6$, between 9 and 729
    candidates. Total.
 
-Fixed t means fixed, small exponent: the exponential lives in t, and for
-t ≤ 8 the constant is microscopic. The reduction buys speed; the
+Fixed $t$ means fixed, small exponent: the exponential lives in $t$, and for
+$t \le 8$ the constant is microscopic. The reduction buys speed; the
 enumeration buys the proof; exact integer arithmetic keeps both honest.
 
 ---
 
 ## 2. The dual pair: two bases, one identity
 
-Everything in this module happens to a **pair** of t×t integer matrices,
+Everything in this module happens to a **pair** of $t \times t$ integer matrices,
 transformed in lockstep. (Rows are basis vectors throughout.)
 
 **The V-basis (dual side).** The dual lattice
-L*_t = { u ∈ Zᵗ : u₁ + a·u₂ + ... + a^{t-1}·u_t ≡ 0 (mod m) }
+$L^*_t = \{ u \in \mathbb{Z}^t : u_1 + a u_2 + \cdots + a^{t-1} u_t \equiv 0 \pmod{m} \}$
 is generated by the rows
 
-    v₁ = (  m,               0, 0, ..., 0 )
-    v₂ = ( −(a     mod m),   1, 0, ..., 0 )
-    v₃ = ( −(a²    mod m),   0, 1, ..., 0 )
-     ⋮
-    v_t = ( −(a^{t-1} mod m), 0, ..., 0, 1 )
+$$\begin{aligned}
+v_1 &= (\,m,\ 0,\ 0,\ \ldots,\ 0\,) \\
+v_2 &= (\,-(a \bmod m),\ 1,\ 0,\ \ldots,\ 0\,) \\
+v_3 &= (\,-(a^2 \bmod m),\ 0,\ 1,\ \ldots,\ 0\,) \\
+&\ \ \vdots \\
+v_t &= (\,-(a^{t-1} \bmod m),\ 0,\ \ldots,\ 0,\ 1\,)
+\end{aligned}$$
 
-**Lemma D.** These rows generate exactly L*_t, and det V = m.
+**Lemma D.** These rows generate exactly $L^*_t$, and $\det V = m$.
 
-*Proof.* Each row satisfies the congruence: −(a^{i-1} mod m) + a^{i-1}·1
-≡ 0 (mod m). Conversely take any u ∈ L*_t. Subtract u₂·v₂ + ... + u_t·v_t
-from u: all coordinates after the first become zero, and the first
-becomes u₁ + Σ_{i≥2} u_i·(a^{i-1} mod m), which the congruence forces to
-be a multiple k·m — that is k·v₁. So u = k·v₁ + u₂·v₂ + ... + u_t·v_t.
-The matrix is lower triangular with diagonal (m, 1, ..., 1), so
-det V = m — which is right: one congruence mod m cuts Zᵗ down to a
-sublattice of index m. ∎
+*Proof.* Each row satisfies the congruence: $-(a^{i-1} \bmod m) + a^{i-1} \cdot 1
+\equiv 0 \pmod{m}$. Conversely take any $u \in L^*_t$. Subtract $u_2 v_2 + \cdots + u_t v_t$
+from $u$: all coordinates after the first become zero, and the first
+becomes $u_1 + \sum_{i \ge 2} u_i (a^{i-1} \bmod m)$, which the congruence forces to
+be a multiple $k m$ — that is $k v_1$. So $u = k v_1 + u_2 v_2 + \cdots + u_t v_t$.
+The matrix is lower triangular with diagonal $(m, 1, \ldots, 1)$, so
+$\det V = m$ — which is right: one congruence mod $m$ cuts $\mathbb{Z}^t$ down to a
+sublattice of index $m$. ∎
 
-This is module 12's basis (m, 0), (−a, 1) grown up: one row to absorb
+This is module 12's basis $(m, 0)$, $(-a, 1)$ grown up: one row to absorb
 the modulus, one row per free coordinate.
 
-**The U-basis (primal side).** Pair V with
+**The U-basis (primal side).** Pair $V$ with
 
-    u₁ = ( 1, a mod m, a² mod m, ..., a^{t-1} mod m )
-    u_i = m·e_i                          for i = 2, ..., t.
+$$\begin{aligned}
+u_1 &= (\,1,\ a \bmod m,\ a^2 \bmod m,\ \ldots,\ a^{t-1} \bmod m\,) \\
+u_i &= m\, e_i \qquad \text{for } i = 2, \ldots, t.
+\end{aligned}$$
 
-u₁ is the generating tuple from module 12's lattice theorem (the t
-consecutive outputs starting at x = 1) and the m·e_i absorb the mod-m
-wraparounds; the rows generate m·(t-tuple lattice), determinant m^{t-1}.
+$u_1$ is the generating tuple from module 12's lattice theorem (the $t$
+consecutive outputs starting at $x = 1$) and the $m e_i$ absorb the mod-$m$
+wraparounds; the rows generate $m \cdot$ (t-tuple lattice), determinant $m^{t-1}$.
 
-**Theorem (the anchor identity).**  U·Vᵀ = m·I.
+**Theorem (the anchor identity).**  $U V^\top = m I$.
 
-*Proof.* Entry (i, j) is u_i·v_j. Three cases:
-u₁·v₁ = 1·m = m; for j ≥ 2, u₁·v_j = 1·(−(a^{j-1} mod m)) +
-(a^{j-1} mod m)·1 = 0; and for i ≥ 2, u_i·v_j = m·(v_j)_i = m·δ_{ij},
-because beyond its first coordinate v_j has a single nonzero entry, the
-1 in position j. ∎
+*Proof.* Entry $(i, j)$ is $u_i \cdot v_j$. Three cases:
+$u_1 \cdot v_1 = 1 \cdot m = m$; for $j \ge 2$, $u_1 \cdot v_j = 1 \cdot (-(a^{j-1} \bmod m)) +
+(a^{j-1} \bmod m) \cdot 1 = 0$; and for $i \ge 2$, $u_i \cdot v_j = m (v_j)_i = m \delta_{ij}$,
+because beyond its first coordinate $v_j$ has a single nonzero entry, the
+1 in position $j$. ∎
 
 Why carry U at all, when V alone defines the problem? Two reasons, and
 they structure the whole module:
 
-1. **U·Vᵀ = m·I is a checkable invariant.** Reduction will perform dozens
+1. **$U V^\top = m I$ is a checkable invariant.** Reduction will perform dozens
    of row operations; one sign slip silently corrupts the lattice and
-   every verdict after it. The identity is an O(t²) integer check that
-   certifies, at any moment, that U and V still describe the same exact
+   every verdict after it. The identity is an $O(t^2)$ integer check that
+   certifies, at any moment, that $U$ and $V$ still describe the same exact
    dual pair. Every stage test hammers it.
-2. **U's rows are the search bounds.** The enumeration box of stage 3 is
-   computed from the inverse of V — and U *is* m·(V⁻¹)ᵀ, kept in exact
+2. **$U$'s rows are the search bounds.** The enumeration box of stage 3 is
+   computed from the inverse of $V$ — and $U$ *is* $m (V^{-1})^\top$, kept in exact
    integers for free. That is precisely how Knuth's step S8 gets its
    bounds. (Stage 3 recomputes them from the adjugate so the function is
    self-contained; exercise H1 shows they are the same numbers.)
@@ -153,7 +156,7 @@ The transformation phase (Knuth's steps S5–S7, restructured as a sweep
 to a fixpoint):
 
 **Algorithm R** (*pairwise size reduction of the dual pair*). Given
-square integer bases V, U with U·Vᵀ = m·I, shorten V's rows.
+square integer bases $V$, $U$ with $U V^\top = m I$, shorten $V$'s rows.
 
 ```text
 R1. [Sweep.]     For each ordered pair (i, j), i ≠ j, do steps R2–R3.
@@ -169,87 +172,89 @@ Step R3 is Gauss–Lagrange's "subtract the best multiple", applied to
 every pair instead of the one pair rank 2 has. Three proofs carry the
 algorithm, and all three are stage-2 test assertions in disguise.
 
-**The invariant survives (the two-line matrix argument).** The V-update
-is V ← E·V with E = I − q·e_i e_jᵀ; the U-update is U ← F·U with
-F = I + q·e_j e_iᵀ. Then
+**The invariant survives (the two-line matrix argument).** The $V$-update
+is $V \leftarrow E V$ with $E = I - q\, e_i e_j^\top$; the $U$-update is $U \leftarrow F U$ with
+$F = I + q\, e_j e_i^\top$. Then
 
-    F·Eᵀ = (I + q·e_j e_iᵀ)(I − q·e_j e_iᵀ) = I − q²·e_j (e_iᵀ e_j) e_iᵀ = I,
+$$F E^\top = (I + q\, e_j e_i^\top)(I - q\, e_j e_i^\top) = I - q^2\, e_j (e_i^\top e_j) e_i^\top = I,$$
 
-because the two linear terms cancel and e_iᵀe_j = 0 (i ≠ j). Hence
+because the two linear terms cancel and $e_i^\top e_j = 0$ ($i \ne j$). Hence
 
-    U'·V'ᵀ = F·U·(E·V)ᵀ = F·(U·Vᵀ)·Eᵀ = m·F·Eᵀ = m·I.  ∎
+$$U' V'^\top = F U (E V)^\top = F (U V^\top) E^\top = m\, F E^\top = m I. \qquad \blacksquare$$
 
-Note the shape of the pairing: shearing row i of V by row j is undone,
-on the other side of the identity, by shearing row **j** of U by row
+Note the shape of the pairing: shearing row $i$ of $V$ by row $j$ is undone,
+on the other side of the identity, by shearing row **j** of $U$ by row
 **i** — indices crossed, sign flipped. Get either wrong and the product
-picks up a q·(...) term; the tests will catch it, but the matrix
-identity tells you *why* it must be exactly this update. Both E and F
+picks up a $q \cdot (\ldots)$ term; the tests will catch it, but the matrix
+identity tells you *why* it must be exactly this update. Both $E$ and $F$
 have determinant 1 (unimodular), so the two lattices — as point sets —
 never change; only their descriptions do.
 
 **Termination (invariant + strictly decreasing integer).** R3 fires only
-when 2|d| > n. Writing the new norm out:
+when $2|d| > n$. Writing the new norm out:
 
-    |v_i − q·v_j|² = |v_i|² − 2q·d + q²·n = |v_i|² + q·(q·n − 2d).
+$$|v_i - q v_j|^2 = |v_i|^2 - 2 q d + q^2 n = |v_i|^2 + q (q n - 2 d).$$
 
-With q = round(d/n) and |d/n| > 1/2 we have q ≠ 0 and |q − d/n| ≤ 1/2,
-so q·n lies within n/2 of d, whence q·n − 2d has the opposite sign of q
-(e.g. q ≥ 1 gives q·n − 2d ≤ (d + n/2) − 2d = n/2 − d < 0). The
-correction term q·(q·n − 2d) is therefore strictly negative: every
-applied transformation strictly decreases Σ_i |v_i|², a positive
+With $q = \operatorname{round}(d/n)$ and $|d/n| > 1/2$ we have $q \ne 0$ and $|q - d/n| \le 1/2$,
+so $q n$ lies within $n/2$ of $d$, whence $q n - 2 d$ has the opposite sign of $q$
+(e.g. $q \ge 1$ gives $q n - 2 d \le (d + n/2) - 2 d = n/2 - d < 0$). The
+correction term $q (q n - 2 d)$ is therefore strictly negative: every
+applied transformation strictly decreases $\sum_i |v_i|^2$, a positive
 integer. A strictly decreasing sequence of positive integers is finite —
 the sweep loop halts. This is module 01's oldest proof pattern, running
 here on matrix norms.
 
 The strict inequality in R2 is load-bearing. If you transform whenever
-round(d/n) ≠ 0, the tie 2|d| = n lets q = ±1 change the basis *without
+$\operatorname{round}(d/n) \ne 0$, the tie $2|d| = n$ lets $q = \pm 1$ change the basis *without
 changing the norm*, and two rows can trade the same shear back and forth
 forever. (The stage-2 idempotence test exists to catch exactly this.)
 
 **What the fixpoint buys — and what it doesn't.** On exit every pair
-satisfies 2|v_i·v_j| ≤ min(|v_i|², |v_j|²). For t = 2 this is precisely
+satisfies $2|v_i \cdot v_j| \le \min(|v_i|^2, |v_j|^2)$. For $t = 2$ this is precisely
 the Gauss–Lagrange reduced condition, so module 12's optimality proof
 applies verbatim: *the shortest row is a shortest lattice vector*, and
-stage 2's tests hold you to module 12's ν₂² values exactly. For t ≥ 3
+stage 2's tests hold you to module 12's $\nu_2^2$ values exactly. For $t \ge 3$
 the fixpoint guarantees no such thing — the minimum may be a combination
 of three or more rows — and that is not a defect of Algorithm R but the
 NP-hardness of §1 showing through. The fixpoint's real product is
-*small numbers*: rows of norm ≈ m^{1/t} instead of m, which is what
+*small numbers*: rows of norm $\approx m^{1/t}$ instead of $m$, which is what
 makes the next section's box tiny.
 
 ---
 
-## 4. Hand trace: RANDU's t = 3 basis collapses onto (9, −6, 1)
+## 4. Hand trace: RANDU's $t = 3$ basis collapses onto $(9, -6, 1)$
 
 Do this on paper once; it is the module's Fibonacci-trace moment. RANDU:
-a = 65539, m = 2³¹ = 2147483648, a² mod m = 393225 (= 6a − 9 — the
-algebra of doom, since (a − 3)² = 2³²). Start:
+$a = 65539$, $m = 2^{31} = 2147483648$, $a^2 \bmod m = 393225$ ($= 6a - 9$ — the
+algebra of doom, since $(a - 3)^2 = 2^{32}$). Start:
 
-    v₁ = (2147483648, 0, 0)      ‖v₁‖² ≈ 4.6×10¹⁸
-    v₂ = (−65539,     1, 0)      ‖v₂‖² ≈ 4.3×10⁹
-    v₃ = (−393225,    0, 1)      ‖v₃‖² ≈ 1.5×10¹¹
+$$\begin{aligned}
+v_1 &= (2147483648,\ 0,\ 0) & \lVert v_1 \rVert^2 &\approx 4.6 \times 10^{18} \\
+v_2 &= (-65539,\ 1,\ 0) & \lVert v_2 \rVert^2 &\approx 4.3 \times 10^{9} \\
+v_3 &= (-393225,\ 0,\ 1) & \lVert v_3 \rVert^2 &\approx 1.5 \times 10^{11}
+\end{aligned}$$
 
 One sweep order (ours; any order reaches *a* fixpoint):
 
-| # | action | q | new row | new ‖·‖² |
+| # | action | $q$ | new row | new $\lVert \cdot \rVert^2$ |
 |---|---|---|---|---|
-| 1 | v₁ ← v₁ − q·v₂ | −32767 | (−32765, 32767, 0) | 2 147 221 514 |
-| 2 | v₃ ← v₃ − q·v₂ | 6 | **(9, −6, 1)** | **118** |
-| 3 | v₁ ← v₁ − q·v₃ | −4165 | (4720, 7777, 4165) | 100 107 354 |
-| 4 | v₂ ← v₂ − q·v₃ | −4999 | (−20548, −29993, 4999) | 1 346 790 354 |
-| 5 | v₂ ← v₂ − q·v₁ | −3 | (−6388, −6662, 17494) | 391 228 824 |
+| 1 | $v_1 \leftarrow v_1 - q v_2$ | $-32767$ | $(-32765, 32767, 0)$ | 2 147 221 514 |
+| 2 | $v_3 \leftarrow v_3 - q v_2$ | $6$ | $\mathbf{(9, -6, 1)}$ | **118** |
+| 3 | $v_1 \leftarrow v_1 - q v_3$ | $-4165$ | $(4720, 7777, 4165)$ | 100 107 354 |
+| 4 | $v_2 \leftarrow v_2 - q v_3$ | $-4999$ | $(-20548, -29993, 4999)$ | 1 346 790 354 |
+| 5 | $v_2 \leftarrow v_2 - q v_1$ | $-3$ | $(-6388, -6662, 17494)$ | 391 228 824 |
 
 then no pair fires: fixpoint. Two things to savor. Step 1 produced the
-vector (−32765, 32767) padded — RANDU's exact ν₂ witness, so 2-D
+vector $(-32765, 32767)$ padded — RANDU's exact $\nu_2$ witness, so 2-D
 reduction is embedded in the sweep. Step 2 is the catastrophe made
-mechanical: v₃ − 6·v₂ = (−393225 + 6·65539, −6, 1) = (9, −6, 1), norm²
-118 — the single division 393225/65539 ≈ 6.0 *is* the discovery that
-a² ≡ 6a − 9. Module 12 needed number-theoretic insight to spot that
+mechanical: $v_3 - 6 v_2 = (-393225 + 6 \cdot 65539, -6, 1) = (9, -6, 1)$, norm$^2$
+118 — the single division $393225/65539 \approx 6.0$ *is* the discovery that
+$a^2 \equiv 6a - 9$. Module 12 needed number-theoretic insight to spot that
 identity; Algorithm R finds it by rote. Meanwhile (silently) each step
-also sheared a row of U, and U·Vᵀ = m·I holds at every line of the
+also sheared a row of $U$, and $U V^\top = m I$ holds at every line of the
 table — the stage tests replay this.
 
-Note the fixpoint is *unbalanced*: rows of norm² 118, 10⁸, 4×10⁸
+Note the fixpoint is *unbalanced*: rows of norm$^2$ 118, $10^8$, $4 \times 10^8$
 coexist. That is allowed — size reduction never promised balance — and
 it is why the certification below must not assume near-orthogonality.
 
@@ -257,14 +262,14 @@ it is why the certification below must not assume near-orthogonality.
 
 ## 5. Algorithm E: certified enumeration
 
-After reduction, is the best row really ν_t? For t ≥ 3, only an
-enumeration can say. The problem: integer combinations x·V are infinite
+After reduction, is the best row really $\nu_t$? For $t \ge 3$, only an
+enumeration can say. The problem: integer combinations $x V$ are infinite
 in every direction. The fix, as in module 12's stage 3, is a bound that
 certifies itself — but the centered-residue trick doesn't survive the
 climb in dimension, so we need a better one. It comes from linear
 algebra we can do in exact integers.
 
-**Algorithm E** (*certified shortest vector on a basis V*).
+**Algorithm E** (*certified shortest vector on a basis $V$*).
 
 ```text
 E1. [Seed.]    best ← min_i v_i·v_i;  d ← det V, computed exactly
@@ -278,112 +283,112 @@ E4. [Return.]  best.
 ```
 
 **Theorem (the certificate).** The value returned by Algorithm E is
-exactly min{ |x·V|² : x ∈ Zᵗ, x ≠ 0 }.
+exactly $\min\{ |x V|^2 : x \in \mathbb{Z}^t,\ x \ne 0 \}$.
 
-*Proof.* Let best₀ be the seed. Suppose w = x·V is any nonzero lattice
-vector with |w|² ≤ best₀ (in particular any vector shorter than whatever
-E returns, since the returned value is ≤ best₀). Multiply x·V = w on the
-right by adj(V) and use V·adj(V) = (det V)·I:
+*Proof.* Let $\mathrm{best}_0$ be the seed. Suppose $w = x V$ is any nonzero lattice
+vector with $|w|^2 \le \mathrm{best}_0$ (in particular any vector shorter than whatever
+E returns, since the returned value is $\le \mathrm{best}_0$). Multiply $x V = w$ on the
+right by $\operatorname{adj}(V)$ and use $V \operatorname{adj}(V) = (\det V) I$:
 
-    x_i · det V = w · g_i        (Cramer's rule, row form),
+$$x_i \det V = w \cdot g_i \qquad \text{(Cramer's rule, row form)},$$
 
 so by Cauchy–Schwarz
 
-    |x_i| = |w·g_i| / |det V| ≤ |w|·|g_i| / |d| ≤ √best₀ · |g_i| / |d|.
+$$|x_i| = |w \cdot g_i| / |\det V| \le |w| \cdot |g_i| / |d| \le \sqrt{\mathrm{best}_0} \cdot |g_i| / |d|.$$
 
-Since x_i is an integer, |x_i| ≤ ⌊√(best₀·|g_i|²/d²)⌋ = z_i (flooring
-the inner quotient first is harmless: for positive integers N, D and
-integer x, x² ≤ N/D ⟺ x² ≤ ⌊N/D⌋). So x lies in the scanned box, E3
-evaluates it, and nothing outside the box can be shorter than best₀ —
+Since $x_i$ is an integer, $|x_i| \le \lfloor \sqrt{\mathrm{best}_0 \cdot |g_i|^2 / d^2} \rfloor = z_i$ (flooring
+the inner quotient first is harmless: for positive integers $N, D$ and
+integer $x$, $x^2 \le N/D \iff x^2 \le \lfloor N/D \rfloor$). So $x$ lies in the scanned box, E3
+evaluates it, and nothing outside the box can be shorter than $\mathrm{best}_0$ —
 i.e. than anything the box contains. The returned minimum is the true
-one. The zero vector never wins: x = 0 is skipped and the seed is a
+one. The zero vector never wins: $x = 0$ is skipped and the seed is a
 genuine row norm. ∎
 
 Read the proof again and notice what it does **not** use: no
-orthogonality, no reduction quality, no property of V beyond
+orthogonality, no reduction quality, no property of $V$ beyond
 invertibility. The bound is rigorous for *any* basis. Reduction enters
-only as an economic force — it makes |g_i|/|d| small so the box is
+only as an economic force — it makes $|g_i|/|d|$ small so the box is
 small. Concretely, with the pipeline of stage 4 (measured, not
 estimated):
 
-| generator | t | box bounds z | candidates scanned |
+| generator | $t$ | box bounds $z$ | candidates scanned |
 |---|---|---|---|
-| RANDU | 3 | (0, 0, 1) | 3 |
-| RANDU | 6 | (0, 0, 1, 1, 1, 1) | 81 |
-| 16807, m = 2³¹−1 | 6 | (0, 0, 0, 1, 0, 1) | 9 |
-| 48271, m = 2³¹−1 | 6 | (1, 1, 1, 1, 1, 1) | 729 |
+| RANDU | 3 | $(0, 0, 1)$ | 3 |
+| RANDU | 6 | $(0, 0, 1, 1, 1, 1)$ | 81 |
+| 16807, $m = 2^{31}-1$ | 6 | $(0, 0, 0, 1, 0, 1)$ | 9 |
+| 48271, $m = 2^{31}-1$ | 6 | $(1, 1, 1, 1, 1, 1)$ | 729 |
 
 Three candidates to certify RANDU's 118. The same box computed on the
-*unreduced* V would have edges in the millions — reduction is the whole
-economy. (A z_i of 0 is the certificate saying: no vector shorter than
-the best row uses row i at all.)
+*unreduced* $V$ would have edges in the millions — reduction is the whole
+economy. (A $z_i$ of 0 is the certificate saying: no vector shorter than
+the best row uses row $i$ at all.)
 
-**Where U went.** From U·Vᵀ = m·I and det V = ±m you can derive
-adj(V) = ±Uᵀ (exercise H1): the cofactor columns g_i *are* the rows of
+**Where U went.** From $U V^\top = m I$ and $\det V = \pm m$ you can derive
+$\operatorname{adj}(V) = \pm U^\top$ (exercise H1): the cofactor columns $g_i$ *are* the rows of
 the primal basis, up to sign. So E2's bounds are Knuth's step-S8 bounds
-z_k = ⌊√(⌊u_k·u_k·s/m²⌋)⌋, and the "abstract inverse" in Cramer's rule
+$z_k = \lfloor \sqrt{\lfloor u_k \cdot u_k \cdot s / m^2 \rfloor} \rfloor$, and the "abstract inverse" in Cramer's rule
 has been sitting in the algorithm as honest integers since stage 1.
 That is the second, deeper reason Algorithm S carries the pair.
 
 ---
 
-## 6. Figures of merit: μ_t for 2 ≤ t ≤ 6
+## 6. Figures of merit: $\mu_t$ for $2 \le t \le 6$
 
-Raw ν_t values are incomparable across t and m. Knuth's normalization
-(§3.3.4, Eq. (37)) is the volume of the t-ball of radius ν_t per lattice
-point of the dual (one point per volume m):
+Raw $\nu_t$ values are incomparable across $t$ and $m$. Knuth's normalization
+(§3.3.4, Eq. (37)) is the volume of the $t$-ball of radius $\nu_t$ per lattice
+point of the dual (one point per volume $m$):
 
-    μ_t = π^{t/2} · ν_t^t / ( Γ(t/2 + 1) · m ).
+$$\mu_t = \pi^{t/2} \nu_t^t / (\Gamma(t/2 + 1) \cdot m).$$
 
-The half-integer Gamma values are exact for t ≤ 6 — from Γ(1/2) = √π
-and Γ(x+1) = x·Γ(x):
+The half-integer Gamma values are exact for $t \le 6$ — from $\Gamma(1/2) = \sqrt{\pi}$
+and $\Gamma(x+1) = x \Gamma(x)$:
 
-| t | Γ(t/2 + 1) | μ_t closed form |
+| $t$ | $\Gamma(t/2 + 1)$ | $\mu_t$ closed form |
 |---|---|---|
-| 2 | Γ(2) = 1 | π·ν²/m |
-| 3 | Γ(5/2) = 3√π/4 | (4π/3)·ν³/m |
-| 4 | Γ(3) = 2 | π²·ν⁴/(2m) |
-| 5 | Γ(7/2) = 15√π/8 | (8π²/15)·ν⁵/m |
-| 6 | Γ(4) = 6 | π³·ν⁶/(6m) |
+| 2 | $\Gamma(2) = 1$ | $\pi \nu^2 / m$ |
+| 3 | $\Gamma(5/2) = 3\sqrt{\pi}/4$ | $(4\pi/3) \nu^3 / m$ |
+| 4 | $\Gamma(3) = 2$ | $\pi^2 \nu^4 / (2m)$ |
+| 5 | $\Gamma(7/2) = 15\sqrt{\pi}/8$ | $(8\pi^2/15) \nu^5 / m$ |
+| 6 | $\Gamma(4) = 6$ | $\pi^3 \nu^6 / (6m)$ |
 
-t = 2 and t = 3 are module 12's μ₂ and μ₃ — your `mu_t` must reproduce
-those values to nine decimals. Knuth's rule of thumb stands: **μ_t ≥ 0.1
-passes, μ_t ≥ 1 is excellent**; Hermite's constants (γ₄ = √2,
-γ₅ = 8^{1/5}, γ₆ = (64/3)^{1/6}, continuing module 12's γ₂, γ₃) cap
-ν_t² at γ_t·m^{2/t} and hence cap μ_t at a small constant per t.
+$t = 2$ and $t = 3$ are module 12's $\mu_2$ and $\mu_3$ — your `mu_t` must reproduce
+those values to nine decimals. Knuth's rule of thumb stands: **$\mu_t \ge 0.1$
+passes, $\mu_t \ge 1$ is excellent**; Hermite's constants ($\gamma_4 = \sqrt{2}$,
+$\gamma_5 = 8^{1/5}$, $\gamma_6 = (64/3)^{1/6}$, continuing module 12's $\gamma_2, \gamma_3$) cap
+$\nu_t^2$ at $\gamma_t m^{2/t}$ and hence cap $\mu_t$ at a small constant per $t$.
 
 The verdicts you will compute (compare Knuth's Table 1):
 
-| generator | ν₂² | ν₃² | ν₄² | ν₅² | ν₆² | μ₂ | μ₃ | μ₄ | μ₅ | μ₆ |
+| generator | $\nu_2^2$ | $\nu_3^2$ | $\nu_4^2$ | $\nu_5^2$ | $\nu_6^2$ | $\mu_2$ | $\mu_3$ | $\mu_4$ | $\mu_5$ | $\mu_6$ |
 |---|---|---|---|---|---|---|---|---|---|---|
-| toy, a = 137, m = 256 | 274 | 30 | 14 | 6 | 4 | 3.36 | 2.69 | 3.78 | 1.81 | 1.29 |
-| RANDU, m = 2³¹ | 2 147 221 514 | 118 | **116** | **116** | **116** | 3.14 | 2.5×10⁻⁶ | 3.1×10⁻⁵ | 3.6×10⁻⁴ | 3.8×10⁻³ |
-| 16807, m = 2³¹−1 | 282 475 250 | 408 197 | 21 682 | 4 439 | 895 | 0.41 | 0.51 | 1.08 | 3.22 | 1.73 |
-| 48271, m = 2³¹−1 | 1 990 735 345 | 1 433 881 | 47 418 | 4 404 | 1 402 | 2.91 | 3.35 | 5.17 | 3.15 | 6.63 |
+| toy, $a = 137$, $m = 256$ | 274 | 30 | 14 | 6 | 4 | 3.36 | 2.69 | 3.78 | 1.81 | 1.29 |
+| RANDU, $m = 2^{31}$ | 2 147 221 514 | 118 | **116** | **116** | **116** | 3.14 | $2.5 \times 10^{-6}$ | $3.1 \times 10^{-5}$ | $3.6 \times 10^{-4}$ | $3.8 \times 10^{-3}$ |
+| 16807, $m = 2^{31}-1$ | 282 475 250 | 408 197 | 21 682 | 4 439 | 895 | 0.41 | 0.51 | 1.08 | 3.22 | 1.73 |
+| 48271, $m = 2^{31}-1$ | 1 990 735 345 | 1 433 881 | 47 418 | 4 404 | 1 402 | 2.91 | 3.35 | 5.17 | 3.15 | 6.63 |
 
-**RANDU never heals.** Pad (9, −6, 1) with zeros and it stays dual, so
-ν_t² ≤ 118 for every t ≥ 3. In fact at t = 4 something *slightly
-shorter* appears: think of dual vectors as polynomials — u is dual iff
-P(x) = u₁ + u₂x + ... + u_t x^{t-1} satisfies P(a) ≡ 0 (mod m). Since
-(a − 3)² = 2³² ≡ 0, every polynomial multiple of (x − 3)² is dual, and
+**RANDU never heals.** Pad $(9, -6, 1)$ with zeros and it stays dual, so
+$\nu_t^2 \le 118$ for every $t \ge 3$. In fact at $t = 4$ something *slightly
+shorter* appears: think of dual vectors as polynomials — $u$ is dual iff
+$P(x) = u_1 + u_2 x + \cdots + u_t x^{t-1}$ satisfies $P(a) \equiv 0 \pmod{m}$. Since
+$(a - 3)^2 = 2^{32} \equiv 0$, every polynomial multiple of $(x - 3)^2$ is dual, and
 
-    (x − 3)²·(x + 1) = x³ − 5x² + 3x + 9  ⟹  u = (9, 3, −5, 1),
+$$(x - 3)^2 (x + 1) = x^3 - 5x^2 + 3x + 9 \implies u = (9, 3, -5, 1),$$
 
-norm² 81 + 9 + 25 + 1 = 116 < 118. Then it freezes: ν₄² = ν₅² = ν₆² =
-116. The μ_t creep upward (2.5×10⁻⁶ → 3.8×10⁻³) only because the
-ball-volume yardstick weakens with t while ν stays flat — RANDU fails
+norm$^2$ $81 + 9 + 25 + 1 = 116 < 118$. Then it freezes: $\nu_4^2 = \nu_5^2 = \nu_6^2 =
+116$. The $\mu_t$ creep upward ($2.5 \times 10^{-6} \to 3.8 \times 10^{-3}$) only because the
+ball-volume yardstick weakens with $t$ while $\nu$ stays flat — RANDU fails
 Knuth's 0.1 rule in every dimension from 3 up, forever.
 
 **The multiplier market.** 16807 (the 1969 "minimal standard") passes
-everywhere but never shines: μ hovers between 0.4 and 3.2. Its 1993
+everywhere but never shines: $\mu$ hovers between 0.4 and 3.2. Its 1993
 replacement 48271 — same cost per step, found by spectral search — is
-excellent at every t (min μ = 2.91, peak 6.63). This is why C++'s
+excellent at every $t$ (min $\mu = 2.91$, peak 6.63). This is why C++'s
 `std::minstd_rand` uses 48271 and why "which multiplier?" is answered by
-tables, not folklore. (Note the one wrinkle at t = 5, where 16807's 3.22
+tables, not folklore. (Note the one wrinkle at $t = 5$, where 16807's 3.22
 nudges past 48271's 3.15: good multipliers are chosen by their *worst*
-dimension, not any single one.) And notice ν_{t+1} ≤ ν_t always (pad a
-dual vector with a zero — module 12's exercise W1), but μ is *not*
-monotone in t; the stage-4 tests deliberately refuse to assert any such
+dimension, not any single one.) And notice $\nu_{t+1} \le \nu_t$ always (pad a
+dual vector with a zero — module 12's exercise W1), but $\mu$ is *not*
+monotone in $t$; the stage-4 tests deliberately refuse to assert any such
 law.
 
 **Honest scope.** Knuth's full Algorithm S adds refinements we
@@ -393,15 +398,15 @@ more cleverly than our sweep, and in careful implementations uses
 floating-point scaffolding for speed with exact integer verification of
 every step; its enumeration prunes with Cholesky-style partial sums
 (an ellipsoid) where we scan a box. Same architecture, better constants;
-t ≤ 8 was in reach on 1970s hardware. Exercises H6 and H7 walk toward it.
+$t \le 8$ was in reach on 1970s hardware. Exercises H6 and H7 walk toward it.
 
 **LLL, the polynomially-guaranteed cousin.** In 1982 Lenstra, Lenstra
 and Lovász turned size reduction into an algorithm with a *proof*: LLL
 interleaves the pairwise shears you built with adjacent-row swaps
 governed by the Lovász condition, and guarantees, in polynomial time in
-both t and the bit size, a basis whose first vector is within 2^{(t-1)/2}
-of the true minimum. The guarantee is exponentially loose in t — yet
-usually far better in practice, and its base case (t = 2) is exactly
+both $t$ and the bit size, a basis whose first vector is within $2^{(t-1)/2}$
+of the true minimum. The guarantee is exponentially loose in $t$ — yet
+usually far better in practice, and its base case ($t = 2$) is exactly
 Gauss–Lagrange. LLL doesn't replace enumeration when you need the exact
 minimum (we still enumerate after reducing; so does every SVP solver),
 but it made "reduce first" a theorem instead of a hope. We implement
@@ -413,31 +418,31 @@ none of it; you have already built its two ingredients.
 
 - **Exact `i128` end to end.** A minimum over a lattice certified by
   floating point certifies nothing: one misrounded cofactor and the box
-  silently excludes the true minimum. Entries stay below m ≤ 2³¹,
-  norms below m² < 2⁶², adjugate-times-norm products comfortably inside
-  i128 for reduced bases. Floating point appears exactly once, in μ_t,
+  silently excludes the true minimum. Entries stay below $m \le 2^{31}$,
+  norms below $m^2 < 2^{62}$, adjugate-times-norm products comfortably inside
+  i128 for reduced bases. Floating point appears exactly once, in $\mu_t$,
   after the integer answer is frozen.
-- **A pair of bases, not one.** U·Vᵀ = m·I gives (1) a machine-checkable
+- **A pair of bases, not one.** $U V^\top = m I$ gives (1) a machine-checkable
   invariant threading every transformation, and (2) the exact inverse of
-  V — the search bounds — maintained by integer shears instead of
+  $V$ — the search bounds — maintained by integer shears instead of
   computed by fragile elimination at the end. One identity, two jobs.
 - **Reduce-then-enumerate.** Reduction is cheap and uncertified;
   enumeration is certified and priced by the quality of the basis.
   Composed, each pays for the other's weakness. This is Knuth's
   Algorithm S, and it is also, three decades later, the architecture of
   every serious SVP solver (LLL/BKZ + enumeration or sieving).
-- **Sweep-to-fixpoint with the strict trigger 2|d| > n.** The strict
-  inequality makes Σ|v_i|² a strictly decreasing positive integer — a
+- **Sweep-to-fixpoint with the strict trigger $2|d| > n$.** The strict
+  inequality makes $\sum |v_i|^2$ a strictly decreasing positive integer — a
   termination *proof*, not a hope — and makes the fixpoint stable
   (reduce twice, get the same pair), which the tests exploit.
 - **Cramer/adjugate bounds, not Gram–Schmidt.** The textbook enumeration
   bound uses Gram–Schmidt norms, which are rationals and invite either
   floats (unsound) or big-rational bookkeeping (heavy). The adjugate
   bound is a bit looser but *integer-exact by construction*, provable in
-  three lines, and — via adj(V) = ±Uᵀ — literally already in memory.
-- **Stop at t = 6.** Γ(t/2 + 1) stays a five-entry table, i128 bounds
+  three lines, and — via $\operatorname{adj}(V) = \pm U^\top$ — literally already in memory.
+- **Stop at $t = 6$.** $\Gamma(t/2 + 1)$ stays a five-entry table, i128 bounds
   are trivially safe, and every test certifies in milliseconds. The
-  architecture is t = 8-ready; the bookkeeping to go there is exercise
+  architecture is $t = 8$-ready; the bookkeeping to go there is exercise
   material, not lesson material.
 
 ---
@@ -450,25 +455,25 @@ bases are `Vec<Vec<i128>>`, rows are basis vectors.
 
 ### Stage 1 — `dual_basis`, `primal_basis`, `check_duality`
 
-Transcribe §2's matrices. Keep powers of a reduced mod m as you multiply
+Transcribe §2's matrices. Keep powers of $a$ reduced mod $m$ as you multiply
 (`pow = pow * a % m` in i128) — the tests pin the *reduced* entries, e.g.
-RANDU's third dual row is (−393225, 0, 1), not (−4295360521, 0, 1).
-`check_duality` computes all t² dot products and also rejects mismatched
+RANDU's third dual row is $(-393225, 0, 1)$, not $(-4295360521, 0, 1)$.
+`check_duality` computes all $t^2$ dot products and also rejects mismatched
 shapes without panicking. The tests verify the identity for the four
-benchmark generators through t = 6, check every V-row against an
-independent dual-vector predicate, and expand det V by cofactors for
-t ≤ 3 to see the m on the diagonal.
+benchmark generators through $t = 6$, check every V-row against an
+independent dual-vector predicate, and expand $\det V$ by cofactors for
+$t \le 3$ to see the $m$ on the diagonal.
 
 ### Stage 2 — `reduce_basis`
 
 Algorithm R verbatim. The two classic bugs: transforming on the tie
-2|d| = n (never terminates — see §3), and mis-pairing the mirror update
-(it is u_j += q·u_i, indices crossed, sign plus; anything else breaks
-U·Vᵀ = m·I and the very first test). Module 12's rounding helper
+$2|d| = n$ (never terminates — see §3), and mis-pairing the mirror update
+(it is $u_j \mathrel{+}= q u_i$, indices crossed, sign plus; anything else breaks
+$U V^\top = m I$ and the very first test). Module 12's rounding helper
 `(2*d + n).div_euclid(2*n)` is still the right nearest-integer quotient
-for n > 0. The tests check the invariant after reduction for all four
-generators up to t = 6, demand Σ|v_i|² strictly dropped, reproduce
-module 12's ν₂² exactly at t = 2 (both pinned values and a brute-force
+for $n > 0$. The tests check the invariant after reduction for all four
+generators up to $t = 6$, demand $\sum |v_i|^2$ strictly dropped, reproduce
+module 12's $\nu_2^2$ exactly at $t = 2$ (both pinned values and a brute-force
 grid), verify the fixpoint condition pairwise, and reduce twice to
 detect idling.
 
@@ -481,10 +486,10 @@ eliminate below the diagonal with the fraction-free update
 previous pivot — the division is exact; remember to swap in a nonzero
 pivot (flipping the sign) and to return 0 if none exists. Cofactors by
 deleting a row and column and recursing into the same determinant.
-For the scan, skip x = 0, and optionally halve the work by forcing the
-first nonzero coefficient positive. Keep the partial sum Σ x_l·v_l
+For the scan, skip $x = 0$, and optionally halve the work by forcing the
+first nonzero coefficient positive. Keep the partial sum $\sum x_l v_l$
 incremental if you like speed; the boxes are so small after reduction
-that correctness is the only real concern. Tests: the t = 2 grid against
+that correctness is the only real concern. Tests: the $t = 2$ grid against
 module 12's brute force, RANDU's 118, a full 4-D brute force on tiny
 moduli, hand-checkable bases (identity, shears), and permuted/negated
 bases — the answer is a property of the lattice, not the basis.
@@ -492,11 +497,11 @@ bases — the answer is a property of the lattice, not the basis.
 ### Stage 4 — `nu_t_squared` and `mu_t`
 
 Ten lines each. The pipeline: build the pair, reduce, search; assert
-2 ≤ t ≤ 6. For μ_t, implement the Γ table of §6 exactly — the tests
-check t = 2, 3 against module 12's frozen nine-decimal values and
-t = 4, 5, 6 against independently expanded closed forms, so a wrong
-Gamma constant cannot hide. Then the verdicts: RANDU ≤ 118 forever
-(and exactly 116 from t = 4), 48271 above 0.29 at every t.
+$2 \le t \le 6$. For $\mu_t$, implement the $\Gamma$ table of §6 exactly — the tests
+check $t = 2, 3$ against module 12's frozen nine-decimal values and
+$t = 4, 5, 6$ against independently expanded closed forms, so a wrong
+Gamma constant cannot hide. Then the verdicts: RANDU $\le 118$ forever
+(and exactly 116 from $t = 4$), 48271 above 0.29 at every $t$.
 
 ---
 
@@ -504,33 +509,33 @@ Gamma constant cannot hide. Then the verdicts: RANDU ≤ 118 forever
 
 - **TestU01 and BigCrush.** L'Ecuyer & Simard's TestU01 (2007) is the
   de-facto certification battery for RNGs; BigCrush runs ~160 statistical
-  tests over ~2³⁸ outputs. The spectral test is the *theoretical* member
+  tests over ~$2^{38}$ outputs. The spectral test is the *theoretical* member
   of the same family: it examines the entire period at once, no sampling,
   but only for generators with lattice structure. The two are used
   together in practice — a new LCG/MRG design is first screened by
-  spectral figures (cheap, exact, covers all t up to 8–32), then
+  spectral figures (cheap, exact, covers all $t$ up to 8–32), then
   battery-tested empirically; and when a plain LCG fails BigCrush, the
   failing tests are overwhelmingly the lattice-shaped ones (serial/
-  birthday-spacings collisions in t dimensions — the empirical shadow of
-  small ν_t). PCG and xoshiro pass BigCrush precisely because a nonlinear
+  birthday-spacings collisions in $t$ dimensions — the empirical shadow of
+  small $\nu_t$). PCG and xoshiro pass BigCrush precisely because a nonlinear
   output permutation stands between their linear state lattice and you.
 - **L'Ecuyer's good-multiplier tables.** "Which a?" is answered by
   exhaustive spectral search, and has been since Fishman–Moore's 1986
-  census of m = 2³¹ − 1. L'Ecuyer's tables (*Mathematics of
-  Computation*, 1999) list multipliers for moduli from 2⁸ to 2⁶⁴ ranked
-  by the worst normalized spectral value over t ≤ 8 (up to 32) — the
+  census of $m = 2^{31} - 1$. L'Ecuyer's tables (*Mathematics of
+  Computation*, 1999) list multipliers for moduli from $2^8$ to $2^{64}$ ranked
+  by the worst normalized spectral value over $t \le 8$ (up to 32) — the
   criterion this module taught you to compute. That is where 48271 earned
   its place in `std::minstd_rand`, where MRG32k3a's component multipliers
   come from, and where PCG's 64-bit default multiplier (Knuth's MMIX
   constant 6364136223846793005, beyond this module's i128-comfortable
-  m ≤ 2³¹ range) was vetted. When someone ships a new multiplier today,
+  $m \le 2^{31}$ range) was vetted. When someone ships a new multiplier today,
   the accompanying evidence is a spectral table computed by exactly the
   reduce-then-enumerate machine you just built.
 - **LLL and cryptanalysis: the same idea, weaponized.** Lattice
   reduction escaped random-number testing long ago. LLL broke the
   Merkle–Hellman knapsack cryptosystem (recovering the secret from a
   "hard" subset-sum by finding a short vector); Coppersmith's method
-  turns "find small roots of a polynomial mod N" into lattice reduction,
+  turns "find small roots of a polynomial mod $N$" into lattice reduction,
   yielding practical attacks on low-exponent and partially-leaked RSA;
   biased or partially known ECDSA nonces become a hidden-number-problem
   lattice whose short vector *is* the private key (attacks that have
@@ -549,25 +554,25 @@ Gamma constant cannot hide. Then the verdicts: RANDU ≤ 118 forever
 
 Answer before moving on (hints follow each item):
 
-1. The mirror update in R3 is u_j += q·u_i. Why not u_i −= q·u_j, which
+1. The mirror update in R3 is $u_j \mathrel{+}= q u_i$. Why not $u_i \mathrel{-}= q u_j$, which
    looks more symmetric? *Hint: write both as matrix multiplications
-   U ← F·U and compute F·Eᵀ for each candidate F; only one gives I.
+   $U \leftarrow F U$ and compute $F E^\top$ for each candidate $F$; only one gives $I$.
    Symmetry is exactly what the identity does not want.*
 2. Where does the certification proof of Algorithm E use Cauchy–Schwarz,
    and why does the argument need no assumption that the basis is
    reduced? What would a badly non-reduced basis cost you instead?
-   *Hint: |w·g_i| ≤ |w|·|g_i|; correctness vs. box volume.*
+   *Hint: $|w \cdot g_i| \le |w| \cdot |g_i|$; correctness vs. box volume.*
 3. Exhibit the infinite loop that R2's strict inequality prevents: find
-   two vectors with 2|v₁·v₂| = |v₂|² where transforming with q = ±1
+   two vectors with $2|v_1 \cdot v_2| = |v_2|^2$ where transforming with $q = \pm 1$
    swaps you between two bases of equal total norm. *Hint: try
-   v₁ = (1, 1), v₂ = (0, 2)... or module 12's α = β = ½ boundary.*
-4. Prove ν_{t+1} ≤ ν_t (one line), then explain why μ_t still may go
-   *up* with t — as it does for every generator in §6's table. *Hint:
-   pad with a zero; then look at how π^{t/2}/Γ(t/2+1) and the exponent
-   on ν trade off against the fixed determinant m.*
-5. For RANDU, every polynomial multiple of (x − 3)² gives a dual vector
+   $v_1 = (1, 1)$, $v_2 = (0, 2)$... or module 12's $\alpha = \beta = \tfrac{1}{2}$ boundary.*
+4. Prove $\nu_{t+1} \le \nu_t$ (one line), then explain why $\mu_t$ still may go
+   *up* with $t$ — as it does for every generator in §6's table. *Hint:
+   pad with a zero; then look at how $\pi^{t/2}/\Gamma(t/2+1)$ and the exponent
+   on $\nu$ trade off against the fixed determinant $m$.*
+5. For RANDU, every polynomial multiple of $(x - 3)^2$ gives a dual vector
    in the dimension matching its degree. Why can't some degree-5
-   multiple of (x − 3)² beat norm² 116 — how does your ν₆² computation
+   multiple of $(x - 3)^2$ beat norm$^2$ 116 — how does your $\nu_6^2$ computation
    *prove* none exists, without reasoning about polynomials at all?
    *Hint: what does the certificate of Algorithm E quantify over?*
 
@@ -583,45 +588,45 @@ theory behind step S8's bound.)
 
 | Ex. | Rating | Statement |
 |---|---|---|
-| ▶H1 | M15 | From U·Vᵀ = m·I and det V = ±m, prove adj(V) = ±Uᵀ, so E2's cofactor columns are the primal rows. (Hence Knuth's z_k bound in S8 and ours are identical integers.) |
-| H2 | M18 | Prove the floor lemma used by E2: for positive integers N, D and integer x ≥ 0, x² ≤ N/D ⟺ x² ≤ ⌊N/D⌋; conclude ⌊√(N/D)⌋ = ⌊√⌊N/D⌋⌋. Where would a naive float sqrt break this? |
-| ▶H3 | M25 | RANDU's polynomial ideal: show u is dual for (a, m) = (65539, 2³¹) whenever its polynomial is a multiple of (x−3)²; derive (9, 3, −5, 1) from (x−3)²(x+1); then search all multiples (x−3)²·(c₀ + c₁x + c₂x²) with small c_i and verify none beats 116 — matching your ν₅², ν₆². |
-| H4 | 22 | Instrument Algorithm E: print z and the box volume for the four benchmark generators at t = 2..6, unreduced vs. reduced. Quantify "reduction is the whole economy". |
-| ▶H5 | M28 | Prove the t = 2 fixpoint claim of §3: pairwise-reduced in both orders ⟹ the shorter row is a shortest lattice vector. (Adapt module 12's α² − |αβ| + β² argument.) Then show by example that for t = 3 a pairwise-reduced basis need not contain a shortest vector. |
-| H6 | 30 | Extend the pipeline to t = 7, 8 (Knuth's full range): grow the Γ table (Γ(9/2) = 105√π/16, Γ(5) = 24), watch i128 headroom in the adjugate products, and reproduce a Table-1-style row for 48271. |
+| ▶H1 | M15 | From $U V^\top = m I$ and $\det V = \pm m$, prove $\operatorname{adj}(V) = \pm U^\top$, so E2's cofactor columns are the primal rows. (Hence Knuth's $z_k$ bound in S8 and ours are identical integers.) |
+| H2 | M18 | Prove the floor lemma used by E2: for positive integers $N, D$ and integer $x \ge 0$, $x^2 \le N/D \iff x^2 \le \lfloor N/D \rfloor$; conclude $\lfloor \sqrt{N/D} \rfloor = \lfloor \sqrt{\lfloor N/D \rfloor} \rfloor$. Where would a naive float sqrt break this? |
+| ▶H3 | M25 | RANDU's polynomial ideal: show $u$ is dual for $(a, m) = (65539, 2^{31})$ whenever its polynomial is a multiple of $(x-3)^2$; derive $(9, 3, -5, 1)$ from $(x-3)^2(x+1)$; then search all multiples $(x-3)^2 (c_0 + c_1 x + c_2 x^2)$ with small $c_i$ and verify none beats 116 — matching your $\nu_5^2, \nu_6^2$. |
+| H4 | 22 | Instrument Algorithm E: print $z$ and the box volume for the four benchmark generators at $t = 2..6$, unreduced vs. reduced. Quantify "reduction is the whole economy". |
+| ▶H5 | M28 | Prove the $t = 2$ fixpoint claim of §3: pairwise-reduced in both orders $\implies$ the shorter row is a shortest lattice vector. (Adapt module 12's $\alpha^2 - |\alpha\beta| + \beta^2$ argument.) Then show by example that for $t = 3$ a pairwise-reduced basis need not contain a shortest vector. |
+| H6 | 30 | Extend the pipeline to $t = 7, 8$ (Knuth's full range): grow the $\Gamma$ table ($\Gamma(9/2) = 105\sqrt{\pi}/16$, $\Gamma(5) = 24$), watch i128 headroom in the adjugate products, and reproduce a Table-1-style row for 48271. |
 | H7 | M32 | Replace the box of E3 with ellipsoid pruning: compute exact Gram–Schmidt data as integer pairs (numerator, denominator) via the Gram matrix, and prune partial sums Cholesky-style as Knuth's S9–S10 do. Measure candidates scanned vs. the box. |
-| H8 | M20 | From det V = m and Hermite's γ₄ = √2, γ₅ = 8^{1/5}, γ₆ = (64/3)^{1/6}, derive the caps on μ₄, μ₅, μ₆ and check §6's table respects them. |
-| H9 | 25 | Fishman–Moore in miniature: for m = 2¹⁴ − 3, search all multipliers maximizing min(μ₂, ..., μ₆) and print the ten best. How lonely is the top? |
+| H8 | M20 | From $\det V = m$ and Hermite's $\gamma_4 = \sqrt{2}$, $\gamma_5 = 8^{1/5}$, $\gamma_6 = (64/3)^{1/6}$, derive the caps on $\mu_4, \mu_5, \mu_6$ and check §6's table respects them. |
+| H9 | 25 | Fishman–Moore in miniature: for $m = 2^{14} - 3$, search all multipliers maximizing $\min(\mu_2, \ldots, \mu_6)$ and print the ten best. How lonely is the top? |
 
 ---
 
 ## 12. Proof techniques you practiced
 
 - **Invariant preservation by explicit matrix identity** — the two-line
-  computation F·Eᵀ = I (§3) upgraded "we also update U" from ritual to
+  computation $F E^\top = I$ (§3) upgraded "we also update U" from ritual to
   theorem; every stage-2 test is this identity made executable. The same
   move — conjugate your transformation so a bilinear form is preserved —
   recurs from Gram–Schmidt to symplectic integrators.
-- **Termination by a strictly decreasing positive integer** — Σ|v_i|²
-  under the strict trigger 2|d| > n (§3); module 01's oldest pattern,
+- **Termination by a strictly decreasing positive integer** — $\sum |v_i|^2$
+  under the strict trigger $2|d| > n$ (§3); module 01's oldest pattern,
   with the new lesson that the *strictness* of the trigger is what
   converts "usually terminates" into "terminates".
 - **Certified enumeration via an a-posteriori bound** — Cramer plus
   Cauchy–Schwarz turned the best-so-far value into a finite, provably
-  sufficient search region (§5), generalizing module 12's B² ≥ best
+  sufficient search region (§5), generalizing module 12's $B^2 \ge \text{best}$
   trick from a square to a box shaped by the basis. This is the
   correctness skeleton of branch-and-bound, exact SVP solvers, and every
   "prune by bound" argument you will ever write.
-- **Duality as computation** — adj(V) = ±Uᵀ (§5, exercise H1): the
+- **Duality as computation** — $\operatorname{adj}(V) = \pm U^\top$ (§5, exercise H1): the
   abstract inverse in Cramer's rule recognized as an object the
   algorithm already maintains in exact integers. Recognizing a needed
   quantity as an existing invariant is a proof technique *and* a
   performance technique.
-- **Integrality/floor lemmas** — x² ≤ N/D ⟺ x² ≤ ⌊N/D⌋ (§5, exercise
+- **Integrality/floor lemmas** — $x^2 \le N/D \iff x^2 \le \lfloor N/D \rfloor$ (§5, exercise
   H2) let integer arithmetic stand in for real square roots without
   losing a single lattice point; the humble cousin of module 12's
   centered-residue argument.
-- **Reduction to a pinned lower-dimensional case** — the t = 2 fixpoint
+- **Reduction to a pinned lower-dimensional case** — the $t = 2$ fixpoint
   identified with Gauss–Lagrange (§3) imported module 12's optimality
   theorem wholesale, and the cross-module pinned constants (118,
   282 475 250, ...) turned that identification into regression tests.
@@ -631,11 +636,11 @@ theory behind step S8's bound.)
 ## 13. Where this leads
 
 - **Module 12 → here → Knuth's full Algorithm S.** You now hold the
-  entire architecture; what remains in §3.3.4 is engineering — grown-t
+  entire architecture; what remains in §3.3.4 is engineering — grown-$t$
   bookkeeping, transformation ordering, ellipsoid pruning (exercises
   H6, H7) — plus Knuth's beautiful worked Table 1.
 - **LLL and BKZ.** Your reducer is greedy with no quality guarantee; LLL
-  adds the Lovász swap condition and earns 2^{(t-1)/2}-approximation in
+  adds the Lovász swap condition and earns $2^{(t-1)/2}$-approximation in
   polynomial time; BKZ interpolates between LLL and exact SVP by running
   enumeration on blocks. The reduce-then-enumerate pattern is unchanged
   all the way up.
@@ -643,6 +648,6 @@ theory behind step S8's bound.)
   number problems, NIST's ML-KEM/ML-DSA — the offense and defense both
   priced by how well the pipeline you built scales.
 - **The statistical companion**: §3.3.2's serial test and TestU01's
-  batteries measure empirically what ν_t bounds structurally; module
+  batteries measure empirically what $\nu_t$ bounds structurally; module
   12's §9 told that story, and it continues wherever a new generator
   ships.

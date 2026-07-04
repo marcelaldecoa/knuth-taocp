@@ -18,16 +18,16 @@ cheapest circuit that computes a given function?**
 By the end you will represent functions as integers, convert to and from normal
 forms, build and cost straight-line circuits ("Boolean chains"), recognize the
 special functions (median, threshold, symmetric, monotone, self-dual), and run
-an exact search for the minimum gate count `C(f)`.
+an exact search for the minimum gate count $C(f)$.
 
 ---
 
 ## 1. The truth-table-as-integer trick
 
-An `n`-variable Boolean function `f(x₁, …, xₙ)` has `2ⁿ` possible inputs, and on
+An $n$-variable Boolean function $f(x_1, \ldots, x_n)$ has $2^n$ possible inputs, and on
 each it returns 0 or 1. Write the inputs in binary — the integer `i` stands for
 the assignment `x_j = (i >> (j−1)) & 1` — and the function is completely
-described by the `2ⁿ`-bit string of its outputs. For `n ≤ 6` that string fits in
+described by the $2^n$-bit string of its outputs. For $n \le 6$ that string fits in
 a single 64-bit word:
 
 ```
@@ -39,14 +39,14 @@ irresistible: **operations on functions become bitwise operations on words.**
 
 | function-level operation | truth-table operation |
 |---|---|
-| `¬f` | `!table` (masked to `2ⁿ` bits) |
-| `f ∧ g` | `table_f & table_g` |
-| `f ∨ g` | `table_f \| table_g` |
-| `f ⊕ g` | `table_f ^ table_g` |
+| $\lnot f$ | `!table` (masked to `2ⁿ` bits) |
+| $f \land g$ | `table_f & table_g` |
+| $f \lor g$ | `table_f \| table_g` |
+| $f \oplus g$ | `table_f ^ table_g` |
 | "does f ever equal 1?" | `table != 0` |
 | "how many inputs give 1?" | `table.count_ones()` |
 
-A single 64-bit AND evaluates a conjunction on all `2ⁿ` rows of the truth table
+A single 64-bit AND evaluates a conjunction on all $2^n$ rows of the truth table
 *at once*. There is no faster way to do bulk Boolean algebra on a normal CPU,
 and it is why the whole module fits in one `u64` field:
 
@@ -54,20 +54,18 @@ and it is why the whole module fits in one `u64` field:
 pub struct BoolFunc { pub n: u32, pub table: u64 }
 ```
 
-**Worked example — AND of two variables.** With `x₁` = bit 0 and `x₂` = bit 1,
-`x₁ ∧ x₂` is 1 only at input `i = 0b11 = 3`, so `table = 0b1000 = 8`. Reading it
+**Worked example — AND of two variables.** With $x_1$ = bit 0 and $x_2$ = bit 1,
+$x_1 \land x_2$ is 1 only at input `i = 0b11 = 3`, so `table = 0b1000 = 8`. Reading it
 back: `eval(3) = (8 >> 3) & 1 = 1`, and `eval(0) = eval(1) = eval(2) = 0`. The
 number of 1-inputs is `count_ones(8) = 1`.
 
 ### How many functions are there?
 
-Each of the `2ⁿ` rows can independently be 0 or 1, so there are exactly
+Each of the $2^n$ rows can independently be 0 or 1, so there are exactly
 
-```
-    2^(2ⁿ)   Boolean functions of n variables.
-```
+$$2^{2^n} \text{ Boolean functions of } n \text{ variables.}$$
 
-That is 2, 4, 16, 256, 65536, 4.3 billion, 1.8×10¹⁹ for `n = 0,1,2,3,4,5,6`. The
+That is 2, 4, 16, 256, 65536, 4.3 billion, $1.8 \times 10^{19}$ for $n = 0,1,2,3,4,5,6$. The
 double exponential is the central fact of the theory: functions are absurdly
 numerous, so **most of them cannot have a small circuit** — there are not enough
 small circuits to go around. We make that precise in §5.
@@ -80,35 +78,31 @@ Two canonical ways to write any function fall straight out of the truth table.
 
 A **minterm** is a product (AND) of literals — one per variable — that is true
 at exactly one input. The row `i` where `f = 1` corresponds to the minterm using
-`+j` when `x_j = 1` in `i` and `−j` (meaning `¬x_j`) when `x_j = 0`. Since a
+$+j$ when $x_j = 1$ in `i` and $-j$ (meaning $\lnot x_j$) when $x_j = 0$. Since a
 function is 1 exactly on its 1-rows, it equals the OR of its minterms — the
 **disjunctive normal form (DNF)**:
 
-```
-    f  =  ⋁ (minterm of each 1-row)
-```
+$$f = \bigvee (\text{minterm of each 1-row})$$
 
 Dually, a **maxterm** is a clause (OR of literals) false at exactly one input.
 The rows where `f = 0` give the maxterms (negate every literal of that
 assignment so the clause vanishes there), and `f` equals their AND — the
 **conjunctive normal form (CNF)**:
 
-```
-    f  =  ⋀ (maxterm of each 0-row)
-```
+$$f = \bigwedge (\text{maxterm of each 0-row})$$
 
-We store a term or clause as a `Vec<i32>` of signed literals: `+j` for `x_j`,
-`−j` for `¬x_j`, with variables numbered from 1.
+We store a term or clause as a `Vec<i32>` of signed literals: $+j$ for $x_j$,
+$-j$ for $\lnot x_j$, with variables numbered from 1.
 
-**Worked example — OR of two variables.** `x₁ ∨ x₂` is true on rows 1, 2, 3 and
+**Worked example — OR of two variables.** $x_1 \lor x_2$ is true on rows 1, 2, 3 and
 false only on row 0.
 
-| row `i` | `x₁ x₂` | `f` | contributes |
+| row `i` | $x_1\ x_2$ | `f` | contributes |
 |---|---|---|---|
-| 0 | 0 0 | 0 | maxterm `(x₁ ∨ x₂)` = clause `[+1, +2]` |
-| 1 | 1 0 | 1 | minterm `x₁¬x₂` = term `[+1, −2]` |
-| 2 | 0 1 | 1 | minterm `¬x₁x₂` = term `[−1, +2]` |
-| 3 | 1 1 | 1 | minterm `x₁x₂` = term `[+1, +2]` |
+| 0 | 0 0 | 0 | maxterm $(x_1 \lor x_2)$ = clause `[+1, +2]` |
+| 1 | 1 0 | 1 | minterm $x_1\lnot x_2$ = term `[+1, −2]` |
+| 2 | 0 1 | 1 | minterm $\lnot x_1 x_2$ = term `[−1, +2]` |
+| 3 | 1 1 | 1 | minterm $x_1 x_2$ = term `[+1, +2]` |
 
 So the DNF has **3** terms (= number of minterms = `count_ones`) and the CNF has
 **1** clause (= number of 0-rows). Notice the size asymmetry: OR has a tiny CNF
@@ -119,12 +113,12 @@ the other, which is exactly why choosing the representation matters.
 `to_cnf(f).len() == 2ⁿ − popcount(table)`. Both normal forms reconstruct the
 function exactly (`from_dnf` / `from_cnf` are the inverses), and terms need not
 be full minterms — a shorter product term like `[+1]` covers a whole subcube
-(here, both rows with `x₁ = 1`).
+(here, both rows with $x_1 = 1$).
 
 **De Morgan, for free.** Complementing the table (`!table`, masked) complements
-the function, and the two laws `¬(f ∧ g) = ¬f ∨ ¬g` and `¬(f ∨ g) = ¬f ∧ ¬g` are
-just bitwise identities on words. In the lab you check `¬(x₁ ∧ x₂)` equals
-`(¬x₁) ∨ (¬x₂)` by comparing whole truth tables — a proof by exhaustive
+the function, and the two laws $\lnot(f \land g) = \lnot f \lor \lnot g$ and $\lnot(f \lor g) = \lnot f \land \lnot g$ are
+just bitwise identities on words. In the lab you check $\lnot(x_1 \land x_2)$ equals
+$(\lnot x_1) \lor (\lnot x_2)$ by comparing whole truth tables — a proof by exhaustive
 evaluation that `assert_eq!` performs in one line.
 
 ---
@@ -134,8 +128,8 @@ evaluation that `assert_eq!` performs in one line.
 A **Boolean chain** (Knuth's term, §7.1.2) is a straight-line program that
 computes a function with 2-input gates. Its values are numbered:
 
-- values `0 .. n−1` are the inputs `x₁ … xₙ`;
-- value `n + k` is produced by step `k`, a gate `op(value[left], value[right])`
+- values $0 \ldots n-1$ are the inputs $x_1 \ldots x_n$;
+- value $n + k$ is produced by step $k$, a gate `op(value[left], value[right])`
   where `left, right` are strictly earlier value indices.
 
 The result is whichever value you nominate as the output. **Cost** is simply the
@@ -144,7 +138,7 @@ gate count, an FPGA's LUT usage, or a crypto circuit's operation budget.
 
 ### The sixteen gates, encoded as nibbles
 
-There are exactly `2^(2²) = 16` two-input Boolean operations. We encode each as
+There are exactly $2^{2^2} = 16$ two-input Boolean operations. We encode each as
 a 4-bit truth table `op`: the output for inputs `(a, b)` is bit `2a + b` of `op`.
 
 | index `2a+b` | `(a,b)` |
@@ -160,7 +154,7 @@ ignoring the right, is `NOTL = 0b0011 = 3`. This uniform nibble encoding is what
 makes the optimum-cost search in §6 a few bitwise instructions per gate.
 
 **Worked example — XOR from AND/OR/NOT.** XOR is not in the `{AND, OR, NOT}`
-basis directly, but `x₁ ⊕ x₂ = (x₁ ∨ x₂) ∧ ¬(x₁ ∧ x₂)`:
+basis directly, but $x_1 \oplus x_2 = (x_1 \lor x_2) \land \lnot(x_1 \land x_2)$:
 
 ```text
 value 0: x1                       (input)
@@ -171,13 +165,13 @@ value 4: NOTL(3, 3)  = ¬(x1 ∧ x2)
 value 5: AND(2, 4)   = (x1∨x2) ∧ ¬(x1∧x2)   ← output
 ```
 
-Four gates. Trace it on `x₁=1, x₂=1`: value 2 = 1, value 3 = 1, value 4 = 0,
-value 5 = 0 — correct, `1 ⊕ 1 = 0`. Of course the *full* basis contains XOR as a
+Four gates. Trace it on $x_1=1, x_2=1$: value 2 = 1, value 3 = 1, value 4 = 0,
+value 5 = 0 — correct, $1 \oplus 1 = 0$. Of course the *full* basis contains XOR as a
 single gate, so with all sixteen operations available this same function costs
 just 1. **The basis you allow changes the cost**; that tension is the whole
 point of §6.
 
-`chain_computes(chain, f)` certifies a chain by evaluating it on all `2ⁿ` inputs
+`chain_computes(chain, f)` certifies a chain by evaluating it on all $2^n$ inputs
 and comparing to `f`'s table — the only honest test of a straight-line program.
 
 ---
@@ -186,18 +180,18 @@ and comparing to `f`'s table — the only honest test of a straight-line program
 
 Some functions are important enough that Knuth gives them their own notation.
 
-**Median / majority.** For an odd number of inputs, `⟨x₁ … xₙ⟩` is the value
+**Median / majority.** For an odd number of inputs, $\langle x_1 \ldots x_n \rangle$ is the value
 held by more than half of them — the median bit. Equivalently it is a
-**threshold**: majority is true iff at least `⌈n/2⌉` inputs are 1. The carry out
-of a full adder is exactly `majority(x₁, x₂, x₃)`.
+**threshold**: majority is true iff at least $\lceil n/2 \rceil$ inputs are 1. The carry out
+of a full adder is exactly $\text{majority}(x_1, x_2, x_3)$.
 
-**Threshold.** `[x₁ + ⋯ + xₙ ≥ k]` — true when at least `k` inputs are 1. Median
-is the special case `k = (n+1)/2`.
+**Threshold.** $[x_1 + \cdots + x_n \ge k]$ — true when at least $k$ inputs are 1. Median
+is the special case $k = (n+1)/2$.
 
 **Symmetric functions.** A function is *symmetric* if its value depends only on
 *how many* inputs are 1, not which. Such a function is pinned down by the
-`n + 1` bits `w₀, …, wₙ`, where `w_j` is the value when exactly `j` inputs are
-true. That is a spectacular compression: `n + 1` bits instead of `2ⁿ`. Majority,
+$n + 1$ bits $w_0, \ldots, w_n$, where $w_j$ is the value when exactly `j` inputs are
+true. That is a spectacular compression: $n + 1$ bits instead of $2^n$. Majority,
 threshold, and parity are all symmetric. In code:
 
 ```rust
@@ -205,66 +199,66 @@ symmetric_function(n, &weights)   // value at x = weights[popcount(x)]
 ```
 
 **Monotone functions.** `f` is *monotone (nondecreasing)* if flipping any input
-from 0 to 1 never flips the output from 1 to 0 — formally `x ⊆ y ⇒ f(x) ≤ f(y)`
+from 0 to 1 never flips the output from 1 to 0 — formally $x \subseteq y \Rightarrow f(x) \le f(y)$
 under the bitwise-subset order. AND, OR, majority, and every threshold are
 monotone; XOR is not (raising one input can toggle the answer either way). It
 suffices to check single-bit steps: for every `x` and every clear bit `b`,
-`f(x) ≤ f(x | bit b)`.
+$f(x) \le f(x \mathbin{|} \text{bit } b)$.
 
-**Self-dual functions.** `f` is *self-dual* if `f(¬x) = ¬f(x)` for every input —
-complementing all inputs complements the output. Every projection `x_j` is
+**Self-dual functions.** `f` is *self-dual* if $f(\lnot x) = \lnot f(x)$ for every input —
+complementing all inputs complements the output. Every projection $x_j$ is
 self-dual, and the median of an odd number of inputs is the archetype (flip all
 the votes and the majority flips too). AND is not self-dual.
 
 ### Dedekind's problem — a famous hard count
 
-How many *monotone* Boolean functions of `n` variables are there? This is the
-**Dedekind number** `M(n)`, and it grows ferociously:
+How many *monotone* Boolean functions of $n$ variables are there? This is the
+**Dedekind number** $M(n)$, and it grows ferociously:
 
 ```
    n:    0   1   2   3    4     5        6            7                8                    9
  M(n):   2   3   6  20  168  7581  7828354  2414682040998  56130437228687557907788  286386577668298411128469151667598498812366
 ```
 
-Dedekind posed it in 1897. Each new value has been a milestone: `M(8)` took a
-supercomputer in 1991, and **`M(9)` was computed only in 2023** — twice,
+Dedekind posed it in 1897. Each new value has been a milestone: $M(8)$ took a
+supercomputer in 1991, and **$M(9)$ was computed only in 2023** — twice,
 independently, by Christian Jäkel and by Van Hirtum et al., using months of FPGA
-and GPU time. There is no known closed form. In the lab you compute `M(0..4)` the
-brute-force way — enumerate all `2^(2ⁿ)` functions and count the monotone ones —
-reproducing `2, 3, 6, 20, 168`. At `n = 4` that is 65536 functions, which your
-laptop dispatches in well under a second; the wall you hit at `n = 6` is the
+and GPU time. There is no known closed form. In the lab you compute $M(0..4)$ the
+brute-force way — enumerate all $2^{2^n}$ functions and count the monotone ones —
+reproducing `2, 3, 6, 20, 168`. At $n = 4$ that is 65536 functions, which your
+laptop dispatches in well under a second; the wall you hit at $n = 6$ is the
 same wall the researchers spent decades scaling.
 
 ---
 
-## 5. Combinational complexity C(f) and the counting bound
+## 5. Combinational complexity $C(f)$ and the counting bound
 
-The **combinational complexity** `C(f)` is the minimum number of gates in any
+The **combinational complexity** $C(f)$ is the minimum number of gates in any
 Boolean chain (over a chosen basis) that computes `f`. It is the "size" of the
-cheapest circuit. Two functions of the same `n` can have wildly different `C`:
-a projection has `C = 0`, XOR-of-two has `C = 1`, and the hardest functions sit
+cheapest circuit. Two functions of the same $n$ can have wildly different $C$:
+a projection has $C = 0$, XOR-of-two has $C = 1$, and the hardest functions sit
 near the ceiling we now derive.
 
 **Shannon's counting theorem (the pessimist's masterpiece).** *Almost every*
-Boolean function of `n` variables requires roughly `2ⁿ / n` gates.
+Boolean function of $n$ variables requires roughly $2^n / n$ gates.
 
-*Proof sketch (counting circuits vs. functions).* A chain of `r` gates over the
+*Proof sketch (counting circuits vs. functions).* A chain of $r$ gates over the
 16-operation basis is described by choosing, for each gate, an operation (16
-ways) and two earlier operands (at most `(n + r)²` ways). So the number of
-chains with `r` gates is at most `(16 (n+r)²)ʳ`, which is `2^{O(r log r)}`. To
-compute even a constant fraction of the `2^(2ⁿ)` functions we need
-`2^{O(r log r)} ≥ 2^(2ⁿ) · const`, forcing `r = Ω(2ⁿ / n)`. Conversely Lupanov
-showed `O(2ⁿ / n)` gates always suffice. So the *typical* function needs
-`≈ 2ⁿ / n` gates — exponentially many. ∎ (sketch)
+ways) and two earlier operands (at most $(n + r)^2$ ways). So the number of
+chains with $r$ gates is at most $(16 (n+r)^2)^r$, which is $2^{O(r \log r)}$. To
+compute even a constant fraction of the $2^{2^n}$ functions we need
+$2^{O(r \log r)} \ge 2^{2^n} \cdot \text{const}$, forcing $r = \Omega(2^n / n)$. Conversely Lupanov
+showed $O(2^n / n)$ gates always suffice. So the *typical* function needs
+$\approx 2^n / n$ gates — exponentially many. ∎ (sketch)
 
 The moral is the double exponential from §1 biting back: there are
-`2^(2ⁿ)` functions but only `2^{O(r log r)}` small circuits, so small circuits
+$2^{2^n}$ functions but only $2^{O(r \log r)}$ small circuits, so small circuits
 are precious and most functions are inherently expensive. Yet the functions we
 actually *want* — adders, comparators, the symmetric functions — are the rare
 cheap ones, which is why hardware is possible at all.
 
 **Size vs. depth.** Two different cost measures live on the same chain. *Size*
-is the gate count (what `C(f)` measures). *Depth* is the longest path from an
+is the gate count (what $C(f)$ measures). *Depth* is the longest path from an
 input to the output — the number of gate delays, i.e. latency. The XOR chain in
 §3 has size 4 but depth 3 (`AND → NOTL → AND`). Minimizing size saves area and
 power; minimizing depth saves time. They trade off against each other, and real
@@ -274,7 +268,7 @@ synthesis tools juggle both.
 
 ## 6. Searching for the optimum chain (§7.1.2)
 
-Computing `C(f)` exactly is a search problem. The lab's `optimal_cost` runs a
+Computing $C(f)$ exactly is a search problem. The lab's `optimal_cost` runs a
 breadth-first search — but *over which graph?* Getting this right is the subtle
 heart of the module.
 

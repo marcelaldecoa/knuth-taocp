@@ -48,7 +48,7 @@ cut:
 - 256 general registers `$0..$255`, each one octabyte (u64). (Full MMIX
   splits them into local/global via rG and rL; we don't.)
 - Byte-addressable **big-endian** memory, default zero — a sparse
-  `HashMap<u64, u8>` in the reference, because a 2⁶⁴-byte `Vec` is not on
+  `HashMap<u64, u8>` in the reference, because a $2^{64}$-byte `Vec` is not on
   the menu; any map with "unwritten = 0" semantics works.
 - The true MMIX instruction encoding and the true numeric opcodes.
 - Integer arithmetic (with MMIX's floor DIV!), loads/stores of all four
@@ -71,10 +71,10 @@ against Fascicle 1's chart.
 ### 2.1 State
 
 A machine state is: 256 registers of 64 bits; a memory function
-M : 2⁶⁴ → 2⁸; the program counter `@` (Knuth's symbol: "the place where
+$M : 2^{64} \to 2^8$; the program counter `@` (Knuth's symbol: "the place where
 we're at"); plus our rR/rH stand-ins, the halted flag, and two cost
 counters. That's it — this is a computational method in the §1.1 sense,
-(Q, I, Ω, f), with `step()` playing f. You met this definition in module
+$(Q, I, \Omega, f)$, with `step()` playing $f$. You met this definition in module
 01; now you are implementing f.
 
 Memory names things by size: a **byte** (8 bits), **wyde** (16), **tetra**
@@ -108,9 +108,9 @@ in `op`, and every test goes through those names):
 | opcodes | mnemonics | meaning |
 |---|---|---|
 | 0x00 | TRAP | halt (full MMIX: OS trap) |
-| 0x18–0x1F | MUL, MULU, DIV, DIVU | multiply and divide, ×2 for immediates |
+| 0x18–0x1F | MUL, MULU, DIV, DIVU | multiply and divide, $\times 2$ for immediates |
 | 0x20–0x27 | ADD, ADDU, SUB, SUBU | add and subtract |
-| 0x30–0x37 | CMP, CMPU, NEG, NEGU | compare (−1/0/1), negate (Y − Z, Y immediate) |
+| 0x30–0x37 | CMP, CMPU, NEG, NEGU | compare ($-1/0/1$), negate ($Y - Z$, $Y$ immediate) |
 | 0x38–0x3F | SL, SLU, SR, SRU | shifts: arithmetic vs logical |
 | 0x40–0x4B | BN, BZ, BNN, BNZ | branches (odd = backward) |
 | 0x80–0x8F | LDB(U), LDW(U), LDT(U), LDO(U) | loads, signed/unsigned |
@@ -123,14 +123,14 @@ in `op`, and every test goes through those names):
 
 A taken branch sets `@ ← branch_address + 4·YZ` (even opcode, forward) or
 `@ ← branch_address + 4·(YZ − 2¹⁶)` (odd opcode, backward); JMP is the same
-with the 24-bit field XYZ and 2²⁴. Offsets are counted in **tetras**, not
-bytes — instructions are tetra-aligned, so the two free low bits buy 4×
+with the 24-bit field XYZ and $2^{24}$. Offsets are counted in **tetras**, not
+bytes — instructions are tetra-aligned, so the two free low bits buy $4\times$
 the range. Because *everything* is pc-relative, assembled code is
 position-independent: stage 3 loads the same words at three different
 addresses and demands identical behavior.
 
 Branch conditions read \$X as a *signed* octabyte: BN (negative), BZ
-(zero), BNN (nonnegative), BNZ (nonzero). Together with CMP's −1/0/1
+(zero), BNN (nonnegative), BNZ (nonzero). Together with CMP's $-1/0/1$
 result these four are a complete comparison kit.
 
 ---
@@ -140,7 +140,7 @@ result these four are a complete comparison kit.
 ### 3.1 Loads: sign extension
 
 `LDB $2,$1,4` fetches the byte at `$1 + 4` and **sign-extends** it: byte
-0x89 becomes 0xFFFFFFFFFFFFFF89 (that is −119, as a signed octabyte).
+0x89 becomes 0xFFFFFFFFFFFFFF89 (that is $-119$, as a signed octabyte).
 `LDBU` zero-extends: 0x89 becomes 0x0000…0089. Same for wydes and tetras;
 for octas LDO and LDOU coincide (there is nothing left to extend). Stores
 go the other way: `STB` writes the low byte of \$X. Work one example by
@@ -151,43 +151,43 @@ eight LDB results; stage 1 pins exactly these.
 
 Most hardware truncates quotients toward zero. Knuth's MMIX does not:
 
-**Definition (Fascicle 1).** `DIV $X,$Y,$Z` sets \$X ← ⌊y/z⌋ and
-rR ← y − z·⌊y/z⌋, operands signed.
+**Definition (Fascicle 1).** `DIV $X,$Y,$Z` sets \$X ← $\lfloor y/z \rfloor$ and
+rR ← $y - z\cdot\lfloor y/z \rfloor$, operands signed.
 
-**Theorem (floor division).** For integers y, z with z ≠ 0 there is
-exactly one pair (q, r) with y = qz + r and r lying between 0 and z ("on
-z's side": 0 ≤ r < z if z > 0, and z < r ≤ 0 if z < 0). That q is ⌊y/z⌋.
+**Theorem (floor division).** For integers $y, z$ with $z \ne 0$ there is
+exactly one pair $(q, r)$ with $y = qz + r$ and $r$ lying between $0$ and $z$ ("on
+$z$'s side": $0 \le r < z$ if $z > 0$, and $z < r \le 0$ if $z < 0$). That $q$ is $\lfloor y/z \rfloor$.
 
-*Proof.* Existence: take q = ⌊y/z⌋, r = y − qz. By definition of floor,
-q ≤ y/z < q + 1. If z > 0, multiplying by z preserves order: qz ≤ y <
-qz + z, i.e. 0 ≤ r < z. If z < 0 the inequalities flip: qz ≥ y > qz + z,
-i.e. z < r ≤ 0. Uniqueness: if y = qz + r = q′z + r′ with both remainders
-on z's side, then (q − q′)z = r′ − r and |r′ − r| < |z|, forcing q = q′,
-r = r′. ∎
+*Proof.* Existence: take $q = \lfloor y/z \rfloor$, $r = y - qz$. By definition of floor,
+$q \le y/z < q + 1$. If $z > 0$, multiplying by $z$ preserves order: $qz \le y < qz + z$,
+i.e. $0 \le r < z$. If $z < 0$ the inequalities flip: $qz \ge y > qz + z$,
+i.e. $z < r \le 0$. Uniqueness: if $y = qz + r = q'z + r'$ with both remainders
+on $z$'s side, then $(q - q')z = r' - r$ and $\lvert r' - r\rvert < \lvert z\rvert$, forcing $q = q'$,
+$r = r'$. ∎
 
 So the remainder always takes the **divisor's sign**. The four cases to
 tattoo somewhere (stage 2 pins them):
 
-| y | z | ⌊y/z⌋ | rR |
+| $y$ | $z$ | $\lfloor y/z \rfloor$ | rR |
 |---|---|---|---|
 | 7 | 2 | 3 | 1 |
-| −7 | 2 | −4 | 1 |
-| 7 | −2 | −4 | −1 |
-| −7 | −2 | 3 | −1 |
+| $-7$ | 2 | $-4$ | 1 |
+| 7 | $-2$ | $-4$ | $-1$ |
+| $-7$ | $-2$ | 3 | $-1$ |
 
 Why does Knuth insist? Because this remainder **is** the `mod` of §1.2.4:
-y mod z = y − z⌊y/z⌋. That operation satisfies the clean laws the whole
-series relies on — y mod z is periodic in y, (y mod z) mod z = y mod z,
-and gcd arguments never need sign case-splits. Truncating division's
+$y \bmod z = y - z\lfloor y/z \rfloor$. That operation satisfies the clean laws the whole
+series relies on — $y \bmod z$ is periodic in $y$, $(y \bmod z) \bmod z = y \bmod z$,
+and $\gcd$ arguments never need sign case-splits. Truncating division's
 remainder changes sign with the dividend and breaks all three. Even the
-edge case is Knuth's: §1.2.4 *defines* y mod 0 = y, and MMIX's DIV by zero
+edge case is Knuth's: §1.2.4 *defines* $y \bmod 0 = y$, and MMIX's DIV by zero
 duly sets \$X = 0, rR = \$Y. (Full MMIX also raises an "integer divide
 check" exception there; MMIX-LITE keeps the values, skips the exception —
 a documented cut.)
 
 Implementation note: Rust's `/` truncates. Compute the truncated quotient,
 then subtract 1 when the remainder is nonzero and the operand signs
-differ; do it in i128 so i64::MIN / −1 cannot overflow (the wrapped answer
+differ; do it in i128 so i64::MIN / $-1$ cannot overflow (the wrapped answer
 is i64::MIN, which is also what full MMIX produces bit-wise).
 
 ### 3.3 The rest of the arithmetic
@@ -197,18 +197,18 @@ is i64::MIN, which is also what full MMIX produces bit-wise).
   agree bit-for-bit with its unsigned twin. Documented simplification;
   the tests treat wrapping as the contract.
 - **MULU** computes the full 128-bit product: low half to \$X, high half to
-  rH (read with `GET $X,rH`). Pin: (2⁶⁴−1)² has high half 2⁶⁴−2 and low
+  rH (read with `GET $X,rH`). Pin: $(2^{64}-1)^2$ has high half $2^{64}-2$ and low
   half 1. Signed MUL does *not* touch rH.
 - **DIVU** with no rD register is plain 64-bit unsigned division — exactly
   full MMIX's behavior when rD = 0, including divide-by-zero: \$X = 0,
   rR = \$Y.
-- **NEG** is spelled subtraction: `NEG $X,Y,$Z` = Y − \$Z where Y is
-  *always* an immediate byte; `NEG $X,$Z` abbreviates Y = 0. MMIX has no
+- **NEG** is spelled subtraction: `NEG $X,Y,$Z` $= Y -$ \$Z where $Y$ is
+  *always* an immediate byte; `NEG $X,$Z` abbreviates $Y = 0$. MMIX has no
   unary minus.
 - **Shifts** do **not** reduce the count mod 64 (x86 does; MMIX doesn't):
-  a count ≥ 64 pushes every bit out — SL/SLU/SRU give 0, SR gives the sign
+  a count $\ge 64$ pushes every bit out — SL/SLU/SRU give 0, SR gives the sign
   fill (0 or all ones). SR is arithmetic (sign-propagating), SRU logical.
-- **CMP/CMPU** put −1, 0, or 1 in \$X (−1 = all ones), signed vs unsigned.
+- **CMP/CMPU** put $-1$, 0, or 1 in \$X ($-1$ = all ones), signed vs unsigned.
   CMP then BN/BZ/BNZ/BNN is how MMIX says `if`.
 
 ---
@@ -217,13 +217,13 @@ is i64::MIN, which is also what full MMIX produces bit-wise).
 
 Knuth prices every MMIX instruction in two units:
 
-- **υ** ("oops") — one unit of machine work; and
-- **μ** ("mems") — one reference to memory.
+- **$\upsilon$** ("oops") — one unit of machine work; and
+- **$\mu$** ("mems") — one reference to memory.
 
-Fascicle 1's price list (a selection): most register operations cost 1υ;
-LDx and STx cost μ + υ; MUL costs 10υ; DIV costs 60υ; a branch costs 1υ
-plus 2υ more when mispredicted. The running time of a program is a
-polynomial aμ + bυ — a *theorem about the program*, independent of the
+Fascicle 1's price list (a selection): most register operations cost $1\upsilon$;
+LDx and STx cost $\mu + \upsilon$; MUL costs $10\upsilon$; DIV costs $60\upsilon$; a branch costs $1\upsilon$
+plus $2\upsilon$ more when mispredicted. The running time of a program is a
+polynomial $a\mu + b\upsilon$ — a *theorem about the program*, independent of the
 building's air conditioning, the compiler's mood, or this year's cache
 hierarchy. That is why counting beats the stopwatch: it is reproducible,
 comparable across decades, and provable. When Knuth reports in Vol. 4 that
