@@ -28,11 +28,11 @@
   :root{
     --parchment:  #F4EDDD;
     --parchment-2:#F4F1E1;
-    --plum:       #5C1D2A;
-    --plum-2:     #8E2C24;
+    --plum:       #0F3642;
+    --plum-2:     #0b2a33;
     --gold:       #C6A664;
     --gold-2:     #C69B4B;
-    --ink:        #1D2A33;
+    --ink:        #1F1B16;
     --lab-bg:     #12181c;
     --lab-bg-2:   #0c1114;
     --lab-line:   #2b3a42;
@@ -62,8 +62,8 @@
   body::before{
     content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
     background-image:
-      repeating-linear-gradient(0deg, rgba(29,42,51,.015) 0 1px, transparent 1px 3px),
-      repeating-linear-gradient(90deg, rgba(29,42,51,.015) 0 1px, transparent 1px 3px);
+      repeating-linear-gradient(0deg, rgba(31,27,22,.015) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(31,27,22,.015) 0 1px, transparent 1px 3px);
     mix-blend-mode:multiply;
   }
 
@@ -76,7 +76,7 @@
   .cover{
     margin-top:8vh;
     border:2px solid var(--ink);
-    box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(31,27,22,.10);
     background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%);
     color:var(--parchment);
     padding:clamp(28px,5vw,54px);
@@ -100,10 +100,10 @@
   .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
   .prose p{ margin:1.15em 0; }
   .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
-  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(15,54,66,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
   .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
   .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
-  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:640px; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#6B5D4F; text-align:center; margin:.9em auto 0; max-width:640px; }
 
   /* reveal-on-scroll */
   .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
@@ -181,7 +181,7 @@
   .bez-eq .muted{ color:#7f9099; }
   #beam,#panL,#panR{ transition:transform 1.1s cubic-bezier(.34,1.3,.5,1); }
 
-  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6B5D4F; }
   footer.foot a{ color:var(--plum-2); text-decoration:none; }
   .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
 </style>
@@ -305,12 +305,12 @@
                 <g id="beam" style="transform-origin:160px 42px;">
                   <line x1="52" y1="42" x2="268" y2="42" stroke="#C6A664" stroke-width="3" stroke-linecap="round"/>
                   <g id="panL" style="transform-origin:52px 42px;">
-                    <line x1="52" y1="42" x2="52" y2="74" stroke="#5b6b73" stroke-width="1.4"/>
+                    <line x1="52" y1="42" x2="52" y2="74" stroke="#6B5D4F" stroke-width="1.4"/>
                     <path d="M28 74 h48 l-8 20 h-32 z" fill="#20160a" stroke="#C6A664" stroke-width="1.4"/>
                     <text x="52" y="90" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="13" fill="#C6A664" id="panLtxt">g</text>
                   </g>
                   <g id="panR" style="transform-origin:268px 42px;">
-                    <line x1="268" y1="42" x2="268" y2="74" stroke="#5b6b73" stroke-width="1.4"/>
+                    <line x1="268" y1="42" x2="268" y2="74" stroke="#6B5D4F" stroke-width="1.4"/>
                     <path d="M244 74 h48 l-8 20 h-32 z" fill="#1c262c" stroke="#7f9099" stroke-width="1.4"/>
                     <text x="268" y="90" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="12" fill="#cdd8de" id="panRtxt">as+bt</text>
                   </g>
@@ -419,7 +419,7 @@ function buildModel(a, b){
 const state = { model:null, count:0, mode:'sub', playing:false, speed:7, acc:0, lastT:0, raf:null };
 
 /* ---------- palette for generations ---------- */
-const GEN_COLORS = ['#8E2C24','#5C1D2A','#3f5560','#274049','#6f5c3c','#9c4a3c','#476069','#7a3a44'];
+const GEN_COLORS = ['#0b2a33','#0F3642','#3f5560','#274049','#6f5c3c','#9c4a3c','#476069','#7a3a44'];
 function genColor(g, m){ return (g === m.totalGens - 1) ? '#C6A664' : GEN_COLORS[g % GEN_COLORS.length]; }
 
 /* ---------- canvas ---------- */

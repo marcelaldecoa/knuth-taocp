@@ -10,6 +10,18 @@ type Module = {id: string; dir: string; title: string; source: string; stages: S
 type Volume = {key: string; name: string; modules: Module[]};
 
 const VOLUMES = (manifest as {volumes: Volume[]}).volumes;
+
+// Each shelf is color-keyed to its book's cover ink (mode-aware tokens from
+// custom.css). 4A/4B share the green of Vol. 4; 4C takes the deep-teal shade.
+const VOL_INK: Record<string, string> = {
+  'Vol. 1': 'var(--v1)',
+  'Vol. 2': 'var(--v2)',
+  'Vol. 3': 'var(--v3)',
+  'Vol. 4A': 'var(--v4)',
+  'Vol. 4B': 'var(--v4)',
+  'Toward Vol. 4C': 'var(--v4c)',
+};
+
 const STORAGE_KEY = 'taocp:done:v1';
 const stageKey = (id: string, i: number) => `${id}:${i}`;
 
@@ -174,7 +186,11 @@ export default function CourseMap(): React.ReactElement {
           0,
         );
         return (
-          <div className={styles.shelf} key={v.key}>
+          <div
+            className={styles.shelf}
+            key={v.key}
+            style={{'--shelf-ink': VOL_INK[v.key] ?? 'var(--taocp-accent)'} as React.CSSProperties}
+          >
             <div className={styles.shelfLabel}>
               <span className={styles.shelfVol}>{v.key.replace('Vol.', 'Volume')}</span>
               <span className={styles.shelfName}>{v.name}</span>

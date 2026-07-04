@@ -36,7 +36,7 @@
 }
 .shelfVol {
   font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--taocp-accent); font-weight: 600;
+  color: var(--shelf-ink, var(--taocp-accent)); font-weight: 600;
 }
 .shelfName { font-style: italic; color: var(--taocp-ink-soft); font-size: 1.02rem; }
 .shelfStat {
@@ -49,7 +49,7 @@
 /* cards */
 .card {
   background: var(--taocp-plate); border: 1px solid var(--taocp-plate-edge);
-  border-left: 3px solid var(--taocp-oxblood); border-radius: 3px;
+  border-left: 3px solid var(--shelf-ink, var(--taocp-oxblood)); border-radius: 3px;
   padding: 1rem 1.05rem 0.85rem; display: flex; flex-direction: column; gap: 0.55rem;
 }
 .cardDone { border-left-color: var(--taocp-done); }

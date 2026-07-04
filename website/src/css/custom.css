@@ -55,13 +55,22 @@
   --taocp-oxblood-deep: #4a1525;  /* cloth-binding plum — navbar, dark panels */
   --taocp-gold: #c6a664;          /* brass foil — rules, accents */
   --taocp-gold-deep: #b89742;
-  --taocp-paper: #f4f1e1;         /* aged parchment — page ground */
-  --taocp-plate: #fbf9f0;         /* lighter parchment — cards lift off the page */
+  --taocp-paper: #F4EDDD;         /* aged parchment — one cream everywhere */
+  --taocp-plate: #FBF7EA;         /* ivory — cards lift off the page */
   --taocp-plate-edge: #e0d9c4;
   --taocp-ink: #1f1b16;           /* matte black — body text */
   --taocp-ink-soft: #4a4238;
-  --taocp-muted: #8a8072;
+  --taocp-muted: #6B5D4F;         /* warm muted — captions/metadata (AA 5.5:1) */
   --taocp-done: #3f6b45;
+
+  /* --- volume inks: each book's cover color, keyed to the four wings.
+     Text-safe forms on parchment (orange/teal are display-only, so their
+     darker siblings amber-ink/deep-teal stand in here). --- */
+  --v1: #0F3642;  /* Vol. 1 · petrol */
+  --v2: #7C024C;  /* Vol. 2 · magenta */
+  --v3: #A34A08;  /* Vol. 3 · amber-ink */
+  --v4: #00634E;  /* Vol. 4 · green */
+  --v4c: #245C58; /* Vol. 4C · deep-teal (text-safe form of teal) */
 
   --taocp-serif: 'Spectral', 'Palatino Linotype', Palatino, 'Book Antiqua',
     'URW Palladio L', Georgia, serif;
@@ -102,6 +111,7 @@
   --ifm-navbar-link-hover-color: #ffffff;
   --ifm-navbar-shadow: 0 2px 0 var(--taocp-gold);
 
+  --ifm-menu-color: #6B5D4F;      /* warm the sidebar greys off Infima's cool #606770 */
   --ifm-menu-color-active: var(--taocp-oxblood);
   --ifm-toc-border-color: var(--taocp-plate-edge);
 
@@ -120,6 +130,13 @@
   --taocp-ink: #ece2cf;
   --taocp-ink-soft: #cabfaa;
   --taocp-muted: #9a8f7d;
+
+  /* Volume inks lightened for the cloth-dark ground so shelf keys stay legible. */
+  --v1: #64a6b6;  /* petrol */
+  --v2: #d46ba4;  /* magenta */
+  --v3: #d98a4a;  /* amber */
+  --v4: #57a98d;  /* green */
+  --v4c: #6fb7b2; /* teal */
 
   --ifm-color-primary: #d98a97;
   --ifm-color-primary-dark: #cf7382;
@@ -168,6 +185,9 @@ body {
   border-bottom: 1px solid var(--taocp-gold);
   padding-bottom: 0.3rem;
 }
+/* Links: plum vs body is only 1.36:1, so colour alone is not a signal —
+   underline every in-prose link (the brand law). */
+.markdown a { text-decoration: underline; text-underline-offset: 3px; }
 
 /* Footer: force the plum band regardless of Infima's footer--dark class, which
    re-sets --ifm-footer-background-color at element scope — so use the token
