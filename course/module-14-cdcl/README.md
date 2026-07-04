@@ -30,8 +30,8 @@ other value. Two structural weaknesses:
 
 1. **Amnesia.** When a branch dies, DPLL learns nothing. If guesses
    `x1 = true, ..., x9 = true` are irrelevant and the *real* contradiction is
-   between `x10` and `x37`, DPLL will re-derive that contradiction inside
-   every one of the 2⁹ subtrees over `x1..x9`.
+   between $x_{10}$ and $x_{37}$, DPLL will re-derive that contradiction inside
+   every one of the $2^9$ subtrees over `x1..x9`.
 2. **Chronological backtracking.** DPLL always returns to the most recent
    decision, even when the conflict's actual causes lie many levels lower.
 
@@ -51,20 +51,20 @@ finds it exactly when, and because, the search needed it.
 
 ## 2. Resolution, the logic under the hood
 
-**Definition.** Let C ∨ x and C′ ∨ ¬x be clauses (C, C′ clauses not
-containing x or ¬x). Their **resolvent** on x is C ∨ C′.
+**Definition.** Let $C \lor x$ and $C' \lor \lnot x$ be clauses ($C, C'$ clauses not
+containing $x$ or $\lnot x$). Their **resolvent** on $x$ is $C \lor C'$.
 
 **Lemma (soundness of resolution).** Every assignment satisfying both
-C ∨ x and C′ ∨ ¬x satisfies C ∨ C′.
+$C \lor x$ and $C' \lor \lnot x$ satisfies $C \lor C'$.
 
-*Proof.* Fix such an assignment. If it makes x true, then C′ ∨ ¬x forces
-some literal of C′ true. If x is false, C ∨ x forces some literal of C true.
-Either way C ∨ C′ has a true literal. ∎
+*Proof.* Fix such an assignment. If it makes $x$ true, then $C' \lor \lnot x$ forces
+some literal of $C'$ true. If $x$ is false, $C \lor x$ forces some literal of $C$ true.
+Either way $C \lor C'$ has a true literal. ∎
 
 **Corollary (learned clauses are implied).** Conflict analysis (§4) produces
-its clause by a chain R₀, R₁, …, R_t where R₀ is a clause of the database and
-each R_{i+1} is a resolvent of R_i with a database clause. By the lemma and
-induction on i, every model of the database satisfies R_t. Since database
+its clause by a chain $R_0, R_1, \ldots, R_t$ where $R_0$ is a clause of the database and
+each $R_{i+1}$ is a resolvent of $R_i$ with a database clause. By the lemma and
+induction on $i$, every model of the database satisfies $R_t$. Since database
 clauses are input clauses or earlier learned clauses, a second induction (on
 the order clauses were learned) gives: **every learned clause is implied by
 the input formula.** ∎
@@ -80,23 +80,23 @@ of all literals currently true, in the order they became true. Each literal
 is either
 
 - a **decision** — a guess, opening a new **decision level**; the d-th
-  decision starts level d (level 0 holds what follows from the formula with
+  decision starts level $d$ (level 0 holds what follows from the formula with
   no guesses at all); or
 - an **implication** — a literal forced by unit propagation; it is tagged
   with its **reason**, the clause that was unit.
 
-Formally, if literal ℓ was forced by reason clause R, then ℓ ∈ R and every
-other literal of R is false on the trail — that is *what it means* for R to
+Formally, if literal $\ell$ was forced by reason clause $R$, then $\ell \in R$ and every
+other literal of $R$ is false on the trail — that is *what it means* for $R$ to
 have been unit. This local fact is the whole soundness interface between the
 propagator (stage 1) and the analyzer (stage 3).
 
 **Definition (implication graph).** Given a trail, form a DAG whose vertices
 are the trail's literal assignments (write `x4@3` for "x4 true, assigned at
-level 3"). For each implied literal ℓ with reason R, draw an edge from ¬m to
-ℓ for every literal m ∈ R \ {ℓ} (each m is false, so ¬m is an assignment on
-the trail). Decisions have no incoming edges. When a clause K dies — all its
-literals false — add a **conflict vertex** Λ with an edge from ¬m for every
-m ∈ K.
+level 3"). For each implied literal $\ell$ with reason $R$, draw an edge from $\lnot m$ to
+$\ell$ for every literal $m \in R \setminus \{\ell\}$ (each $m$ is false, so $\lnot m$ is an assignment on
+the trail). Decisions have no incoming edges. When a clause $K$ dies — all its
+literals false — add a **conflict vertex** $\Lambda$ with an edge from $\lnot m$ for every
+$m \in K$.
 
 The trail plus the reason tags *is* this graph, stored as one flat array —
 no pointers, no allocation. That is why stage 2's `Trail` has `level_of`,
@@ -105,29 +105,29 @@ with a discipline, exactly in the spirit of the MIX-era chapters.
 
 ## 4. UIPs, and learning the first-UIP clause
 
-Fix a conflict at decision level d, with decision literal ℓ_d.
+Fix a conflict at decision level $d$, with decision literal $\ell_d$.
 
-**Definition (UIP).** A vertex u at level d is a **unique implication
-point** if every path from ℓ_d to Λ passes through u. (In graph terms: u
-dominates Λ relative to ℓ_d, considering only level-d vertices.)
+**Definition (UIP).** A vertex $u$ at level $d$ is a **unique implication
+point** if every path from $\ell_d$ to $\Lambda$ passes through $u$. (In graph terms: $u$
+dominates $\Lambda$ relative to $\ell_d$, considering only level-$d$ vertices.)
 
-UIPs always exist: ℓ_d itself is one (every level-d implication descends
+UIPs always exist: $\ell_d$ itself is one (every level-$d$ implication descends
 from it). There may be several; order them along the trail. The **first
 UIP** is the one closest to the conflict.
 
 ### The cut, and why "asserting" matters
 
-Any UIP u defines a *cut* of the graph: on one side u and everything after
+Any UIP $u$ defines a *cut* of the graph: on one side $u$ and everything after
 it (the "conflict side"), on the other everything else. The clause read off
 the cut — the negations of the assignments with an edge crossing into the
-conflict side — contains **exactly one level-d literal, ¬u**. Such a clause
+conflict side — contains **exactly one level-$d$ literal, $\lnot u$**. Such a clause
 is called **asserting**, and assertingness is the payoff:
 
-after backjumping to level b = (highest level among the clause's other
-literals), those other literals are still false, u is unassigned, and the
-learned clause has become **unit**. It immediately *forces* ¬u at level b.
+after backjumping to level $b$ = (highest level among the clause's other
+literals), those other literals are still false, $u$ is unassigned, and the
+learned clause has become **unit**. It immediately *forces* $\lnot u$ at level $b$.
 The solver does not re-guess; it is pushed forward. (With two or more
-level-d literals the clause would arrive at level b with two unassigned
+level-$d$ literals the clause would arrive at level $b$ with two unassigned
 literals — silent, useless.)
 
 ### Why the *first* UIP
@@ -147,29 +147,29 @@ A3. [Resolve.]  Let p = the most recently assigned level-d literal with
 
 Three facts, worth proving before you code stage 3:
 
-- **A3 is always legal.** While R has ≥ 2 level-d literals, the latest of
-  them cannot be the decision (the decision is the *earliest* level-d
-  assignment), so it has a reason, and that reason contains p while R
-  contains ¬p — a valid resolution.
-- **Termination and correctness.** Each A3 step removes ¬p and adds only
+- **A3 is always legal.** While $R$ has $\ge 2$ level-$d$ literals, the latest of
+  them cannot be the decision (the decision is the *earliest* level-$d$
+  assignment), so it has a reason, and that reason contains $p$ while $R$
+  contains $\lnot p$ — a valid resolution.
+- **Termination and correctness.** Each A3 step removes $\lnot p$ and adds only
   literals assigned *earlier* on the trail (a reason's other literals were
-  already false when p was forced). So the "latest level-d literal of R"
+  already false when $p$ was forced). So the "latest level-$d$ literal of $R$"
   moves strictly backwards, and A2 must trigger at the decision at the
   latest. The vertex it stops at is a UIP — indeed the first: every path
-  from ℓ_d to Λ must cross the shrinking level-d frontier that R tracks —
-  and R is exactly the first-UIP cut clause.
+  from $\ell_d$ to $\Lambda$ must cross the shrinking level-$d$ frontier that $R$ tracks —
+  and $R$ is exactly the first-UIP cut clause.
 - **First UIP minimizes the backjump level.** Continuing to resolve past
   the first UIP never *removes* lower-level literals — resolution on
-  level-d variables only adds side literals. So among all UIP cuts, the
+  level-$d$ variables only adds side literals. So among all UIP cuts, the
   first UIP's clause has the smallest set of lower-level literals, hence
   the lowest (or equal) second-highest level, hence the deepest backjump —
   and it is the shortest such clause too. Stopping early is not laziness;
   it is optimal within the chain.
 
-One more rule: literals assigned at **level 0** are dropped from R
+One more rule: literals assigned at **level 0** are dropped from $R$
 entirely. They are false in every future state of the search (level 0 is
 never undone), and since the formula implies them false, dropping them
-preserves implication: if F ⊨ C ∨ m and F ⊨ ¬m then F ⊨ C.
+preserves implication: if $F \models C \lor m$ and $F \models \lnot m$ then $F \models C$.
 
 ### A worked example: eight variables, three levels
 
@@ -184,22 +184,22 @@ C1 = (¬x1 ∨ x3 ∨ x7)    C4 = (¬x4 ∨ x6)
 C2 = (¬x2 ∨ ¬x3 ∨ x4)   C5 = (¬x5 ∨ ¬x6)
 ```
 
-Decisions: ¬x7 at level 1, ¬x8 at level 2, x1 at level 3. Propagation at
+Decisions: $\lnot x_7$ at level 1, $\lnot x_8$ at level 2, $x_1$ at level 3. Propagation at
 level 3 then runs C0, C1, C2, C3, C4 in turn and crashes into C5:
 
 | t | literal | level | reason |
 |---|---------|-------|--------|
-| 0 | ¬x7 | 1 | (decision) |
-| 1 | ¬x8 | 2 | (decision) |
-| 2 | x1  | 3 | (decision) |
-| 3 | x2  | 3 | C0 |
-| 4 | x3  | 3 | C1 |
-| 5 | x4  | 3 | C2 |
-| 6 | x5  | 3 | C3 |
-| 7 | x6  | 3 | C4 |
-|   | Λ   |   | C5 all false — conflict |
+| 0 | $\lnot x_7$ | 1 | (decision) |
+| 1 | $\lnot x_8$ | 2 | (decision) |
+| 2 | $x_1$ | 3 | (decision) |
+| 3 | $x_2$ | 3 | C0 |
+| 4 | $x_3$ | 3 | C1 |
+| 5 | $x_4$ | 3 | C2 |
+| 6 | $x_5$ | 3 | C3 |
+| 7 | $x_6$ | 3 | C4 |
+|   | $\Lambda$ | | C5 all false — conflict |
 
-The implication graph (`@d` = assigned at level d; x1, ¬x7, ¬x8 are the
+The implication graph (`@d` = assigned at level $d$; $x_1$, $\lnot x_7$, $\lnot x_8$ are the
 decisions):
 
 ```text
@@ -210,10 +210,10 @@ decisions):
                                 ¬x8@2 ───C3────────^
 ```
 
-Every path from the decision `x1@3` to Λ passes through `x4@3` — and through
-nothing else at level 3 beyond it. So x4 is the **first UIP** (x1, the
+Every path from the decision `x1@3` to $\Lambda$ passes through `x4@3` — and through
+nothing else at level 3 beyond it. So $x_4$ is the **first UIP** ($x_1$, the
 decision, is the *last*). Now run A1–A3, resolving backwards along the trail
-(on x6, then x5):
+(on $x_6$, then $x_5$):
 
 ```text
 R = C5                        = (¬x5 ∨ ¬x6)      two level-3 literals
@@ -221,14 +221,14 @@ R = resolve(R, C4, on x6)     = (¬x4 ∨ ¬x5)      still two
 R = resolve(R, C3, on x5)     = (¬x4 ∨ x8)       one level-3 literal: stop
 ```
 
-Learned clause **C6 = (¬x4 ∨ x8)**; its other literal x8 lives at level 2,
+Learned clause **C6** $= (\lnot x_4 \lor x_8)$; its other literal $x_8$ lives at level 2,
 so the solver **backjumps to level 2** — the level-3 suffix `x1..x6`
 disappears wholesale, and level 2's trail grows by the forced literal:
-`¬x8@2 (decision), ¬x4@2 (reason C6)`. No re-guessing of x1 happened, and
-none was needed: with ¬x4 asserted, the old dead end is unreachable.
+`¬x8@2 (decision), ¬x4@2 (reason C6)`. No re-guessing of $x_1$ happened, and
+none was needed: with $\lnot x_4$ asserted, the old dead end is unreachable.
 
 Had we kept resolving to the *last* UIP (through C2, C1, C0) we would have
-learned `(¬x1 ∨ x7 ∨ x8)` — a longer clause asserting the same level. Trace
+learned $(\lnot x_1 \lor x_7 \lor x_8)$ — a longer clause asserting the same level. Trace
 it yourself; it is the check-your-understanding question 2.
 
 ## 5. Two watched literals: propagation that never looks back
@@ -238,17 +238,17 @@ to touch a clause until it might matter. The device — introduced by the
 Chaff solver (2001), adopted by Knuth as the heart of Algorithm C's inner
 loop — is the **two watched literals** scheme of stage 1.
 
-Each clause of length ≥ 2 *watches* two of its literals (keep them in
-slots 0 and 1). Per literal ℓ we keep the **watch list**: the clauses
-currently watching ℓ.
+Each clause of length $\ge 2$ *watches* two of its literals (keep them in
+slots 0 and 1). Per literal $\ell$ we keep the **watch list**: the clauses
+currently watching $\ell$.
 
 **Invariant W.** At every propagation fixed point, for every clause: if a
 watched literal is false, then the other watched literal is true, or the
 clause has at most one non-false literal (it is unit or conflicting).
 
 Contrapositive: a clause whose two watches are both non-false is neither
-unit nor false — it can safely be *ignored*. So when literal p becomes true,
-only the clauses watching ¬p are examined; for each, in order:
+unit nor false — it can safely be *ignored*. So when literal $p$ becomes true,
+only the clauses watching $\lnot p$ are examined; for each, in order:
 
 ```text
 P1. [Satisfied?]  Other watch true → keep the watch, next clause.
@@ -262,7 +262,7 @@ P4. [Conflict.]   Other watch false too → the clause is falsified: report it.
 ```
 
 Process forced literals **in assignment order** (a FIFO queue — in Knuth's
-formulation, a pointer G chasing the trail). The stage tests pin this order
+formulation, a pointer $G$ chasing the trail). The stage tests pin this order
 down: it is the canonical one, and it makes conflicts deterministic.
 
 **Theorem (backtracking is free).** If Invariant W holds and variables are
@@ -270,23 +270,23 @@ unassigned in LIFO order (a suffix of the trail — exactly what `backjump`
 produces), Invariant W still holds. No watch list needs repair.
 
 *Proof sketch.* Unassignment turns values into `None`; a violation would
-need a *false* watch w whose partner w′ *was* true and became unassigned
-while w stayed false. When propagation last examined w and kept it false
-(case P1), w′ was true, and both w's falsification and w′'s assignment had
-happened at levels ≤ the level current at that examination — with
-level(w′) ≤ level(w-falsified): within a batch both sit at the same level,
-across batches the satisfying w′ was assigned no later. Backjumping removes
-whole levels from the top, so it cannot unassign w′ while keeping ¬w: if
-level(w′) is popped, then level(¬w) ≥ level(w′) is popped too, and the watch
+need a *false* watch $w$ whose partner $w'$ *was* true and became unassigned
+while $w$ stayed false. When propagation last examined $w$ and kept it false
+(case P1), $w'$ was true, and both $w$'s falsification and $w'$'s assignment had
+happened at levels $\le$ the level current at that examination — with
+$\operatorname{level}(w') \le \operatorname{level}(w\text{-falsified})$: within a batch both sit at the same level,
+across batches the satisfying $w'$ was assigned no later. Backjumping removes
+whole levels from the top, so it cannot unassign $w'$ while keeping $\lnot w$: if
+$\operatorname{level}(w')$ is popped, then $\operatorname{level}(\lnot w) \ge \operatorname{level}(w')$ is popped too, and the watch
 is no longer false at all. Cases P3/P4 leave the clause unit/conflicting,
 which Invariant W tolerates and the driver resolves immediately. ∎
 
 **Amortized cost sketch.** Between two conflicts, the work of `propagate` is
 (number of clauses examined) = (watch moves) + (kept watches). Every kept
-watch is charged to case P1/P3/P4 — O(1) each, at most once per (clause,
+watch is charged to case P1/P3/P4 — $O(1)$ each, at most once per (clause,
 assignment). Every watch move strictly advances that clause's watch along
 its non-false literals for the current trail prefix. And backtracking is
-O(popped literals), touching no clause at all. Compare Module 10's
+$O(\text{popped literals})$, touching no clause at all. Compare Module 10's
 propagator, which rescans *every* clause after *every* assignment — and
 which had to *undo* nothing only because it kept no per-clause state. Here
 we keep state and *still* undo nothing; that asymmetry (pay on the way down,
@@ -336,19 +336,19 @@ Marques-Silva & Sakallah 1999):
 satisfiable.
 
 *Proof sketch.* For the state after each C4, consider the vector
-σ = (n₀, n₁, …) where n_l = number of trail literals at level l (pad with
-zeros). Claim: each learning step increases σ **lexicographically**. The
-backjump to level b leaves n₀..n_b−1 as they were and then the asserting
-literal is forced *at level b*, so n_b grows by at least one; higher
-components — wiped to zero — are majorized by the growth at position b.
-Could the asserting literal already have been assigned at some level ≤ b?
-No: it was assigned at the conflict level d > b (its negation was the UIP),
-so the backjump unassigned it; it is genuinely new at level b.
+$\sigma = (n_0, n_1, \ldots)$ where $n_l$ = number of trail literals at level $l$ (pad with
+zeros). Claim: each learning step increases $\sigma$ **lexicographically**. The
+backjump to level $b$ leaves $n_0 \ldots n_{b-1}$ as they were and then the asserting
+literal is forced *at level $b$*, so $n_b$ grows by at least one; higher
+components — wiped to zero — are majorized by the growth at position $b$.
+Could the asserting literal already have been assigned at some level $\le b$?
+No: it was assigned at the conflict level $d > b$ (its negation was the UIP),
+so the backjump unassigned it; it is genuinely new at level $b$.
 
-Each n_l is bounded by n (the variable count) and at most n + 1 components
+Each $n_l$ is bounded by $n$ (the variable count) and at most $n + 1$ components
 can be nonzero, so a lexicographically strictly increasing sequence of such
 vectors is finite: **finitely many conflicts**. Between conflicts, every C2/
-C5/C6 pass grows the trail, which is bounded by n — so the whole run is
+C5/C6 pass grows the trail, which is bounded by $n$ — so the whole run is
 finite.
 
 Partial correctness: a **SAT** answer is verified by §6's argument. An
@@ -356,7 +356,7 @@ Partial correctness: a **SAT** answer is verified by §6's argument. An
 is either a consequence of unit clauses of F or of learned clauses, all
 implied by F (§2 corollary, plus induction along level 0's propagation
 order); a clause with all literals false at level 0 therefore witnesses that
-F implies a contradiction — F is unsatisfiable. Equivalently: splice the
+$F$ implies a contradiction — $F$ is unsatisfiable. Equivalently: splice the
 reason chain of the level-0 conflict into the learned-clause resolutions and
 you have a *resolution refutation* of F. CDCL is, literally, a resolution
 proof search engine. ∎
@@ -373,13 +373,13 @@ deterministic heuristic and document it; the reference implements the first
 and third.
 
 - **VSIDS** (Variable State Independent Decaying Sum, from Chaff; Knuth's
-  `ACT` array with damping factor ρ). Every variable has an *activity*.
+  `ACT` array with damping factor $\rho$). Every variable has an *activity*.
   When a clause is learned, bump the activity of its variables; periodically
-  *decay* all activities (Knuth multiplies by ρ ≈ 0.95; the reference, being
+  *decay* all activities (Knuth multiplies by $\rho \approx 0.95$; the reference, being
   integer-only, halves everything every 128 conflicts). Decide on the
   unassigned variable of maximal activity. Effect: the search clusters
   around the variables involved in *recent* conflicts, digging into one
-  contradiction instead of wandering. It costs O(learned clause) per
+  contradiction instead of wandering. It costs $O(\text{learned clause})$ per
   conflict plus a scan (production solvers keep a priority heap).
 - **Phase saving** (Knuth's `OVAL` polarities). When a variable is
   unassigned by backjumping, remember its last polarity; when it is next
@@ -400,7 +400,7 @@ and third.
 And a limit to the magic, from Module 10's other direction: learned clauses
 are resolution consequences, so a CDCL run refuting F yields a resolution
 refutation of F no shorter than the run. **Haken's theorem** (every
-resolution refutation of PHP(n+1, n) is exponential in n) therefore lower-
+resolution refutation of $\text{PHP}(n+1, n)$ is exponential in $n$) therefore lower-
 bounds *every* CDCL solver on pigeonhole, VSIDS or not. Stage 4 makes you
 feel this: `php(7,6)` is dispatched quickly at this size, but the growth is
 merciless — try `php(9,8)` and watch. Symmetry breaking or stronger proof
@@ -441,7 +441,7 @@ and every exotic step will slot into a place you already built.
   keep a lazy data structure honest — a lesson that transfers far beyond SAT.
 - **Verdicts you can audit:** models are checked by evaluation; learned
   clauses by `brute_force_implies`; UNSAT by brute-force cross-checks and
-  known theorems (W(3,3) = 9, pigeonhole). Certification over trust, as in
+  known theorems ($W(3,3) = 9$, pigeonhole). Certification over trust, as in
   every module since Bézout coefficients in Module 01.
 
 ## In the real world
@@ -545,7 +545,7 @@ check for level-0 conflict *before* analyzing; unassign backjumped variables
 in the order `backjump` returns them; dedup/detautologize input clauses.
 Then pick a heuristic, document it, and enjoy the scale tests: `php(7,6)`
 (UNSAT, beyond comfortable DPLL) and a 60-variable random 3-SAT instance
-(hopeless for brute force at 2⁶⁰, milliseconds for you). Also here:
+(hopeless for brute force at $2^{60}$, milliseconds for you). Also here:
 `solve_brute`, `pigeonhole_cnf`, `waerden_cnf` — module 10 muscle memory.
 
 ---
@@ -557,16 +557,16 @@ Then pick a heuristic, document it, and enjoy the scale tests: `php(7,6)`
    level, forces immediately. Two or more → arrives with two unassigned
    literals, silent; the solver would have to rediscover the conflict.)
 2. In the §4 example, finish the resolution past the first UIP (through C2,
-   then C1, then C0) and confirm you get (¬x1 ∨ x7 ∨ x8). Why does its
+   then C1, then C0) and confirm you get $(\lnot x_1 \lor x_7 \lor x_8)$. Why does its
    backjump level equal the first-UIP clause's here, and why is it worse
    anyway? (Same second-highest level 2, but longer — and in general the
    level can only get worse, by §4's monotonicity argument.)
-3. When p becomes true, why is it enough to examine clauses watching ¬p —
-   what about clauses *containing* ¬p unwatched? (Invariant W: their two
-   watches are non-false, so falsifying an unwatched literal leaves ≥ 2
+3. When $p$ becomes true, why is it enough to examine clauses watching $\lnot p$ —
+   what about clauses *containing* $\lnot p$ unwatched? (Invariant W: their two
+   watches are non-false, so falsifying an unwatched literal leaves $\ge 2$
    non-false literals — not unit, not conflicting. They can wait.)
 4. Exactly where does the termination proof (§7) use assertingness? (The
-   forced literal at level b makes n_b grow — without it the lexicographic
+   forced literal at level $b$ makes $n_b$ grow — without it the lexicographic
    measure could stall, and a solver that backjumps without learning can
    loop forever.)
 5. Your solver answers UNSAT. What object *could* it print to let a
@@ -601,7 +601,7 @@ consult the book for exact statements. The last row is this course's own.)
   arenas; its heuristics are decayed counters (Module 04's arithmetic);
   its hard instances were charted in Modules 10 and 13. The capstone is a
   reunion.
-- **Proof complexity.** CDCL ≡ resolution (with restarts, polynomially so —
+- **Proof complexity.** CDCL $\equiv$ resolution (with restarts, polynomially so —
   Pipatsrisawat–Darwiche/Atserias et al.). Stronger systems (extended
   resolution, cutting planes, algebraic provers) power the next generation
   of solvers; Haken's wall is a property of resolution, not of SAT.

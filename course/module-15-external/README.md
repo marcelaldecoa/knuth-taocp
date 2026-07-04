@@ -21,7 +21,7 @@ everyone honest.
 
 ---
 
-## 1. Why external ≠ internal: the memory hierarchy is the algorithm
+## 1. Why external $\ne$ internal: the memory hierarchy is the algorithm
 
 Internal sorting counts comparisons because comparisons are what you pay
 for. External sorting counts **record transfers**, because moving a record
@@ -36,7 +36,7 @@ object store. The constants have shrunk by nine orders of magnitude, but the
   SSD serves large sequential reads at full bus bandwidth; S3 serves ranged
   GETs best in big contiguous chunks.
 - **Random access is expensive.** A tape must physically rewind (seconds!);
-  an SSD random 4K read costs ~100× the per-byte price of a sequential
+  an SSD random 4K read costs ~$100\times$ the per-byte price of a sequential
   scan; a disk seek costs ~10 ms while the CPU executes tens of millions of
   instructions.
 
@@ -51,7 +51,7 @@ lab models:
   memory and one per record written out.
 
 **Definition (pass).** One *pass* is the I/O of reading every record of the
-file once and writing it once: `n` reads + `n` writes. The quality measure
+file once and writing it once: $n$ reads + $n$ writes. The quality measure
 of an external sort is *how many passes it makes*, and the entire module is
 a campaign to shrink that number. The plan of every merge sort since 1945:
 
@@ -60,21 +60,21 @@ Pass 0 (run formation): read the file through memory, write initial runs.
 Merge passes:           combine runs into fewer, longer runs, until one.
 ```
 
-Fewer initial runs ⇒ fewer merge passes. Higher merge order ⇒ fewer merge
-passes. Cleverer scheduling ⇒ cheaper passes. Those are stages 1, 2 and 3.
+Fewer initial runs $\Rightarrow$ fewer merge passes. Higher merge order $\Rightarrow$ fewer merge
+passes. Cleverer scheduling $\Rightarrow$ cheaper passes. Those are stages 1, 2 and 3.
 
 ---
 
 ## 2. Run formation: replacement selection (Algorithm 5.4.1R)
 
-The obvious pass 0: fill memory (P records), sort, write a run; repeat.
-That produces runs of length exactly P. Replacement selection produces runs
-of expected length **2P** — from the same memory — by refusing to draw a
+The obvious pass 0: fill memory ($P$ records), sort, write a run; repeat.
+That produces runs of length exactly $P$. Replacement selection produces runs
+of expected length **$2P$** — from the same memory — by refusing to draw a
 hard boundary between one memoryful and the next.
 
-Keep the P records in a selection structure ordered by the two-part key
+Keep the $P$ records in a selection structure ordered by the two-part key
 `(RN, KEY)`: run number first, then key. Output the smallest; refill the
-slot from the input immediately. A new arrival that is ≥ the last key
+slot from the input immediately. A new arrival that is $\ge$ the last key
 output can still ride the current run; one that is smaller has missed its
 chance and is **frozen** — tagged with the next run's number, asleep in
 memory until the current run finishes.
@@ -99,7 +99,7 @@ build in stage 2 — the freezing is done by treating `(RN, KEY)` as the
 tournament key. Any priority structure ordered by `(RN, KEY)` behaves
 identically; a `BinaryHeap<Reverse<(usize, i64)>>` is fine for stage 1.)
 
-### Hand trace: P = 3 on Knuth's sixteen keys
+### Hand trace: $P = 3$ on Knuth's sixteen keys
 
 Input: `503 087 512 061 908 170 897 275 653 426 154 509 612 677 765 703`.
 
@@ -121,18 +121,18 @@ Stage 1 pins this exact example.
 
 Two boundary behaviours worth internalizing (both tested):
 
-- **Already-sorted input ⇒ one run, for any P.** Nothing ever arrives
+- **Already-sorted input $\Rightarrow$ one run, for any $P$.** Nothing ever arrives
   smaller than the last output; nothing freezes; the run never ends.
-- **Reverse-sorted input ⇒ runs of length exactly P.** Every arrival
-  freezes, so each run is precisely the P records present at its start.
-  This is the worst case; P = 1 similarly degenerates to the input's
+- **Reverse-sorted input $\Rightarrow$ runs of length exactly $P$.** Every arrival
+  freezes, so each run is precisely the $P$ records present at its start.
+  This is the worst case; $P = 1$ similarly degenerates to the input's
   natural ascending runs (module 06's `count_runs` counts them).
 
 ### The snow-plow argument: why 2P
 
 **Theorem (E. F. Moore, 1961).** On random input (keys i.i.d., all relative
 orders equally likely), the expected run length of replacement selection
-with memory P tends to **2P** in the steady state.
+with memory $P$ tends to **$2P$** in the steady state.
 
 *Proof sketch — Knuth's snow-plow.* Map keys into position on a **circular
 track** of circumference 1 (via the keys' quantiles — uniform arrivals).
@@ -142,47 +142,45 @@ Watch the algorithm run in its steady state:
   run boundary, and sweeps again: a **snow-plow driving laps around the
   track**.
 - Arriving records are **snowflakes falling uniformly** on the track. A
-  flake ahead of the plow (key ≥ LASTKEY) will be swept up *this* lap: it
+  flake ahead of the plow (key $\ge$ LASTKEY) will be swept up *this* lap: it
   joins the current run. A flake behind the plow is frozen: it waits on the
   ground for the *next* lap.
 - One flake falls for each flake plowed (R4 refills what R3 outputs), so in
-  equilibrium **the snow on the ground is constant: exactly P records.**
+  equilibrium **the snow on the ground is constant: exactly $P$ records.**
 
-Now compute. Let snow fall at rate *h* per unit length per unit time, and
-let a lap take time *L*. When the plow reaches a point, snow there has been
-accumulating since the plow last visited — a full lap, time *L* — so the
-plow removes depth *hL* everywhere. One lap therefore sweeps `hL · 1 = hL`
-records: **the run length is hL.**
+Now compute. Let snow fall at rate $h$ per unit length per unit time, and
+let a lap take time $L$. When the plow reaches a point, snow there has been
+accumulating since the plow last visited — a full lap, time $L$ — so the
+plow removes depth $hL$ everywhere. One lap therefore sweeps $hL \cdot 1 = hL$
+records: **the run length is $hL$.**
 
 How much snow lies on the ground at any instant? A point the plow passed
-time *t* ago carries depth *ht*, and *t* is spread uniformly over [0, L)
+time $t$ ago carries depth $ht$, and $t$ is spread uniformly over $[0, L)$
 around the track, so the total is
 
-```text
-    ∫₀¹ h·(time since plow passed) dx  =  h · L/2   =   P.
-```
+$$\int_0^1 h\cdot(\text{time since plow passed})\,dx = h \cdot L/2 = P.$$
 
-Hence `hL = 2P`. ∎
+Hence $hL = 2P$. ∎
 
 The picture also explains the boundaries: sorted input is snow that always
 falls *just ahead* of the plow (one infinite lap); reverse-sorted input is
-snow that always falls just behind (the plow only ever eats the P flakes
-present at lap start). Stage 1's property test does the experiment: P = 64,
-n = 100 000 random keys, and the average run length lands within a few
-percent of 128. (The *first* run is shorter — expected `(e−1)P ≈ 1.72P` —
+snow that always falls just behind (the plow only ever eats the $P$ flakes
+present at lap start). Stage 1's property test does the experiment: $P = 64$,
+$n = 100\,000$ random keys, and the average run length lands within a few
+percent of 128. (The *first* run is shorter — expected $(e-1)P \approx 1.72P$ —
 because the track starts bare; the steady state is what the test measures.)
 
 ---
 
 ## 3. k-way merging with a tree of losers (§5.4.1)
 
-Merging k runs of total length n naively compares the k front records at
-every step: `(k−1)·n` comparisons. With a tournament tree it costs
-`⌈lg k⌉` per record — and since merging n records resolves `n lg k` bits of
+Merging $k$ runs of total length $n$ naively compares the $k$ front records at
+every step: $(k-1)\cdot n$ comparisons. With a tournament tree it costs
+$\lceil \lg k \rceil$ per record — and since merging $n$ records resolves $n \lg k$ bits of
 uncertainty about the interleaving, that is the information-theoretic rate:
 you cannot do better.
 
-The right tournament tree is the **tree of losers**. The k run fronts sit
+The right tournament tree is the **tree of losers**. The $k$ run fronts sit
 at the leaves. Play the tournament (smaller key wins); each internal node
 remembers the **loser** of the match played there, and slot 0 above the
 root remembers the champion.
@@ -210,7 +208,7 @@ right-hand tree:
   behind as the new loser;
 - at node 1 the climber 12 meets the stored loser 8: 8 wins, 12 stays.
 
-New champion: 8. Two comparisons — exactly `lg 4`.
+New champion: 8. Two comparisons — exactly $\lg 4$.
 
 **Why losers beat winners.** After the champion's leaf changes, the only
 matches whose outcome can change are the ones on that leaf-to-root path.
@@ -224,16 +222,14 @@ opponent in the exact place the replay visits. One node, one comparison,
 per level.
 
 **Comparison bound (stage 2's contract).** Building the initial tournament
-plays one match per internal node: ≤ k − 1 key comparisons. Each of the n
-outputs replays one root path: ≤ ⌈lg k⌉ comparisons (pad k to the next
-power of two so every leaf has depth exactly ⌈lg k⌉). Total:
+plays one match per internal node: $\le k - 1$ key comparisons. Each of the $n$
+outputs replays one root path: $\le \lceil \lg k \rceil$ comparisons (pad $k$ to the next
+power of two so every leaf has depth exactly $\lceil \lg k \rceil$). Total:
 
-```text
-    comparisons  ≤  n·⌈lg k⌉ + k.
-```
+$$\text{comparisons} \le n\cdot\lceil \lg k \rceil + k.$$
 
-Exhausted runs are handled with a +∞ sentinel (`None` in the lab): matches
-against +∞ are flag checks, not key comparisons, so a skewed merge (one
+Exhausted runs are handled with a $+\infty$ sentinel (`None` in the lab): matches
+against $+\infty$ are flag checks, not key comparisons, so a skewed merge (one
 long run, many short) still meets the bound. A `BinaryHeap` misses it by a
 factor approaching 2 — pop-then-push costs up to two comparisons per level
 — and stage 2's test can tell.
@@ -242,14 +238,14 @@ factor approaching 2 — pop-then-push costs up to two comparisons per level
 
 ## 4. The polyphase merge: Fibonacci on tape (§5.4.2)
 
-Suppose you have T tape drives and S initial runs. The **balanced merge**
-splits the drives half and half: k = T/2 input tapes, T/2 output tapes,
-merge k-ways, swap roles, repeat. Every phase is a full pass, and there are
-`⌈log_k S⌉` of them: total merge I/O `n·⌈log_k S⌉` written (plus pass 0).
-With T = 4 and S = 13 that is `⌈lg 13⌉ = 4` full passes.
+Suppose you have $T$ tape drives and $S$ initial runs. The **balanced merge**
+splits the drives half and half: $k = T/2$ input tapes, $T/2$ output tapes,
+merge $k$-ways, swap roles, repeat. Every phase is a full pass, and there are
+$\lceil \log_k S \rceil$ of them: total merge I/O $n\cdot\lceil \log_k S \rceil$ written (plus pass 0).
+With $T = 4$ and $S = 13$ that is $\lceil \lg 13 \rceil = 4$ full passes.
 
 Polyphase asks a sneaky question: *why must a phase be a full pass?* Keep
-**T − 1 input tapes and a single output tape**, and merge (T−1)-ways until
+**$T - 1$ input tapes and a single output tape**, and merge $(T-1)$-ways until
 exactly *one* input tape is exhausted. Stop there. The exhausted tape
 becomes the new output; **every other tape keeps its unread runs exactly
 where they are** — partially consumed, mid-reel. A phase now moves only
@@ -260,17 +256,17 @@ of higher order, on fewer drives.
 
 When does this schedule work perfectly — every phase a genuine (T−1)-way
 merge, one tape (not two) dying per phase, ending with exactly one run?
-Run the machine **backwards** from the end. Take T = 3 (two input tapes),
+Run the machine **backwards** from the end. Take $T = 3$ (two input tapes),
 writing run counts as pairs:
 
-- After the last phase: `(1, 0)` — one run, somewhere.
-- That phase must have merged 1 run from each input: before it, `(1, 1)`.
+- After the last phase: $(1, 0)$ — one run, somewhere.
+- That phase must have merged 1 run from each input: before it, $(1, 1)$.
 - Un-merging the phase before: the tape that provided the *survivors* had
-  1 extra run, so `(2, 1)`. Before that, `(3, 2)`; then `(5, 3)`, `(8, 5)`…
+  1 extra run, so $(2, 1)$. Before that, $(3, 2)$; then $(5, 3)$, $(8, 5)$…
 
 The perfect run counts for three tapes are **consecutive Fibonacci
 numbers**, totals 1, 2, 3, 5, 8, 13, 21, … The forward statement of the
-recurrence, for T tapes and level-n distribution `(a₁ ≥ a₂ ≥ … ≥ a_{T−1})`:
+recurrence, for $T$ tapes and level-$n$ distribution $(a_1 \ge a_2 \ge \cdots \ge a_{T-1})$:
 
 ```text
     level 0:  (1, 0, …, 0)
@@ -278,77 +274,77 @@ recurrence, for T tapes and level-n distribution `(a₁ ≥ a₂ ≥ … ≥ a_{
                 a_{T−2}' = a₁ + a_{T−1},  a_{T−1}' = a₁.
 ```
 
-**Perfect-distribution theorem.** A polyphase merge on T tapes can run
-perfectly from initial run counts `(a₁, …, a_{T−1})` if and only if they
-form a level of this recurrence; the totals `t_n` obey the generalized
+**Perfect-distribution theorem.** A polyphase merge on $T$ tapes can run
+perfectly from initial run counts $(a_1, \ldots, a_{T-1})$ if and only if they
+form a level of this recurrence; the totals $t_n$ obey the generalized
 Fibonacci law
 
-```text
-    t_n = t_{n−1} + t_{n−2} + … + t_{n−(T−1)}
-```
+$$t_n = t_{n-1} + t_{n-2} + \cdots + t_{n-(T-1)}$$
 
-(T = 3: 1, 2, 3, 5, 8, 13 — Fibonacci. T = 4: 1, 3, 5, 9, 17, 31 — each
+($T = 3$: 1, 2, 3, 5, 8, 13 — Fibonacci. $T = 4$: 1, 3, 5, 9, 17, 31 — each
 the sum of the previous three.)
 
 *Proof sketch.* Backward induction, exactly as in the T = 3 story: a
-perfect final state is level 0. Reversing one phase of a level-n state
-adds, to each surviving tape, the a₁ runs that the exhausted tape consumed
-alongside it — that is precisely the level n+1 formula; and any perfect
+perfect final state is level 0. Reversing one phase of a level-$n$ state
+adds, to each surviving tape, the $a_1$ runs that the exhausted tape consumed
+alongside it — that is precisely the level $n+1$ formula; and any perfect
 schedule *must* reverse this way because each phase, run backward, restores
 one run to every input tape per merged output run. The totals recurrence
-follows by summing: `t_{n+1} = (T−1)·a₁(n) + (t_n − a₁(n))`, with
-`a₁(n) = t_{n−(T−2)} … ` telescoping into the sum of the previous T − 1
+follows by summing: $t_{n+1} = (T-1)\cdot a_1(n) + (t_n - a_1(n))$, with
+$a_1(n) = t_{n-(T-2)} \ldots$ telescoping into the sum of the previous $T - 1$
 totals. ∎
 
 ### Hand trace: 13 runs on 3 tapes (Knuth's tape table)
 
-Write `1⁸` for "8 runs of relative length 1". Initial distribution: level
-5 = (8, 5). n = 13 records (unit runs).
+Write $1^8$ for "8 runs of relative length 1". Initial distribution: level
+5 = $(8, 5)$. $n = 13$ records (unit runs).
 
 | phase | tape 1 | tape 2 | tape 3 | action                | records moved |
 |-------|--------|--------|--------|-----------------------|---------------|
-| start | 1⁸     | 1⁵     | —      | distribute            | (13)          |
-| 1     | 1³     | —      | 2⁵     | merge 5 pairs → T3    | 10            |
-| 2     | —      | 3³     | 2²     | merge 3 pairs → T2    | 9             |
-| 3     | 5²     | 3¹     | —      | merge 2 pairs → T1    | 10            |
-| 4     | 5¹     | —      | 8¹     | merge 1 pair → T3     | 8             |
-| 5     | —      | 13¹    | —      | merge 1 pair → T2     | 13            |
+| start | $1^8$  | $1^5$  | —      | distribute            | (13)          |
+| 1     | $1^3$  | —      | $2^5$  | merge 5 pairs → T3    | 10            |
+| 2     | —      | $3^3$  | $2^2$  | merge 3 pairs → T2    | 9             |
+| 3     | $5^2$  | $3^1$  | —      | merge 2 pairs → T1    | 10            |
+| 4     | $5^1$  | —      | $8^1$  | merge 1 pair → T3     | 8             |
+| 5     | —      | $13^1$ | —      | merge 1 pair → T2     | 13            |
 
 Read phase 2 carefully — it is the whole trick. Tape 3 still holds 2 unread
 runs of length 2 *and stays where it is*; only tape 1's three runt runs and
 three of tape 3's runs are touched. Total merge I/O: 10 + 9 + 10 + 8 + 13 =
-**50 records ≈ 3.85 passes**, versus balanced 2-way's 4 full passes (52) —
+**50 records $\approx$ 3.85 passes**, versus balanced 2-way's 4 full passes (52) —
 *and balanced needed a fourth tape drive*. Asymptotically 3-tape polyphase
-sorts S runs in about `1.04 lg S` effective passes; more tapes push the
-growth ratio from φ toward 2 and the passes down further.
+sorts $S$ runs in about $1.04 \lg S$ effective passes; more tapes push the
+growth ratio from $\varphi$ toward 2 and the passes down further.
 
 ### Dummy runs
 
 Real files do not arrive with Fibonacci run counts. If replacement
-selection produced S runs and the smallest perfect total ≥ S is t, invent
-`t − S` **dummy runs** — imaginary runs of length zero. A dummy merges at
+selection produced $S$ runs and the smallest perfect total $\ge S$ is $t$, invent
+$t - S$ **dummy runs** — imaginary runs of length zero. A dummy merges at
 zero I/O cost (merging "nothing" with real runs just renames them), so the
 schedule keeps its perfect shape and the phase count is unchanged. Knuth's
 Algorithm 5.4.2D interleaves the distribution and the dummy bookkeeping
-(his D(j) counters) and places dummies where they will be merged fewest
+(his $D(j)$ counters) and places dummies where they will be merged fewest
 times; the lab uses the simplest correct convention — **compute the
 perfect distribution, deal out real runs, top up each tape's quota with
 empty runs** — and the tests hold you only to that documented convention.
 
 ### The bill, precisely
 
-Let S runs come out of pass 0 and let the perfect level be *phases*. Run
-formation moves every record once (n reads + n writes). Each merge phase
-reads and writes at most n records — usually far fewer. Hence the ceiling
+Let $S$ runs come out of pass 0 and let the perfect level be *phases*. Run
+formation moves every record once ($n$ reads + $n$ writes). Each merge phase
+reads and writes at most $n$ records — usually far fewer. Hence the ceiling
 stage 4 asserts:
 
-```text
-    records_written  ≤  n · (1 + phases)          (polyphase, ceiling)
-    records_written  =  n · (1 + ⌈log_k S⌉)       (balanced k-way, exact)
-```
+$$
+\begin{aligned}
+\text{records\_written} &\le n \cdot (1 + \text{phases}) && \text{(polyphase, ceiling)}\\
+\text{records\_written} &= n \cdot (1 + \lceil \log_k S \rceil) && \text{(balanced $k$-way, exact)}
+\end{aligned}
+$$
 
-and one run (already-sorted input, or memory ≥ n) costs exactly one pass:
-n reads, n writes, zero phases. The accountant `IoStats` makes these
+and one run (already-sorted input, or memory $\ge n$) costs exactly one pass:
+$n$ reads, $n$ writes, zero phases. The accountant `IoStats` makes these
 theorems executable.
 
 ---
@@ -366,30 +362,30 @@ Details that bite: the run boundary is detected when the *popped* record's
 tag exceeds the current run number (step R2 before R3); refill from the
 input on every output while input remains (R4); `p == 0` panics with a
 message containing `"at least one"`; empty input yields no runs. Tests: the
-P = 3 worked example pinned exactly, sortedness + permutation on LCG data,
-one run for sorted input, exact-P runs for reverse input, the 2P law at
-P = 64 / n = 100 000, P = 1 ≡ natural runs, P ≥ n ≡ one sorted run.
+$P = 3$ worked example pinned exactly, sortedness + permutation on LCG data,
+one run for sorted input, exact-$P$ runs for reverse input, the $2P$ law at
+$P = 64$ / $n = 100\,000$, $P = 1 \equiv$ natural runs, $P \ge n \equiv$ one sorted run.
 
 ### Stage 2 — `merge_runs`, `merge_runs_counting` (loser tree, §5.4.1)
 
 Build the tree of losers. The compact array layout: pad to
 `kk = k.next_power_of_two()`; internal nodes at slots `1..kk`; leaf j lives
 (conceptually) at slot `kk + j`; parent of slot i is `i/2`; slot 0 holds
-the champion. Represent exhausted/padding fronts as `None` = +∞ and don't
+the champion. Represent exhausted/padding fronts as `None` = $+\infty$ and don't
 count comparisons against them. Initial build: one match per internal node,
 bottom-up (recursion is easiest: play both children, store the loser,
 return the winner). After each output: advance that run, replay the one
 root path. Tests: correctness against flatten-and-sort on equal, skewed,
-empty, duplicate-heavy, k = 1 and k = 100 shapes, plus the
-`n·⌈lg k⌉ + O(k)` comparison bound — which a `BinaryHeap` implementation
+empty, duplicate-heavy, $k = 1$ and $k = 100$ shapes, plus the
+$n\cdot\lceil \lg k \rceil + O(k)$ comparison bound — which a `BinaryHeap` implementation
 fails.
 
 ### Stage 3 — `polyphase_distribution`, `polyphase_merge` (§5.4.2)
 
 `polyphase_distribution`: iterate the generalized-Fibonacci recurrence from
-`(1, 0, …, 0)` until the total covers `num_runs`; return that level
-(length T − 1, non-increasing; all zeros for `num_runs == 0`; panic with
-`"at least 3"` for `tapes < 3`). `polyphase_merge`: deal runs onto T − 1
+$(1, 0, \ldots, 0)$ until the total covers `num_runs`; return that level
+(length $T - 1$, non-increasing; all zeros for `num_runs == 0`; panic with
+`"at least 3"` for `tapes < 3`). `polyphase_merge`: deal runs onto $T - 1$
 tapes per the distribution, topping quotas up with empty (dummy) runs; then
 loop — find the empty tape, merge `min(input tape run counts)` groups onto
 it with your stage-2 merger, count one phase — until one run remains.
@@ -398,13 +394,13 @@ pins: 2 runs → 1 phase, 3 → 2, 5 → 3, 8 → 4, 13 → 5.
 
 ### Stage 4 — `external_sort` (the pipeline, with the accountant)
 
-Wire it together: charge n reads + n writes for run formation, then for
+Wire it together: charge $n$ reads + $n$ writes for run formation, then for
 every merge group charge reads = sum of input-run lengths and writes =
 merged length. Reuse your stage-3 phase loop (a shared helper taking
 `&mut IoStats` is the tidy factoring). Tests: 200 000 records through 256
 slots and 3 tapes — sorted, permutation, and
-`records_written ≤ n·(1 + phases)` with phases recomputed from stage-3
-logic; sorted input pinned at exactly n reads + n writes; `memory ≥ n`
+$\text{records\_written} \le n\cdot(1 + \text{phases})$ with phases recomputed from stage-3
+logic; sorted input pinned at exactly $n$ reads + $n$ writes; $\text{memory} \ge n$
 ditto; empty input costs zero; reverse-sorted worst case still under the
 ceiling.
 
@@ -414,8 +410,8 @@ ceiling.
 
 Answer before moving on (hints in parentheses).
 
-1. Replacement selection and the runs-of-P method use the same memory. Where
-   do the extra P records of each run *come from*? (Hint: while a run is
+1. Replacement selection and the runs-of-$P$ method use the same memory. Where
+   do the extra $P$ records of each run *come from*? (Hint: while a run is
    being written, how many records pass *through* memory rather than sit in
    it? The plow eats snow that fell after the lap began.)
 2. Why must the selection structure order by `(RN, KEY)` and not by `KEY`
@@ -429,10 +425,10 @@ Answer before moving on (hints in parentheses).
    backward reconstruction *force* Fibonacci for T = 3? (Hint: with one
    input tape, a "merge" copies. Reverse a perfect phase and count what
    returns to each tape.)
-5. Your laptop's SSD does random reads a mere ~100× slower than sequential,
-   not ~100 000× like a tape seek. Which parts of this module survive that
+5. Your laptop's SSD does random reads a mere ~$100\times$ slower than sequential,
+   not ~$100\,000\times$ like a tape seek. Which parts of this module survive that
    change and which soften? (Hint: think per-record cost of a k-way merge
-   with k = 1000 — memory for input buffers is `k × buffer size`; what
+   with $k = 1000$ — memory for input buffers is $k \times \text{buffer size}$; what
    does shrinking the buffer do to I/O granularity?)
 
 ---
@@ -445,13 +441,13 @@ Log your work in `course/module-15-external/exercises.md`.
 
 | Ex. | Rating | Statement (paraphrased) |
 |---|---|---|
-| 5.4.1-1 | 10 | Run replacement selection by hand with P = 4 on the sixteen example keys; compare run lengths with P = 3. |
-| 5.4.1-3 | 15 | Prove: on reverse-ordered input every run has length exactly P (stage 1 tests it; you write the argument). |
-| ▶5.4.1-10 | M22 | Show a loser-tree replay makes exactly ⌈lg k⌉ key comparisons when k is a power of two, and never more after padding. Where does a winner tree pay double? |
+| 5.4.1-1 | 10 | Run replacement selection by hand with $P = 4$ on the sixteen example keys; compare run lengths with $P = 3$. |
+| 5.4.1-3 | 15 | Prove: on reverse-ordered input every run has length exactly $P$ (stage 1 tests it; you write the argument). |
+| ▶5.4.1-10 | M22 | Show a loser-tree replay makes exactly $\lceil \lg k \rceil$ key comparisons when $k$ is a power of two, and never more after padding. Where does a winner tree pay double? |
 | ▶5.4.2-1 | 15 | Reproduce the 13-run/3-tape table and verify the 50-record total; then redo it with 21 runs and 6 phases. |
-| 5.4.2-3 | M20 | Derive perfect distributions for T = 4 through total 57 and verify tₙ = tₙ₋₁ + tₙ₋₂ + tₙ₋₃. |
-| ▶5.4.2-13 | M28 | Dummy placement: show that putting dummies where they are merged *fewest* times beats our append-at-the-back convention, and quantify the saving for S = 6, T = 3. |
-| 5.4.1-21 | M30 | The first run is special: show its expected length is (e − 1)P ≈ 1.718P, not 2P, and explain via the bare snow-plow track. |
+| 5.4.2-3 | M20 | Derive perfect distributions for $T = 4$ through total 57 and verify $t_n = t_{n-1} + t_{n-2} + t_{n-3}$. |
+| ▶5.4.2-13 | M28 | Dummy placement: show that putting dummies where they are merged *fewest* times beats our append-at-the-back convention, and quantify the saving for $S = 6$, $T = 3$. |
+| 5.4.1-21 | M30 | The first run is special: show its expected length is $(e-1)P \approx 1.718P$, not $2P$, and explain via the bare snow-plow track. |
 
 ---
 
@@ -461,20 +457,20 @@ Log your work in `course/module-15-external/exercises.md`.
   out of one inversion: the expensive resource is the *channel*, not the
   comparator. That is why run formation happily spends a heap operation per
   record (to halve the number of runs), why merging goes k-way instead of
-  2-way (comparisons per record grow like lg k, but *passes* shrink like
-  1/lg k — a wonderful trade), and why the lab's tests assert `IoStats`
+  2-way (comparisons per record grow like $\lg k$, but *passes* shrink like
+  $1/\lg k$ — a wonderful trade), and why the lab's tests assert `IoStats`
   bounds rather than time.
 - **Replacement selection over sort-a-chunk** because doubling run length
   costs *nothing* at sort time and removes one whole merge level about half
-  the time (`log` of half as many runs). The snow-plow tells you it's not
-  a hack: 2P is a steady-state law, not a lucky constant.
+  the time ($\log$ of half as many runs). The snow-plow tells you it's not
+  a hack: $2P$ is a steady-state law, not a lucky constant.
 - **Loser tree over heap** because the merge inner loop is the hottest loop
   in the whole sort: one comparison per level, one node touched per level,
   no sift-down branching. Knuth builds Algorithm R *inside* this structure
   precisely so run formation and merging share their machinery.
 - **Polyphase over balanced merging** because tape drives were the scarcest
   resource in the machine room: with T drives, balanced merging musters
-  only (T/2)-way merges, while polyphase gets (T−1)-way power and
+  only $(T/2)$-way merges, while polyphase gets $(T-1)$-way power and
   partial-pass phases from the same hardware. The Fibonacci distribution is
   not aesthetics; it is the unique fixed point of "merge onto the empty
   tape and leave every other tape mid-reel".
@@ -510,20 +506,20 @@ Log your work in `course/module-15-external/exercises.md`.
   larger-than-memory sorts, joins and aggregations by writing runs to disk
   and merging them out-of-core; DuckDB's sort was rewritten around
   cache-friendly run formation plus merge precisely because SSDs kept the
-  old asymmetry (sequential ≫ random) even after seeks stopped costing
+  old asymmetry (sequential $\gg$ random) even after seeks stopped costing
   10 ms. The devices changed; the accountant's ledger did not.
 
 ## Proof techniques you practiced
 
 - **Steady-state / equilibrium analysis** — the snow-plow: instead of
   tracking the algorithm step by step, find the invariant regime (constant
-  snow = P, uniform lap) and read the answer off a conservation law. This
+  snow = $P$, uniform lap) and read the answer off a conservation law. This
   is your first *fluid limit* argument; queueing theory and amortized
   analyses reuse it constantly.
 - **Adversarial/extremal inputs** — sorted and reverse-sorted inputs pin
   the two ends of replacement selection's behaviour (one run; runs of
-  exactly P), turning "expected 2P" into a bracketed, tested claim.
-- **Counting via tree depth** — the `n·⌈lg k⌉ + k` merge bound is a
+  exactly $P$), turning "expected $2P$" into a bracketed, tested claim.
+- **Counting via tree depth** — the $n\cdot\lceil \lg k \rceil + k$ merge bound is a
   path-length argument: charge each output to one root path, bound the
   path by padding to a power of two, and account the build separately.
 - **Backward induction / running the machine in reverse** — the
@@ -531,7 +527,7 @@ Log your work in `course/module-15-external/exercises.md`.
   reversal trick as Lamé's theorem in Module 01 (build the worst case
   backwards) and CDCL's conflict analysis in Module 14.
 - **Executable cost theorems** — `IoStats` turns "polyphase writes at most
-  (1 + phases)·n records" from prose into an assertion. Stating resource
+  $(1 + \text{phases})\cdot n$ records" from prose into an assertion. Stating resource
   bounds as machine-checkable contracts is the course's habit; here the
   resource is I/O for the first time.
 
@@ -543,9 +539,9 @@ Log your work in `course/module-15-external/exercises.md`.
 - **Module 11 (B-trees)** is the same memory-hierarchy inversion applied to
   *searching*: nodes sized to blocks, height = number of I/Os.
 - **Cache-oblivious algorithms** (Frigo–Leiserson et al., after Knuth)
-  redo this module's arithmetic with block size B and memory M unknown to
+  redo this module's arithmetic with block size $B$ and memory $M$ unknown to
   the algorithm — funnel sort is a loser tree that adapts to every level
   of the hierarchy at once.
-- The **2P law** returns whenever a bounded buffer smooths a stream:
+- The **$2P$ law** returns whenever a bounded buffer smooths a stream:
   timsort's run detection, LSM memtables, even video-encoder lookahead —
-  a P-record window buys you 2P of order.
+  a $P$-record window buys you $2P$ of order.

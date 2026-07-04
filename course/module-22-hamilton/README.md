@@ -28,7 +28,7 @@ you will understand *why* no fifth, fast, always-correct way is known.
 
 ## 1. Two questions that look the same and aren't
 
-Let `G` be a graph on `n` vertices.
+Let $G$ be a graph on $n$ vertices.
 
 - An **Eulerian** trail uses **every edge** exactly once; an Eulerian circuit
   is a closed one. (Königsberg's bridges, 1736 — the birth of graph theory.)
@@ -41,7 +41,7 @@ Euler settled his question completely and cheaply:
 > vertex has even degree; it has an Eulerian trail iff exactly zero or two
 > vertices have odd degree.
 
-You can *check* that condition in one pass over the vertices — **O(n + m)**
+You can *check* that condition in one pass over the vertices — $O(n + m)$
 time — and Hierholzer's algorithm even *constructs* the trail in linear time.
 Eulerianness is a local, countable property.
 
@@ -79,8 +79,8 @@ changes.
 
 ### Algorithm H (Hamiltonian path/cycle by backtracking)
 
-State: a partial simple path `x₀ x₁ … x_{l−1}` and a `used[]` flag per vertex.
-The "level" `l` is the path's length.
+State: a partial simple path $x_0 x_1 \ldots x_{l-1}$ and a `used[]` flag per vertex.
+The "level" $l$ is the path's length.
 
 ```text
 H1. [Initialize.]  Pick a start s (for a path, try each s in turn; for a
@@ -97,14 +97,14 @@ H5. [Backtrack.]   When the candidates at level l are exhausted, remove the
 ```
 
 The bracketed **assertion** that makes it correct: *at every entry to H2,
-`x₀ … x_{l−1}` is a simple path in G.* Advancing preserves it (H3 only admits an
+$x_0 \ldots x_{l-1}$ is a simple path in $G$.* Advancing preserves it (H3 only admits an
 unused neighbor); backtracking restores the earlier state exactly (H5 undoes
 what H4 did). That "state restoration is exact" invariant is the beating heart
 of all backtracking ↩ Module 09.
 
-### A hand trace: does the 4-cycle `C₄` have a Hamiltonian cycle?
+### A hand trace: does the 4-cycle $C_4$ have a Hamiltonian cycle?
 
-Vertices `0,1,2,3`; edges `0–1, 1–2, 2–3, 3–0`. Fix `s = 0`.
+Vertices `0,1,2,3`; edges `0–1, 1–2, 2–3, 3–0`. Fix $s = 0$.
 
 | l | path so far | endpoint | unused neighbors | action |
 |---|---|---|---|---|
@@ -119,14 +119,14 @@ H2 would reject and H5 would backtrack to try the other branch (`0 3 2 1`).
 ### Counting, and why we divide by two
 
 `count_hamiltonian_cycles` fixes the start at vertex 0 and counts *directed*
-closed walks `0 → … → 0`. Every undirected cycle is walked in **two**
+closed walks $0 \to \ldots \to 0$. Every undirected cycle is walked in **two**
 directions, so the undirected count is (directed count)/2. Two anchors the
 tests pin down:
 
-- **Complete graph `Kₙ`.** From the fixed start, the remaining `n−1` vertices
-  can appear in any order, all edges present, so there are `(n−1)!` directed
-  cycles and **`(n−1)!/2`** undirected ones. (K₅: `4!/2 = 12`.)
-- **Cycle graph `Cₙ`.** Only two directed walks (clockwise, counter-clockwise),
+- **Complete graph $K_n$.** From the fixed start, the remaining $n-1$ vertices
+  can appear in any order, all edges present, so there are $(n-1)!$ directed
+  cycles and **$(n-1)!/2$** undirected ones. ($K_5$: $4!/2 = 12$.)
+- **Cycle graph $C_n$.** Only two directed walks (clockwise, counter-clockwise),
   so exactly **1** undirected cycle — itself.
 
 ### Pruning: how real solvers survive
@@ -134,7 +134,7 @@ tests pin down:
 Plain Algorithm H already works, but its search tree can explode. The classic
 prunes (state them; you will implement stronger ones in the exercises):
 
-1. **Degree ≥ 2 for cycles.** A vertex with fewer than two neighbors cannot lie
+1. **Degree $\ge 2$ for cycles.** A vertex with fewer than two neighbors cannot lie
    on any cycle — reject immediately.
 2. **Endpoint reachability.** After committing a partial path, if some unused
    vertex has *all* its neighbors already used (and it is not the vertex we
@@ -182,8 +182,8 @@ W4. [Choose.]      Move to the v minimizing (d(v), v)  [ties -> smaller
 ```
 
 Note what is **missing**: there is no backtracking. Algorithm W commits to each
-greedy step forever. That makes it blazingly fast — O(board²) moves, each
-looking at ≤ 8 neighbors — but it is a *heuristic*, not an algorithm in Knuth's
+greedy step forever. That makes it blazingly fast — $O(\text{board}^2)$ moves, each
+looking at $\le 8$ neighbors — but it is a *heuristic*, not an algorithm in Knuth's
 strict sense (§1.1's finiteness-and-definiteness bar ↩ Module 01): it can walk
 into a dead end and simply give up.
 
@@ -200,10 +200,10 @@ full tours from almost every start.
 ### Why it sometimes fails — the honest story
 
 "Usually" is not "always." With the deterministic tie-break above, the greedy
-walk completes a `5×5` tour from a corner and even from the center — yet it gets
+walk completes a $5 \times 5$ tour from a corner and even from the center — yet it gets
 **stuck starting from square 2** of that same board, *even though a full tour
 from square 2 provably exists* (a backtracking search finds one). The same
-happens on `8×8` from square 24. The heuristic made a locally sensible choice
+happens on $8 \times 8$ from square 24. The heuristic made a locally sensible choice
 that was globally fatal, and, having no backtracking, it cannot recover.
 
 That is the lesson, stated bluntly: **a heuristic is a bet, not a proof.** When
@@ -211,7 +211,7 @@ Warnsdorff succeeds it is wonderful; when it fails it tells you nothing about
 whether a tour exists. Real systems pair heuristics like this with a fallback
 (backtracking, or a smarter tie-break) precisely because of this gap.
 
-> **A rigorous aside — parity forbids some starts entirely.** Colour the `5×5`
+> **A rigorous aside — parity forbids some starts entirely.** Colour the $5 \times 5$
 > board like a checkerboard: 13 squares of one colour, 12 of the other. A
 > knight always steps to the opposite colour, so a 25-square tour alternates
 > colours and must *begin and end on the majority colour* (13 of them). The 12
@@ -229,64 +229,64 @@ Sometimes the graph has so much structure that a Hamiltonian cycle can be
 written down with no search at all. The cleanest example ties this finale
 straight back to where combinatorial generation began.
 
-The **`d`-dimensional hypercube** `Q_d` has the `2^d` binary strings of length
-`d` as vertices, with an edge between two strings iff they **differ in exactly
-one bit**. A Hamiltonian cycle on `Q_d` is therefore a cyclic listing of all
-`d`-bit strings in which *each string differs from the next in a single bit* —
+The **$d$-dimensional hypercube** $Q_d$ has the $2^d$ binary strings of length
+$d$ as vertices, with an edge between two strings iff they **differ in exactly
+one bit**. A Hamiltonian cycle on $Q_d$ is therefore a cyclic listing of all
+$d$-bit strings in which *each string differs from the next in a single bit* —
 which is precisely the definition of a **cyclic Gray code**. The two ideas are
 not analogous; they are *the same object* seen from two angles:
 
-> "Generate all `n`-bit strings, changing one bit at a time" (Module 08's
-> reflected Gray code) **=** "walk a Hamiltonian cycle on the hypercube `Q_n`"
+> "Generate all $n$-bit strings, changing one bit at a time" (Module 08's
+> reflected Gray code) **=** "walk a Hamiltonian cycle on the hypercube $Q_n$"
 > (this module).
 
-The reflected binary Gray code you built in Module 08 is `g(k) = k ⊕ ⌊k/2⌋`
-(i.e. `k ^ (k >> 1)`), for `k = 0, 1, …, 2^d − 1`. `gray_code_cycle(d)` emits
+The reflected binary Gray code you built in Module 08 is $g(k) = k \oplus \lfloor k/2 \rfloor$
+(i.e. `k ^ (k >> 1)`), for $k = 0, 1, \ldots, 2^d - 1$. `gray_code_cycle(d)` emits
 exactly that sequence, and it *is* our Hamiltonian cycle.
 
-### Theorem and proof: `g` is a Hamiltonian cycle on `Q_d`
+### Theorem and proof: $g$ is a Hamiltonian cycle on $Q_d$
 
-> **Theorem.** The sequence `G_d = g(0), g(1), …, g(2^d − 1)` lists every vertex
-> of `Q_d` exactly once, and consecutive vertices — *including the wrap-around
-> from the last back to the first* — differ in exactly one bit. Hence `G_d` is a
-> Hamiltonian cycle on `Q_d`.
+> **Theorem.** The sequence $G_d = g(0), g(1), \ldots, g(2^d - 1)$ lists every vertex
+> of $Q_d$ exactly once, and consecutive vertices — *including the wrap-around
+> from the last back to the first* — differ in exactly one bit. Hence $G_d$ is a
+> Hamiltonian cycle on $Q_d$.
 
-*Proof (induction on `d`, mirroring the "reflect and prefix" construction).*
+*Proof (induction on $d$, mirroring the "reflect and prefix" construction).*
 
-**Base `d = 1`.** `G_1 = 0, 1`. Two vertices; `0→1` flips one bit and the wrap
-`1→0` flips one bit. ✓
+**Base $d = 1$.** $G_1 = 0, 1$. Two vertices; $0 \to 1$ flips one bit and the wrap
+$1 \to 0$ flips one bit. ✓
 
-**Step.** Assume `G_{d−1}` is a Hamiltonian cycle on `Q_{d−1}` listing all
-`2^{d−1}` shorter strings with single-bit steps. The reflected construction
-builds `G_d` in two halves:
+**Step.** Assume $G_{d-1}$ is a Hamiltonian cycle on $Q_{d-1}$ listing all
+$2^{d-1}$ shorter strings with single-bit steps. The reflected construction
+builds $G_d$ in two halves:
 
-1. **First half:** prefix a `0` to each string of `G_{d−1}`, in order.
-2. **Second half:** prefix a `1` to each string of `G_{d−1}` in **reverse**
+1. **First half:** prefix a $0$ to each string of $G_{d-1}$, in order.
+2. **Second half:** prefix a $1$ to each string of $G_{d-1}$ in **reverse**
    order (the "reflection").
 
 Check the three claims.
 
-- *All vertices once.* The first half is exactly the `2^{d−1}` strings starting
-  `0…`, each once (by the hypothesis); the second half is the `2^{d−1}` strings
-  starting `1…`, each once. Together: all `2^d` strings, no repeats. ✓
-- *Steps within a half* flip a single bit among the low `d−1` positions (that is
+- *All vertices once.* The first half is exactly the $2^{d-1}$ strings starting
+  $0\ldots$, each once (by the hypothesis); the second half is the $2^{d-1}$ strings
+  starting $1\ldots$, each once. Together: all $2^d$ strings, no repeats. ✓
+- *Steps within a half* flip a single bit among the low $d-1$ positions (that is
   the hypothesis, applied forward in the first half and backward — still
   single-bit — in the second) and never touch the new top bit. ✓
-- *The two seams.* At the **middle seam**, the first half ends at `0·w` where `w`
-  is `G_{d−1}`'s last string, and the second half begins at `1·w` (same `w`,
-  because the reflection starts from `G_{d−1}`'s last string). These differ only
-  in the top bit. ✓ At the **wrap-around**, `G_d` ends at `1·u` where `u` is
-  `G_{d−1}`'s *first* string, and `G_d` begins at `0·u`. Again a single top-bit
+- *The two seams.* At the **middle seam**, the first half ends at $0 \cdot w$ where $w$
+  is $G_{d-1}$'s last string, and the second half begins at $1 \cdot w$ (same $w$,
+  because the reflection starts from $G_{d-1}$'s last string). These differ only
+  in the top bit. ✓ At the **wrap-around**, $G_d$ ends at $1 \cdot u$ where $u$ is
+  $G_{d-1}$'s *first* string, and $G_d$ begins at $0 \cdot u$. Again a single top-bit
   difference. ✓
 
-All three hold, so `G_d` is a Hamiltonian cycle on `Q_d`. ∎
+All three hold, so $G_d$ is a Hamiltonian cycle on $Q_d$. ∎
 
-The reflection is doing something beautiful: it *doubles* a cycle on `Q_{d−1}`
-into a cycle on `Q_d`, using the single new bit to stitch the two copies at both
+The reflection is doing something beautiful: it *doubles* a cycle on $Q_{d-1}$
+into a cycle on $Q_d$, using the single new bit to stitch the two copies at both
 their ends. That is the same doubling that makes the code "reflected."
 
-`hypercube_neighbors(d, v)` (flip each of the `d` low bits) and
-`is_hamiltonian_cycle_on_hypercube` (all `2^d` vertices once, cyclic single-bit
+`hypercube_neighbors(d, v)` (flip each of the $d$ low bits) and
+`is_hamiltonian_cycle_on_hypercube` (all $2^d$ vertices once, cyclic single-bit
 steps) let you *verify* the theorem computationally in stage 3 — and confirm
 that the Module-08 formula and the Module-22 hypercube tell one story.
 
@@ -300,44 +300,44 @@ cycles) of a **weighted** graph, find the **cheapest**. The cyclic version is
 the **Traveling Salesman Problem** (TSP), perhaps the most-studied optimization
 problem in existence.
 
-Brute force enumerates all `n!` orders — hopeless past `n ≈ 12`. The
+Brute force enumerates all $n!$ orders — hopeless past $n \approx 12$. The
 **Held–Karp** dynamic program (1962) does far better by a classic move: notice
 that a partial tour's future depends only on *which* vertices remain and *where*
 we currently stand — not on the order in which the visited ones were visited.
 
 ### The recurrence
 
-Let `d(i, j)` be the weight of edge `i–j`. Define
+Let $d(i, j)$ be the weight of edge `i–j`. Define
 
-> `C(S, j)` = the least weight of a path that starts somewhere, visits **exactly
-> the set of vertices `S`**, and **ends at `j ∈ S`**.
+> $C(S, j)$ = the least weight of a path that starts somewhere, visits **exactly
+> the set of vertices $S$**, and **ends at $j \in S$**.
 
-Then, peeling off the last vertex `j`:
+Then, peeling off the last vertex $j$:
 
-> **`C(S, j) = min over i ∈ S∖{j} of  C(S∖{j}, i) + d(i, j)`**
+> **$C(S, j) = \min_{i \in S \setminus \{j\}} \bigl[ C(S \setminus \{j\}, i) + d(i, j) \bigr]$**
 
-with base case `C({j}, j) = 0`. The shortest Hamiltonian **path** is
-`min_j C(V, j)` over the full set `V`. For the shortest **cycle**, anchor the
+with base case $C(\{j\}, j) = 0$. The shortest Hamiltonian **path** is
+$\min_j C(V, j)$ over the full set $V$. For the shortest **cycle**, anchor the
 start at vertex 0 and close the best path:
-`min_{j≠0} C(V, j) + d(j, 0)`.
+$\min_{j \ne 0} C(V, j) + d(j, 0)$.
 
-### Why the subset makes it `2^n` ↩ Module 13
+### Why the subset makes it $2^n$ ↩ Module 13
 
-The state is a pair `(S, j)`: a **subset** `S` of the `n` vertices and a last
-vertex `j`. There are `2^n` subsets and `n` choices of `j`, so `2^n · n` states,
-each computed by a `min` over ≤ `n` predecessors — total **O(2^n · n²)** time
-and **O(2^n · n)** space. We encode `S` as a bitmask in a machine word, exactly
-the bitmask-state technique of Module 13 ↩: "vertex `k` is in `S`" is bit `k`;
-`S ∖ {j}` is `S & !(1<<j)`; "adding `k`" is `S | (1<<k)`. Iterating subsets in
+The state is a pair $(S, j)$: a **subset** $S$ of the $n$ vertices and a last
+vertex $j$. There are $2^n$ subsets and $n$ choices of $j$, so $2^n n$ states,
+each computed by a $\min$ over $\le n$ predecessors — total **$O(2^n n^2)$** time
+and **$O(2^n n)$** space. We encode $S$ as a bitmask in a machine word, exactly
+the bitmask-state technique of Module 13 ↩: "vertex $k$ is in $S$" is bit $k$;
+$S \setminus \{j\}$ is `S & !(1<<j)`; "adding $k$" is `S | (1<<k)`. Iterating subsets in
 **increasing numeric order** is a valid evaluation order, because adding a
 vertex only *sets* a bit, so `S | (1<<k) > S` — every state is computed after
 all the states it depends on.
 
 ### A hand trace: the triangle
 
-`n = 3`, weights `d(0,1)=1, d(1,2)=2, d(0,2)=3`.
+$n = 3$, weights $d(0,1)=1, d(1,2)=2, d(0,2)=3$.
 
-| S | j | C(S,j) | from |
+| S | j | $C(S,j)$ | from |
 |---|---|---|---|
 | {0} | 0 | 0 | base |
 | {1} | 1 | 0 | base |
@@ -349,21 +349,21 @@ all the states it depends on.
 | {0,1,2} | 2 | 3 | C({0,1},1)+d(1,2) = 1+2 |
 | {0,1,2} | 0 | 4 | C({1,2},2)+d(2,0) = 2+... |
 
-Shortest **path** = `min_j C({0,1,2}, j) = 3` (the route 0–1–2, skipping the
-expensive edge 0–2). Shortest **cycle** = `C({0,1,2},2) + d(2,0) = 3 + 3 = 6`
+Shortest **path** = $\min_j C(\{0,1,2\}, j) = 3$ (the route 0–1–2, skipping the
+expensive edge 0–2). Shortest **cycle** = $C(\{0,1,2\},2) + d(2,0) = 3 + 3 = 6$
 (the only triangle). Your stage-4 tests check exactly these numbers, then
 cross-check the DP against brute-force permutation enumeration on random
-instances up to `n = 9`, and confirm `n = 13` runs in milliseconds.
+instances up to $n = 9$, and confirm $n = 13$ runs in milliseconds.
 
 ### The punchline: this is still the best we know
 
-Held–Karp turns `n!` into `2^n · n²` — the difference between "impossible at
-`n = 15`" and "instant at `n = 20`." And yet **`O(2^n · n²)` remains, sixty
+Held–Karp turns $n!$ into $2^n n^2$ — the difference between "impossible at
+$n = 15$" and "instant at $n = 20$." And yet **$O(2^n n^2)$ remains, sixty
 years later, essentially the best known worst-case bound for general TSP.** No
 polynomial algorithm has been found, and (Section 1's asymmetry again) finding
 one would collapse P and NP. Held–Karp is the honest state of the art:
 exponential, but *tamed* — a subset dimension instead of a factorial one. When
-even `2^n` is too much (routing thousands of stops), practice turns to
+even $2^n$ is too much (routing thousands of stops), practice turns to
 *approximation* and *heuristics* — the Warnsdorff spirit, scaled up — which is
 why Section 3 was not a detour but a preview.
 
@@ -373,7 +373,7 @@ why Section 3 was not a detour but a preview.
 
 Open `labs/module-22-hamilton/src/lab.rs`. Graphs are neighbor lists
 `&[Vec<usize>]`, assumed undirected and simple; `adjacency_matrix` transposes
-them to an `n×n` bool grid for O(1) adjacency checks.
+them to an $n \times n$ bool grid for $O(1)$ adjacency checks.
 
 ### Stage 1 — `hamiltonian_path`, `hamiltonian_cycle`, `count_hamiltonian_cycles`
 
@@ -383,37 +383,37 @@ the path, launch from every start; for the cycle, fix start 0 and require the
 last vertex adjacent to 0. For the count, tally directed closed walks from 0 and
 divide by 2. The tests *validate* every returned route (permutation +
 consecutive adjacency + closure) rather than comparing to a fixed answer, and
-they pin `Kₙ → (n−1)!/2`, `Cₙ → 1`, `Pₙ → path but no cycle`, and the Petersen
+they pin $K_n$ → $(n-1)!/2$, $C_n$ → 1, $P_n$ → path but no cycle, and the Petersen
 graph → no cycle but a path.
 
 ### Stage 2 — `knight_moves`, `warnsdorff_tour`, `is_valid_tour`
 
-`knight_moves(board, sq)` returns the on-board `(±1,±2)/(±2,±1)` destinations in
+`knight_moves(board, sq)` returns the on-board $(\pm 1, \pm 2)/(\pm 2, \pm 1)$ destinations in
 a fixed order — that fixed order is what makes your tie-breaking deterministic.
 `warnsdorff_tour` follows Algorithm W: at each step pick the unvisited neighbor
 minimizing `(onward-degree, square index)`, and return `None` if you get stuck.
 `is_valid_tour` checks that a sequence is a permutation of all squares with
 every consecutive pair a knight move. Expect success from corners on `5–8`
-boards and from every start on `6×6`; expect the documented **failures** from
-`5×5` square 2 and `8×8` square 24 — the heuristic's honest limits.
+boards and from every start on $6 \times 6$; expect the documented **failures** from
+$5 \times 5$ square 2 and $8 \times 8$ square 24 — the heuristic's honest limits.
 
 ### Stage 3 — `hypercube_neighbors`, `gray_code_cycle`, `is_hamiltonian_cycle_on_hypercube`
 
-`hypercube_neighbors` flips each of the `d` low bits. `gray_code_cycle` is a
-one-liner: `k ^ (k >> 1)` for `k` in `0..2^d`. The validator checks all `2^d`
+`hypercube_neighbors` flips each of the $d$ low bits. `gray_code_cycle` is a
+one-liner: `k ^ (k >> 1)` for $k$ in `0..2^d`. The validator checks all $2^d$
 vertices appear once and consecutive (cyclically!) vertices differ in one bit.
-The tests confirm the sequence *is* a Hamiltonian cycle on `Q_d`, matches the
+The tests confirm the sequence *is* a Hamiltonian cycle on $Q_d$, matches the
 Module-08 formula bit-for-bit, and that each successive XOR is a single power of
 two — a hypercube edge.
 
 ### Stage 4 — `shortest_hamiltonian_path`, `shortest_hamiltonian_cycle`
 
-Fill `dp[S][j] = C(S, j)` in increasing subset order using the Held–Karp
+Fill `dp[S][j]` $= C(S, j)$ in increasing subset order using the Held–Karp
 recurrence, with a large `INF` sentinel that leaves headroom against overflow.
 Answer the path query with `min_j dp[full][j]`; the cycle query anchors at 0 and
-closes with `+ d(j, 0)`. Handle the degenerate `n ≤ 1` (weight 0). The tests
-hand-check tiny instances, cross-check against brute force for `n ≤ 9`, accept
-arbitrary (triangle-inequality-free, even asymmetric) weights, and time `n = 13`.
+closes with $+\, d(j, 0)$. Handle the degenerate $n \le 1$ (weight 0). The tests
+hand-check tiny instances, cross-check against brute force for $n \le 9$, accept
+arbitrary (triangle-inequality-free, even asymmetric) weights, and time $n = 13$.
 
 Run the growth curve any time with
 `cargo run -p lab-22-hamilton --example bench --features solutions --release`.
@@ -426,9 +426,9 @@ Run the growth curve any time with
    *guaranteed*, and which are you *not*? (Eulerian circuit yes; Hamiltonian
    cycle — no guarantee at all.)
 2. Why may `count_hamiltonian_cycles` divide by exactly 2, never some other
-   number, for every graph with `n ≥ 3`? (Each undirected cycle is traversed in
+   number, for every graph with $n \ge 3$? (Each undirected cycle is traversed in
    precisely two directions from the fixed start.)
-3. On a `5×5` board, name a square from which *no* knight's tour exists for
+3. On a $5 \times 5$ board, name a square from which *no* knight's tour exists for
    *any* algorithm, and explain why. (Any minority-colour square — a tour must
    start and end on the majority colour.)
 4. In Held–Karp, why is iterating subsets in increasing integer order a valid
@@ -446,13 +446,13 @@ ones. Log attempts in `course/module-22-hamilton/exercises.md`.
 
 | Ex. | Rating | Statement (paraphrased) |
 |---|---|---|
-| 22-1 | 10 | Prove `Kₙ` has `(n−1)!/2` Hamiltonian cycles by the fixed-start / divide-by-two argument. |
+| 22-1 | 10 | Prove $K_n$ has $(n-1)!/2$ Hamiltonian cycles by the fixed-start / divide-by-two argument. |
 | 22-2 | 15 | Give the even/odd-degree Eulerian criterion and prove necessity. |
 | ▶22-3 | 25 | Add the "endpoint reachability" prune to Algorithm H and measure the search-tree shrinkage on random graphs. |
-| 22-4 | 20 | Prove the `5×5` colour-parity fact: a knight's tour must begin and end on the majority colour. |
-| ▶22-5 | 25 | Prove the reflected Gray code is a Hamiltonian cycle on `Q_d` by induction (fill in every seam of §4). |
+| 22-4 | 20 | Prove the $5 \times 5$ colour-parity fact: a knight's tour must begin and end on the majority colour. |
+| ▶22-5 | 25 | Prove the reflected Gray code is a Hamiltonian cycle on $Q_d$ by induction (fill in every seam of §4). |
 | 22-6 | 20 | Modify Held–Karp to also *return the optimal tour*, not just its cost (store parent pointers). |
-| ▶22-7 | 30 | Show the decision problem "does `G` have a Hamiltonian cycle?" is NP-complete via a reduction from 3-SAT (sketch Karp's gadget). |
+| ▶22-7 | 30 | Show the decision problem "does $G$ have a Hamiltonian cycle?" is NP-complete via a reduction from 3-SAT (sketch Karp's gadget). |
 | 22-8 | 30 | Implement the Held–Karp *space*-saving trick: process subsets by popcount so only two "layers" live in memory. |
 
 ## In the real world
@@ -494,8 +494,8 @@ ones. Log attempts in `course/module-22-hamilton/exercises.md`.
 - **The Gray-code bridge** shows that recognizing structure can replace search
   entirely: on the hypercube the answer is a closed-form formula, no
   backtracking needed.
-- **Held–Karp reshapes the state space** — a subset dimension (`2^n`) instead of
-  a sequence dimension (`n!`) — the single idea that turns a factorial into a
+- **Held–Karp reshapes the state space** — a subset dimension ($2^n$) instead of
+  a sequence dimension ($n!$) — the single idea that turns a factorial into a
   merely exponential cost, and the bitmask makes that subset a machine word.
 
 ## Proof techniques you practiced
@@ -504,16 +504,16 @@ ones. Log attempts in `course/module-22-hamilton/exercises.md`.
   a simple path," undone precisely on backtrack; the master pattern from Module
   01, now guarding a search tree.
 - **Induction with a construction** — the reflected Gray code is a Hamiltonian
-  cycle on `Q_d`, proved by *building* `G_d` from `G_{d−1}` and checking both
+  cycle on $Q_d$, proved by *building* $G_d$ from $G_{d-1}$ and checking both
   seams. Structural induction that mirrors the algorithm.
-- **Parity / colouring arguments** — the `5×5` knight's-tour impossibility from
+- **Parity / colouring arguments** — the $5 \times 5$ knight's-tour impossibility from
   a two-colouring; a local invariant (each move flips colour) forcing a global
   conclusion.
 - **Dynamic programming via optimal substructure** — Held–Karp's recurrence
   earns its correctness from "the future depends only on the visited set and the
   current vertex," and its efficiency from evaluating states in a valid order.
-- **Counting by symmetry (divide-out the over-count)** — `(n−1)!/2` cycles in
-  `Kₙ`: fix a representative (start at 0), then divide by the size of the orbit
+- **Counting by symmetry (divide-out the over-count)** — $(n-1)!/2$ cycles in
+  $K_n$: fix a representative (start at 0), then divide by the size of the orbit
   (two directions).
 - **Complexity as classification** — recognizing Hamiltonicity as NP-complete,
   and *using* that classification to choose an approach rather than to give up.
@@ -543,11 +543,11 @@ something, and prove it correct.
 
 - **Vol. 4B/4C, §7.2.2.3–7.2.2.4** develop constraint satisfaction and
   Hamiltonian paths in depth, with far stronger pruning than we used here.
-- **Approximation algorithms** (Christofides' 3/2-approximation for metric TSP)
+- **Approximation algorithms** (Christofides' $3/2$-approximation for metric TSP)
   and **local search** (2-opt, Lin–Kernighan) are the practical sequel to
-  Held–Karp when `2^n` is too much.
+  Held–Karp when $2^n$ is too much.
 - **Parameterized complexity** studies exactly *how* exponential these problems
-  must be — Held–Karp's `2^n` is conjectured optimal under the Strong
+  must be — Held–Karp's $2^n$ is conjectured optimal under the Strong
   Exponential Time Hypothesis.
 - **The whole course** now lives in [`docs/toolkit.md`](../../docs/toolkit.md):
   read it, and see how far you've come.

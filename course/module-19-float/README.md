@@ -31,26 +31,24 @@ recovers the bits everyone else throws away.
 > the accumulated chopping error drift the clock until the interceptor misses —
 > and flip _chop_ to _round_ to see the same precision, spent more wisely, save
 > the day. It reproduces the real figures from the 1991 Dhahran failure
-> (≈9.5×10⁻⁸ s per tick, 0.34 s of drift over 100 hours) on live IEEE-754.
+> ($\approx 9.5 \times 10^{-8}$ s per tick, 0.34 s of drift over 100 hours) on live IEEE-754.
 
 ---
 
 ## 1. Positional fractions and the normalized form
 
-Fix a base `b` (we use `b = 2`) and a precision `p` (we use `p = 53`, matching
+Fix a base $b$ (we use $b = 2$) and a precision $p$ (we use $p = 53$, matching
 IEEE 754 binary64). A **floating-point number** is a value
 
-```text
-    x = (-1)^s · f · b^e
-```
+$$x = (-1)^s \cdot f \cdot b^e$$
 
-where `s ∈ {0,1}` is the sign, `e` is an integer **exponent**, and `f` is the
-**significand** (Knuth calls it the *fraction*), a p-digit base-b number. The
-"floating" point is that `e` slides the radix point to wherever the value needs
-it: the same p significant digits describe `6.022·10²³` and `1.602·10⁻¹⁹`.
+where $s \in \{0,1\}$ is the sign, $e$ is an integer **exponent**, and $f$ is the
+**significand** (Knuth calls it the *fraction*), a $p$-digit base-$b$ number. The
+"floating" point is that $e$ slides the radix point to wherever the value needs
+it: the same $p$ significant digits describe $6.022 \cdot 10^{23}$ and $1.602 \cdot 10^{-19}$.
 
-Two different (f, e) pairs can denote the same value — `0.5 = 1·2⁻¹ =
-0.1·2⁰` — so we impose a canonical form. A nonzero number is **normalized**
+Two different (f, e) pairs can denote the same value — $0.5 = 1 \cdot 2^{-1} =
+0.1 \cdot 2^0$ — so we impose a canonical form. A nonzero number is **normalized**
 when its leading significand digit is nonzero; in binary that means the leading
 bit is 1. We store the 53-bit significand as an *integer* `frac` with its
 leading 1 pinned at bit 52:
@@ -74,13 +72,13 @@ same exponent differ by exactly one ulp.
    from a 52-bit field. Our `from_f64` restores that `1`; `to_f64` strips it.
 
 Zero is special: it has no nonzero leading digit, so it can't be normalized.
-We represent it as `frac == 0`, and keep the sign bit so that `+0` and `−0` are
-distinguishable (they matter at the boundary of underflow and for `1/x`).
+We represent it as `frac == 0`, and keep the sign bit so that $+0$ and $-0$ are
+distinguishable (they matter at the boundary of underflow and for $1/x$).
 
 The classic cautionary example lives here already. **One tenth has no finite
-binary expansion**: `1/10 = 0.0001100110011…₂`, the block `0011` repeating
-forever, exactly as `1/3 = 0.333…` never terminates in decimal. So `from_f64(0.1)`
-cannot equal `1/10`; it is the *nearest 53-bit number* to `1/10`, off by less
+binary expansion**: $1/10 = 0.0001100110011\ldots_2$, the block `0011` repeating
+forever, exactly as $1/3 = 0.333\ldots$ never terminates in decimal. So `from_f64(0.1)`
+cannot equal $1/10$; it is the *nearest 53-bit number* to $1/10$, off by less
 than half a ulp. Every "floating-point is broken" bug report traces back to
 this one fact.
 
@@ -106,7 +104,7 @@ then for a normal number
 
 so our `frac = 2^52 + m` and our `exp = E − 1023 − 52 = E − 1075`. Going back,
 `E = exp + 1075` and `m = frac − 2^52 = frac & (2^52 − 1)`. The three reserved
-patterns — `E = 0` (zero and subnormals) and `E = 2047` (∞ and NaN) — mark the
+patterns — `E = 0` (zero and subnormals) and `E = 2047` ($\infty$ and NaN) — mark the
 edges of the representable world; we handle zero and treat the rest as out of
 scope for this finite model.
 
@@ -123,32 +121,30 @@ When an exact result needs more than 53 bits, we must **round**. IEEE's default
 To round correctly you cannot simply chop; you must know three things about the
 discarded tail, the celebrated **guard / round / sticky** bits:
 
-- the **guard/round bit** `r`: the first bit past the ones you keep;
-- the **sticky bit** `t`: the OR of *all* bits below the round bit — "is there
+- the **guard/round bit** $r$: the first bit past the ones you keep;
+- the **sticky bit** $t$: the OR of *all* bits below the round bit — "is there
   anything else down there?"
 
-Then, keeping value `q` with last kept bit `q₀`:
+Then, keeping value $q$ with last kept bit $q_0$:
 
-```text
-    round up  ⟺  r = 1 AND (t = 1 OR q₀ = 1).
-```
+$$\text{round up} \iff r = 1 \text{ AND } (t = 1 \text{ OR } q_0 = 1).$$
 
-If `r = 0` you're below halfway → round down. If `r = 1, t = 1` you're above
-halfway → round up. If `r = 1, t = 0` you're *exactly* halfway (a tie) → round
-to even, i.e. up iff `q₀ = 1`. Our `round_wide` computes exactly these from a
-wide integer: the round bit is bit `s−1`, the sticky is "any bit below `s−1`
-set", where `s` is how many bits we're dropping.
+If $r = 0$ you're below halfway → round down. If $r = 1, t = 1$ you're above
+halfway → round up. If $r = 1, t = 0$ you're *exactly* halfway (a tie) → round
+to even, i.e. up iff $q_0 = 1$. Our `round_wide` computes exactly these from a
+wide integer: the round bit is bit $s-1$, the sticky is "any bit below $s-1$
+set", where $s$ is how many bits we're dropping.
 
 **Why ties to even? A no-drift argument.** Suppose you always rounded ties *up*
 ("round half up", the schoolbook rule). Then over many operations the tiny
 half-ulp errors would all have the same sign and **accumulate**: sum a million
-numbers and your bias marches steadily away from the truth, growing like `n`.
+numbers and your bias marches steadily away from the truth, growing like $n$.
 Rounding ties to even sends half the ties up and half down (the last bit is
 equidistributed between 0 and 1 over generic data), so the errors are **mean-zero**
-and tend to cancel — the accumulated bias grows like `√n` rather than `n`, by
+and tend to cancel — the accumulated bias grows like $\sqrt{n}$ rather than $n$, by
 the same central-limit reasoning that makes a random walk stay near the origin.
 "To even" specifically (rather than randomly) also has the pleasant property
-that `round(round(x, p+1), p) = round(x, p)` — rounding in two steps agrees
+that $\operatorname{round}(\operatorname{round}(x, p+1), p) = \operatorname{round}(x, p)$ — rounding in two steps agrees
 with rounding once, so it composes without introducing *double-rounding* error.
 That is why every serious system defaults to it.
 
@@ -173,7 +169,7 @@ A6. [Normalize.]      Renormalize the result (it may have grown a bit on carry
                       or lost many on cancellation) and round to p bits (step N).
 ```
 
-The subtlety is A4. If `v` is much smaller, shifting it right by (say) 200
+The subtlety is A4. If $v$ is much smaller, shifting it right by (say) 200
 places would need a 250-bit register. But you don't need every bit — you need
 the value *rounded* to 53 bits, and rounding only cares about guard + round +
 sticky. So once `v` has shifted past the round position, all its remaining bits
@@ -181,20 +177,20 @@ just OR into the sticky bit. Our implementation keeps a fixed 64-bit guard
 window exact and collapses everything beyond it into sticky — provably enough,
 because a `v` shifted more than 64 places cannot reach even the round bit.
 
-Subtraction is just `u − v = u + (−v)`; negate `v`'s sign and call add.
+Subtraction is just $u - v = u + (-v)$; negate $v$'s sign and call add.
 
 ### Hand-trace: aligning and rounding
 
-Let's add, in a toy `p = 4`-bit binary system (leading 1 explicit, RNE):
+Let's add, in a toy $p = 4$-bit binary system (leading 1 explicit, RNE):
 
 ```text
     u =  1.011₂ · 2^3   =  1011₂ · 2^0   = 11
     v =  1.101₂ · 2^0   =  1101₂ · 2^{-3} = 1.625
 ```
 
-**A2/A3.** `e_u = 3 ≥ e_v = 0`, so `e = 3`, shift = 3.
+**A2/A3.** $e_u = 3 \ge e_v = 0$, so $e = 3$, shift = 3.
 
-**A4.** Shift `v` right 3 places, tracking the tail:
+**A4.** Shift $v$ right 3 places, tracking the tail:
 
 ```text
     v significand:  1.101       (at 2^0)
@@ -211,15 +207,15 @@ Let's add, in a toy `p = 4`-bit binary system (leading 1 explicit, RNE):
        1.100     with pending round bits r=1, t=1  (we are above halfway)
 ```
 
-**A6 (step N).** `r = 1, t = 1` → round up the last kept bit:
+**A6 (step N).** $r = 1, t = 1$ → round up the last kept bit:
 
 ```text
        1.100  + 0.001  =  1.101   · 2^3  =  1101₂ · 2^0 = 13
 ```
 
-The exact sum is `11 + 1.625 = 12.625`; the nearest 4-bit float is `13` (the
-representable neighbours are `12 = 1.100·2^3` and `13 = 1.101·2^3`, and
-`12.625` is closer to `13`). Round-to-nearest did its job. Notice how the guard
+The exact sum is $11 + 1.625 = 12.625$; the nearest 4-bit float is $13$ (the
+representable neighbours are $12 = 1.100 \cdot 2^3$ and $13 = 1.101 \cdot 2^3$, and
+$12.625$ is closer to $13$). Round-to-nearest did its job. Notice how the guard
 and sticky bits, *not* the discarded value itself, drove the decision.
 
 ---
@@ -238,26 +234,26 @@ M3. [Normalize.]  Renormalize the ~106-bit product to 53 bits (step N) and
 
 Because the exact product fits in `u128`, multiplication is *exact before
 rounding* — the single rounding at M3 makes it correctly rounded. Multiplying
-by a power of two touches only the exponent: `x · 2^k` shifts `exp` by `k` with
+by a power of two touches only the exponent: $x \cdot 2^k$ shifts `exp` by $k$ with
 no rounding at all, a fact the tests check.
 
 **Division** is the hard one, because a quotient of two finite binaries is
-generally *not* finite (`1/3` again). We compute enough bits and round:
+generally *not* finite ($1/3$ again). We compute enough bits and round:
 
 ```text
     q = ⌊ frac_u · 2^64 / frac_v ⌋,     r = (frac_u · 2^64) mod frac_v.
 ```
 
 Sixty-four extra low bits is far more than the two (round + sticky) that
-rounding needs, and the remainder `r ≠ 0` tells us there is *more* below — it
-**is** the sticky bit. Then step N rounds `q` at exponent `e_u − e_v − 64`. The
+rounding needs, and the remainder $r \ne 0$ tells us there is *more* below — it
+**is** the sticky bit. Then step N rounds $q$ at exponent $e_u - e_v - 64$. The
 result is correctly rounded, matching hardware `/` to the last bit.
 
 ### Hand-trace: `3.0 / 7.0` in binary64
 
-`3 = 1.1₂·2¹` (`frac = 3·2^51`, `exp = −50`), `7 = 1.11₂·2²`. The exact
-quotient `3/7 = 0.011011011…₂` repeats forever. Long division produces
-`0.01101101101101…`; normalized that's `1.1011011…·2⁻²`. Keep 53 bits, look at
+$3 = 1.1_2 \cdot 2^1$ (`frac = 3·2^51`, `exp = −50`), $7 = 1.11_2 \cdot 2^2$. The exact
+quotient $3/7 = 0.011011011\ldots_2$ repeats forever. Long division produces
+$0.01101101101101\ldots$; normalized that's $1.1011011\ldots \cdot 2^{-2}$. Keep 53 bits, look at
 bit 54 (the round bit) and the infinite tail (sticky = 1, since the pattern
 never terminates), apply RNE. You get exactly `f64::from_bits((3.0f64/7.0).to_bits())` —
 which the lab asserts over 40000 random pairs.
@@ -268,44 +264,41 @@ which the lab asserts over 40000 random pairs.
 
 Here is the theorem that makes numerical analysis possible.
 
-**Definition.** The **unit roundoff** is `u = 2^{-p} = 2^{-53}` in the "distance
-to the tie" convention, or (as we and much C use it) `u = 2^{-(p-1)} = 2^{-52}`,
-the gap `ulp(1)` between `1` and its successor. We take `machine_epsilon() =
-2^{-52}`: the smallest `ε` with `1 + ε ≠ 1`, while `1 + ε/2 = 1`.
+**Definition.** The **unit roundoff** is $u = 2^{-p} = 2^{-53}$ in the "distance
+to the tie" convention, or (as we and much C use it) $u = 2^{-(p-1)} = 2^{-52}$,
+the gap $\operatorname{ulp}(1)$ between $1$ and its successor. We take `machine_epsilon()` $=
+2^{-52}$: the smallest $\varepsilon$ with $1 + \varepsilon \ne 1$, while $1 + \varepsilon/2 = 1$.
 
-**Theorem (fundamental bound of floating-point arithmetic).** Let `op` be one of
-`+ − × ÷`, let `x, y` be representable, and suppose `x op y` is in the normal
+**Theorem (fundamental bound of floating-point arithmetic).** Let $\circ$ be one of
+$+ - \times \div$, let $x, y$ be representable, and suppose $x \circ y$ is in the normal
 range. Then the computed result satisfies
 
-```text
-    fl(x op y) = (x op y)(1 + δ)      for some δ with |δ| ≤ u/2.
-```
+$$\mathrm{fl}(x \circ y) = (x \circ y)(1 + \delta) \quad \text{for some } \delta \text{ with } |\delta| \le u/2.$$
 
-*Proof sketch.* `fl` returns the representable number nearest `x op y`. Adjacent
-representables straddle `x op y` at a spacing of one ulp of the result, so the
-nearest is within half a ulp: `|fl(x op y) − (x op y)| ≤ (1/2)·ulp(x op y)`. For
-a normalized result `z`, `ulp(z) ≤ u·|z| = 2^{-52}|z|` (the last bit's weight is
-at most `2^{-52}` of the value). Combine: `|fl − exact| ≤ (u/2)|exact|`, i.e.
-`δ = (fl − exact)/exact` has `|δ| ≤ u/2`. ∎
+*Proof sketch.* $\mathrm{fl}$ returns the representable number nearest $x \circ y$. Adjacent
+representables straddle $x \circ y$ at a spacing of one ulp of the result, so the
+nearest is within half a ulp: $|\mathrm{fl}(x \circ y) - (x \circ y)| \le (1/2) \cdot \operatorname{ulp}(x \circ y)$. For
+a normalized result $z$, $\operatorname{ulp}(z) \le u \cdot |z| = 2^{-52}|z|$ (the last bit's weight is
+at most $2^{-52}$ of the value). Combine: $|\mathrm{fl} - \text{exact}| \le (u/2)|\text{exact}|$, i.e.
+$\delta = (\mathrm{fl} - \text{exact})/\text{exact}$ has $|\delta| \le u/2$. ∎
 
-This "`(1+δ)` model" is the entire engine of rounding-error analysis: you carry
-one `(1+δ)` per operation and bound the product `∏(1+δ_i)`. The lab verifies the
-bound *empirically and exactly* using **TwoSum** — Knuth's trick that, for `s =
-fl(a+b)`, computes the exact rounding error `err = (a − (s − (s − a))) + (b − (s
-− a))` with no extra precision, so `a + b = s + err` exactly (in the absence of
-overflow). You then check `|err| ≤ (u/2)|s|` over 60000 random pairs.
+This "$(1+\delta)$ model" is the entire engine of rounding-error analysis: you carry
+one $(1+\delta)$ per operation and bound the product $\prod(1+\delta_i)$. The lab verifies the
+bound *empirically and exactly* using **TwoSum** — Knuth's trick that, for $s =
+\mathrm{fl}(a+b)$, computes the exact rounding error $\mathrm{err} = (a - (s - (s - a))) + (b - (s - a))$ with no extra precision, so $a + b = s + \mathrm{err}$ exactly (in the absence of
+overflow). You then check $|\mathrm{err}| \le (u/2)|s|$ over 60000 random pairs.
 
 ### Why floating-point addition is NOT associative
 
-The `(1+δ)` per operation means the *order* of operations changes the answer.
-Concretely, with `h = 2^{-53}` (half a ulp at 1):
+The $(1+\delta)$ per operation means the *order* of operations changes the answer.
+Concretely, with $h = 2^{-53}$ (half a ulp at 1):
 
 ```text
     (1 + h) + h :  1 + h ties to even → 1 ;  then 1 + h ties again → 1.
     1 + (h + h) :  h + h = 2^{-52} = ulp(1) exactly ;  1 + ulp = 1 + 2^{-52}.
 ```
 
-So `(1 + h) + h = 1` but `1 + (h + h) = 1 + 2^{-52}`. **Different answers from
+So $(1 + h) + h = 1$ but $1 + (h + h) = 1 + 2^{-52}$. **Different answers from
 the same three numbers.** Addition is commutative but not associative; the
 lesson (and every compiler's `-ffast-math` footgun) is that you may not freely
 reorder floating-point sums. The lab reproduces this on both our `Float` and
@@ -316,20 +309,20 @@ hardware `f64` — they disagree with associativity in exactly the same way.
 When you subtract two nearly-equal numbers, the leading bits cancel and the
 result is built entirely from the *low, error-contaminated* bits — the relative
 error can explode even though each operation obeyed the fundamental bound.
-`(1 + ε) − 1` recovers `ε` cleanly when `ε` is representable at 1's scale, but
-compute `ε` as `fl(1 + tiny) − 1` with `tiny < u/2` and you get **0**: the tiny
+$(1 + \varepsilon) - 1$ recovers $\varepsilon$ cleanly when $\varepsilon$ is representable at 1's scale, but
+compute $\varepsilon$ as $\mathrm{fl}(1 + \text{tiny}) - 1$ with $\text{tiny} < u/2$ and you get **0**: the tiny
 term was rounded away by the addition, and the subtraction has nothing left to
 reveal. The fix is never to *form* the cancelling difference — rearrange the
-algebra (e.g. `√(x+1) − √x = 1/(√(x+1) + √x)`) so the catastrophic subtraction
+algebra (e.g. $\sqrt{x+1} - \sqrt{x} = 1/(\sqrt{x+1} + \sqrt{x})$) so the catastrophic subtraction
 never happens. This is the single most important practical lesson of §4.2.2.
 
 ---
 
 ## 7. Kahan summation — buying back the lost bits
 
-Summing `n` numbers naively accumulates one rounding error per addition; in the
-worst case the total error grows like `n·u` times the running magnitude. **Kahan's
-compensated summation** (1965) keeps a running *correction* `c` that holds the
+Summing $n$ numbers naively accumulates one rounding error per addition; in the
+worst case the total error grows like $n \cdot u$ times the running magnitude. **Kahan's
+compensated summation** (1965) keeps a running *correction* $c$ that holds the
 low-order bits dropped by the previous addition and feeds them back:
 
 ```text
@@ -342,23 +335,22 @@ low-order bits dropped by the previous addition and feeds them back:
     return s
 ```
 
-**Why `c` is exactly the lost bits (first-order proof).** Look at the third
-line. In exact real arithmetic `(t − s) − y = 0`; the reason it isn't zero in
-floating point is precisely that `t = fl(s + y)` discarded some low bits of the
-true `s + y`. When `|s| ≥ |y|` (the usual case — you're adding small terms to a
-large running total), `t − s` is computed *exactly* (Sterbenz's lemma: the
+**Why $c$ is exactly the lost bits (first-order proof).** Look at the third
+line. In exact real arithmetic $(t - s) - y = 0$; the reason it isn't zero in
+floating point is precisely that $t = \mathrm{fl}(s + y)$ discarded some low bits of the
+true $s + y$. When $|s| \ge |y|$ (the usual case — you're adding small terms to a
+large running total), $t - s$ is computed *exactly* (Sterbenz's lemma: the
 difference of two floats within a factor of two of each other is exact, and
-more generally the leading cancellation here is benign), so `(t − s) − y`
-evaluates to the exact difference `(s + y) − t = −(the part of s+y that t threw
-away)`. Thus `c` holds, to first order in `u`, exactly the rounding error of the
+more generally the leading cancellation here is benign), so $(t - s) - y$
+evaluates to the exact difference $(s + y) - t = -(\text{the part of } s+y \text{ that } t \text{ threw away})$. Thus $c$ holds, to first order in $u$, exactly the rounding error of the
 step — and subtracting it next iteration cancels that error. The upshot is a
-total error bound of `O(u)·Σ|x_i|` **independent of n**, versus `O(nu)·Σ|x_i|`
+total error bound of $O(u) \cdot \sum|x_i|$ **independent of n**, versus $O(nu) \cdot \sum|x_i|$
 for naive. The lab makes this vivid: sum `0.1` a hundred thousand times and
-Kahan lands on `10000` to the bit while naive drifts; sum `[10¹⁶, 1, 1, …, 1,
-−10¹⁶]` and naive returns `0` (every `1` was swamped) while Kahan recovers all
+Kahan lands on `10000` to the bit while naive drifts; sum $[10^{16}, 1, 1, \ldots, 1,
+-10^{16}]$ and naive returns `0` (every `1` was swamped) while Kahan recovers all
 ten thousand ones.
 
-Kahan does about 4× the flops per element (the lab's benchmark shows the
+Kahan does about $4\times$ the flops per element (the lab's benchmark shows the
 constant factor), which is why it is a *choice* — but when accuracy matters it
 is nearly free next to the alternative of using double the precision.
 
@@ -402,35 +394,35 @@ and catastrophic-cancellation phenomena as concrete assertions.
 
 Implement `mul` (exact 106-bit product in `u128`, then round) and `div` (scaled
 long division with the remainder as sticky). Bit-exact vs hardware `*` and `/`;
-multiply-by-power-of-two exact; `x/x = 1`; sign rules; and a `should_panic` on
-division by zero (∞ is out of scope). The single rounding after an *exact* wide
+multiply-by-power-of-two exact; $x/x = 1$; sign rules; and a `should_panic` on
+division by zero ($\infty$ is out of scope). The single rounding after an *exact* wide
 product/quotient is the whole trick to correct rounding.
 
 ### Stage 4 — Error analysis: ulps and compensated summation
 
-Implement `machine_epsilon` (`2^{-52}`), `ulp_f64`, `ulp_error`, `naive_sum`,
+Implement `machine_epsilon` ($2^{-52}$), `ulp_f64`, `ulp_error`, `naive_sum`,
 `kahan_sum`. The tests verify the fundamental bound via TwoSum, the
-`1 + ε ≠ 1 = 1 + ε/2` threshold, and that Kahan crushes naive on two adversarial
+$1 + \varepsilon \ne 1 = 1 + \varepsilon/2$ threshold, and that Kahan crushes naive on two adversarial
 inputs. This is where representation turns into *numerical analysis*.
 
 ---
 
 ## 10. Check your understanding
 
-1. Why can't `0.1` be stored exactly in binary64, and how far from `1/10` is the
-   stored value? (Repeating expansion; within half a ulp = under `2^{-56}`.)
-2. In `1.0 + 2^{-53}`, what are the guard, round, and sticky bits, and which way
-   does RNE go? (Round bit 1, sticky 0 → a tie; last kept bit of `1.0` is 0
-   (even) → round down → `1.0`.)
-3. Give three floats `a, b, c` with `(a+b)+c ≠ a+(b+c)` and explain in one
-   sentence. (E.g. `1, 2^{-53}, 2^{-53}`: the two half-ulps round away
+1. Why can't `0.1` be stored exactly in binary64, and how far from $1/10$ is the
+   stored value? (Repeating expansion; within half a ulp = under $2^{-56}$.)
+2. In $1.0 + 2^{-53}$, what are the guard, round, and sticky bits, and which way
+   does RNE go? (Round bit 1, sticky 0 → a tie; last kept bit of $1.0$ is 0
+   (even) → round down → $1.0$.)
+3. Give three floats $a, b, c$ with $(a+b)+c \ne a+(b+c)$ and explain in one
+   sentence. (E.g. $1, 2^{-53}, 2^{-53}$: the two half-ulps round away
    separately but survive when added first.)
 4. Why does multiplication need only *one* rounding to be correctly rounded,
    while a naive division might need several? (The exact product fits in 106
    bits; the exact quotient is infinite, so you must generate guard/round/sticky
    yourself.)
-5. In Kahan's loop, what does `c` hold after the `n`-th step, and why does
-   subtracting it next time help? (The low bits lost when `t = fl(s+y)` rounded;
+5. In Kahan's loop, what does $c$ hold after the $n$-th step, and why does
+   subtracting it next time help? (The low bits lost when $t = \mathrm{fl}(s+y)$ rounded;
    feeding them back cancels that step's error to first order.)
 
 ## 11. Exercises from the text
@@ -443,10 +435,10 @@ work in `course/module-19-float/exercises.md`.
 |---|---|---|
 | 4.2.1-1 | 10 | Give the normalized binary form of a few decimal fractions; which are exact? |
 | ▶4.2.1-3 | 20 | Show why the sticky bit (not just guard+round) is needed for correct rounding of addition. |
-| 4.2.1-6 | 22 | When can `x · y` overflow even though `x` and `y` are well inside range? Analyze the exponent sum. |
-| ▶4.2.2-9 | 25 | Prove Sterbenz's lemma: if `y/2 ≤ x ≤ 2y` then `x − y` is computed exactly. |
-| 4.2.2-15 | 28 | Bound the error of naive summation of `n` terms; then Kahan's, showing the `n`-independence. |
-| ▶4.2.2-21 | 30 | Analyze `(a+b)+c` vs `a+(b+c)`: characterize when they differ and by how much. |
+| 4.2.1-6 | 22 | When can $x \cdot y$ overflow even though $x$ and $y$ are well inside range? Analyze the exponent sum. |
+| ▶4.2.2-9 | 25 | Prove Sterbenz's lemma: if $y/2 \le x \le 2y$ then $x - y$ is computed exactly. |
+| 4.2.2-15 | 28 | Bound the error of naive summation of $n$ terms; then Kahan's, showing the $n$-independence. |
+| ▶4.2.2-21 | 30 | Analyze $(a+b)+c$ vs $a+(b+c)$: characterize when they differ and by how much. |
 
 ## Why it's done this way
 
@@ -457,7 +449,7 @@ work in `course/module-19-float/exercises.md`.
 - **A biased exponent** makes the raw bit pattern sort in numeric order, so
   hardware can compare floats with integer instructions.
 - **Round to nearest, *even*** is the unique tie rule that is unbiased (errors
-  cancel, drift is `√n` not `n`) *and* composes without double-rounding — which
+  cancel, drift is $\sqrt{n}$ not $n$) *and* composes without double-rounding — which
   is why it is everyone's default.
 - **Guard/round/sticky** is the minimum state that makes rounding correct after
   a shift or an infinite quotient; carry those three bits and you never need the
@@ -494,18 +486,18 @@ work in `course/module-19-float/exercises.md`.
 ## Proof techniques you practiced
 
 - **Nearest-point + spacing bound** — the fundamental theorem falls out of
-  "adjacent representables are one ulp apart," turned into `|δ| ≤ u/2`.
-- **The `(1+δ)` model** — replace each rounded operation by an exact one times
-  `(1 + δ)`, `|δ| ≤ u/2`, then bound the accumulated product. The backbone of all
+  "adjacent representables are one ulp apart," turned into $|\delta| \le u/2$.
+- **The $(1+\delta)$ model** — replace each rounded operation by an exact one times
+  $(1 + \delta)$, $|\delta| \le u/2$, then bound the accumulated product. The backbone of all
   rounding-error analysis.
 - **Exact error extraction (TwoSum/TwoProduct)** — recover the rounding error
   itself in floating point with no extra precision; used both to *verify* the
   bound and to *build* Kahan summation.
 - **Bias/no-drift argument** — the mean-zero, random-walk reasoning that makes
-  round-to-even's error grow like `√n` instead of `n`.
+  round-to-even's error grow like $\sqrt{n}$ instead of $n$.
 - **Counterexample by construction** — non-associativity proved by exhibiting
-  `1, 2^{-53}, 2^{-53}` and tracing both groupings.
-- **Invariant maintenance** — Kahan's `c` maintains "the bits lost so far,"
+  $1, 2^{-53}, 2^{-53}$ and tracing both groupings.
+- **Invariant maintenance** — Kahan's $c$ maintains "the bits lost so far,"
   proved preserved each iteration (a loop invariant, as in Module 01).
 
 ## 12. Where this leads
@@ -513,7 +505,7 @@ work in `course/module-19-float/exercises.md`.
 - **Interval and higher-precision arithmetic** (double-double, the `TwoSum`/
   `TwoProduct` "error-free transformations") build directly on stage 4 to get
   guaranteed bounds and extra digits from ordinary hardware.
-- **Numerical linear algebra** — the `(1+δ)` model is how you prove Gaussian
+- **Numerical linear algebra** — the $(1+\delta)$ model is how you prove Gaussian
   elimination, QR, and iterative solvers are backward-stable; the conditioning of
   a problem times the stability of an algorithm bounds the error.
 - **The rest of Vol. 2** — §4.2.3 (double precision), §4.2.4 (distribution of

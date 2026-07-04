@@ -57,7 +57,7 @@ solver do the search.
 
 A **literal** is a variable or its negation. In this course a literal is a
 nonzero `i32`: `+v` means "variable *v* is true", `-v` means "variable *v* is
-false", for `1 ≤ v ≤ num_vars`. A **clause** is a disjunction (OR) of literals,
+false", for $1 \le v \le$ `num_vars`. A **clause** is a disjunction (OR) of literals,
 written as a `Vec<i32>`. A formula in **conjunctive normal form** (CNF) is a
 conjunction (AND) of clauses: `Vec<Vec<i32>>`.
 
@@ -112,14 +112,14 @@ by comparing against a fixed expected model.
 Knuth threads one family of formulas through all of §7.2.2.2, and so will we.
 
 **Van der Waerden's theorem (1927).** For any *j*, *k* there is a least integer
-`W(j, k)` such that *however* you 2-colour the integers `1, 2, …, W(j,k)` (say
+$W(j, k)$ such that *however* you 2-colour the integers $1, 2, \ldots, W(j,k)$ (say
 red/blue), you are *forced* to create either a red *j*-term arithmetic
 progression or a blue *k*-term one. An arithmetic progression (AP) is
-`a, a+d, a+2d, …` — equally spaced integers.
+$a, a+d, a+2d, \ldots$ — equally spaced integers.
 
-The smallest interesting value is **W(3, 3) = 9**. Encode "is `1..n`
+The smallest interesting value is **$W(3, 3) = 9$**. Encode "is `1..n`
 2-colourable with no monochromatic 3-term AP?" as `waerden_cnf(3, 3, n)`:
-variable *i* means "*i* is red". For every 3-term AP `a, a+d, a+2d` inside
+variable *i* means "*i* is red". For every 3-term AP $a, a+d, a+2d$ inside
 `1..=n` add two clauses,
 
 ```text
@@ -127,8 +127,8 @@ variable *i* means "*i* is red". For every 3-term AP `a, a+d, a+2d` inside
 ( x_a ∨  x_{a+d} ∨  x_{a+2d})     "not all three blue"
 ```
 
-The formula is satisfiable **iff** `n < W(3,3) = 9`. Your solver will confirm
-both halves. For `n = 8` a satisfying colouring is
+The formula is satisfiable **iff** $n < W(3,3) = 9$. Your solver will confirm
+both halves. For $n = 8$ a satisfying colouring is
 
 ```text
 i:     1 2 3 4 5 6 7 8
@@ -136,10 +136,10 @@ colour R R B B R R B B
 ```
 
 Check it by hand: `(1,2,3)=RRB`, `(2,4,6)=RBR`, `(1,4,7)=RBB`, … no three
-equally-spaced positions share a colour. For `n = 9` no such colouring exists —
-that is *precisely* the statement `W(3,3) = 9`, and `solve(&waerden_cnf(3,3,9))`
-returns `None`. (Knuth's book pushes this to `W(3,3,3,3)` and beyond; the
-numbers explode — `W(2,6) = 1132`, and most values are simply unknown.)
+equally-spaced positions share a colour. For $n = 9$ no such colouring exists —
+that is *precisely* the statement $W(3,3) = 9$, and `solve(&waerden_cnf(3,3,9))`
+returns `None`. (Knuth's book pushes this to $W(3,3,3,3)$ and beyond; the
+numbers explode — $W(2,6) = 1132$, and most values are simply unknown.)
 
 ---
 
@@ -227,10 +227,10 @@ on failure.
 DPLL never returns a wrong answer. Unit propagation only assigns literals that
 are *logically forced*, so it never removes a model — the set of models
 extending the partial assignment is preserved. And each branch node tries
-*both* truth values of ℓ, so the two subtrees together cover *every* completion.
+*both* truth values of $\ell$, so the two subtrees together cover *every* completion.
 Therefore DPLL returns `None` only when genuinely no assignment satisfies the
 formula, and a model only when it has verified one. (Termination: every branch
-fixes one more variable, so recursion depth ≤ `num_vars`.)
+fixes one more variable, so recursion depth $\le$ `num_vars`.)
 
 ### Hand trace with the search tree
 
@@ -267,7 +267,7 @@ exactly one backtrack. This is the entire algorithm in miniature.
 
 *Which* literal to branch on (D2) is a free choice that dramatically changes the
 tree size. Classic rules: **MOM** (maximum occurrences in minimum-size clauses),
-**Jeroslow–Wang** (weight literals by `2^{-|clause|}`), and in modern CDCL
+**Jeroslow–Wang** (weight literals by $2^{-|\text{clause}|}$), and in modern CDCL
 solvers **VSIDS** (bump variables that appear in recent conflicts). Any choice
 is *correct*; only speed changes. Our lab branches on the first literal of the
 first unsatisfied clause — the simplest rule that still lets propagation shine.
@@ -277,13 +277,13 @@ first unsatisfied clause — the simplest rule that still lets propagation shine
 ## 6. When search explodes: pigeonhole and the road to CDCL
 
 Some formulas are UNSAT for a reason so simple a child sees it, yet drive DPLL
-to its knees. The **pigeonhole principle** `PHP(m, n)` says *m* pigeons cannot
-occupy *n* holes if `m > n` with no two pigeons sharing a hole. Encode it
+to its knees. The **pigeonhole principle** $\text{PHP}(m, n)$ says *m* pigeons cannot
+occupy *n* holes if $m > n$ with no two pigeons sharing a hole. Encode it
 (`pigeonhole_cnf`) with `x[p][h]` = "pigeon *p* in hole *h*": each pigeon sits
 somewhere (`x[p][0] ∨ … ∨ x[p][n-1]`), and no hole is shared
-(`¬x[p][h] ∨ ¬x[q][h]` for `p < q`). It is unsatisfiable exactly when `m > n`.
+(`¬x[p][h] ∨ ¬x[q][h]` for $p < q$). It is unsatisfiable exactly when $m > n$.
 
-**Haken's theorem (1985).** Every *resolution* refutation of `PHP(n+1, n)` has
+**Haken's theorem (1985).** Every *resolution* refutation of $\text{PHP}(n+1, n)$ has
 size **exponential** in *n*. Since DPLL's reasoning is a form of resolution,
 DPLL provably needs exponential time on the pigeonhole family — no branching
 heuristic can save it. This is not a defect of one implementation; it is a
@@ -308,14 +308,14 @@ constraining *how many* of a set of literals are true.
 ### At-most-one and exactly-one
 
 "At most one of `ℓ1, …, ℓn`" in the **pairwise** (binomial) encoding is one
-clause per pair: `(¬ℓi ∨ ¬ℓj)` for all `i < j` — `C(n,2) = O(n²)` clauses and
+clause per pair: `(¬ℓi ∨ ¬ℓj)` for all $i < j$ — $\binom{n}{2} = O(n^2)$ clauses and
 *zero* new variables. Add the single clause `(ℓ1 ∨ … ∨ ℓn)` for at-*least*-one
 and you have **exactly-one** (`exactly_one`). Note the edge case: exactly-one of
 *nothing* yields the empty clause — correctly unsatisfiable.
 
-The `O(n²)` blow-up matters at scale. §7.2.2.2 gives cleverer encodings — the
-**sequential (ladder)** and **commander** encodings introduce `O(n)` auxiliary
-variables to get only `O(n)` clauses. At lab sizes the pairwise encoding wins on
+The $O(n^2)$ blow-up matters at scale. §7.2.2.2 gives cleverer encodings — the
+**sequential (ladder)** and **commander** encodings introduce $O(n)$ auxiliary
+variables to get only $O(n)$ clauses. At lab sizes the pairwise encoding wins on
 simplicity, but knowing the trade-off is the point: encoding choice can decide
 whether a solver finishes in a second or a century.
 
@@ -323,12 +323,12 @@ whether a solver finishes in a second or a century.
 
 - **n-queens** (`queens_cnf`). `x[r][c]` = "queen on row *r*, column *c*."
   Exactly one queen per row; at most one per column; at most one per diagonal
-  (both directions). Satisfiable for `n = 1` and `n ≥ 4`, unsatisfiable for
-  `n = 2, 3`. `decode_queens` reads a model into `cols[r]` = the queen's column.
+  (both directions). Satisfiable for $n = 1$ and $n \ge 4$, unsatisfiable for
+  $n = 2, 3$. `decode_queens` reads a model into `cols[r]` = the queen's column.
 - **Graph *k*-colouring** (`coloring_cnf`). `x[v][c]` = "vertex *v* has colour
   *c*." Exactly one colour per vertex; for every edge `(u,w)` and colour *c*,
   `(¬x[u][c] ∨ ¬x[w][c])` forbids equal colours on adjacent vertices. The
-  Petersen graph is 3-colourable but the complete graph `K₄` is not
+  Petersen graph is 3-colourable but the complete graph $K_4$ is not
   2-colourable. `decode_coloring` reads out `colours[v]`.
 
 Always validate the *decoded* solution against the problem's own rules — a
@@ -368,9 +368,9 @@ variants.
 
 ### Stage 3 — `solve`, `solve_brute`, `pigeonhole_cnf`, `waerden_cnf`
 `solve` is Algorithm D: snapshot, propagate, detect success, else branch two
-ways with backtracking. `solve_brute` enumerates all `2^num_vars` assignments as
+ways with backtracking. `solve_brute` enumerates all $2^{\texttt{num\_vars}}$ assignments as
 the honest cross-check (cap at 25 vars). Then build the two formula families;
-the tests confirm `PHP(4,3)`/`PHP(5,4)` UNSAT, `waerden(3,3;8)` SAT and
+the tests confirm $\text{PHP}(4,3)$/$\text{PHP}(5,4)$ UNSAT, `waerden(3,3;8)` SAT and
 `waerden(3,3;9)` UNSAT, and cross-check random 3-SAT against `solve_brute`.
 
 ### Stage 4 — `exactly_one`, `queens_cnf`, `decode_queens`, `coloring_cnf`, `decode_coloring`
@@ -392,11 +392,11 @@ monochromatic edge.
 3. In the DPLL trace of §5, why must backtracking undo `x2` and `x3` and not
    just `x1`? (They were *forced by* the guess `x1 = true`; a different guess
    invalidates them.)
-4. `PHP(n+1, n)` is "obviously" false. Why does that not make it easy for DPLL?
+4. $\text{PHP}(n+1, n)$ is "obviously" false. Why does that not make it easy for DPLL?
    (Haken: every resolution refutation is exponentially large.)
-5. The pairwise at-most-one encoding uses `C(n,2)` clauses. For `n = 1000`
+5. The pairwise at-most-one encoding uses $\binom{n}{2}$ clauses. For $n = 1000$
    variables in a row of a Sudoku, how many clauses is that, and why might you
-   prefer a sequential encoding? (≈ 500 000; `O(n)` vs `O(n²)`.)
+   prefer a sequential encoding? ($\approx 500{,}000$; $O(n)$ vs $O(n^2)$.)
 
 ## 10. Exercises from the text
 
@@ -409,7 +409,7 @@ especially instructive exercises. Log your attempts in
 |---|---|---|
 | 7.2.2.2-1 | 10 | Show that the empty clause is unsatisfiable and the empty formula is valid; relate to `evaluate`. |
 | 7.2.2.2-4 | 15 | Prove the unit-clause rule preserves the set of satisfying assignments. |
-| ▶7.2.2.2-13 | 22 | Verify `W(3,3) = 9` by exhibiting an 8-element colouring and arguing no 9-element one exists. |
+| ▶7.2.2.2-13 | 22 | Verify $W(3,3) = 9$ by exhibiting an 8-element colouring and arguing no 9-element one exists. |
 | 7.2.2.2-17 | 20 | Give the pairwise at-most-one encoding and count its clauses; compare with the sequential encoding's variable/clause counts. |
 | ▶7.2.2.2-99 | 30 | Prove DPLL is sound and complete (the argument sketched in §5). |
 | 7.2.2.2-176 | 40 | Read Haken's exponential lower bound for pigeonhole resolution and reproduce its outline. |
