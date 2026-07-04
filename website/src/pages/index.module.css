@@ -20,7 +20,7 @@
   font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.0; margin: 0 0 0.7rem;
   color: var(--taocp-ink); text-wrap: balance; letter-spacing: 0.005em;
 }
-.title em { font-style: italic; color: var(--taocp-oxblood); }
+.title em { font-style: italic; color: var(--taocp-accent); }
 .lede {
   font-family: var(--taocp-serif); font-size: clamp(1.02rem, 2vw, 1.2rem);
   max-width: 62ch; margin: 0 0 1.6rem; color: var(--taocp-ink-soft);
@@ -31,7 +31,7 @@
 .startlinks {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 1.1rem;
   padding: 0.7rem 0.9rem; background: var(--taocp-plate);
-  border: 1px solid var(--taocp-plate-edge); border-left: 3px solid var(--taocp-oxblood);
+  border: 1px solid var(--taocp-plate-edge); border-left: 3px solid var(--taocp-accent);
   border-radius: 3px; font-size: 0.92rem; margin-bottom: 2rem;
 }
 .slLabel {

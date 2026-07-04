@@ -113,7 +113,7 @@
   --ifm-navbar-shadow: 0 2px 0 var(--taocp-gold);
 
   --ifm-menu-color: #6B5D4F;      /* warm the sidebar greys off Infima's cool #606770 */
-  --ifm-menu-color-active: var(--taocp-oxblood);
+  --ifm-menu-color-active: var(--taocp-accent);  /* mode-aware: plum in light, pink in dark */
   --ifm-toc-border-color: var(--taocp-plate-edge);
 
   /* Footer = a quiet parchment band with a gold foil rule (matches the museum). */
@@ -205,6 +205,18 @@ body {
 }
 .markdown .katex { color: var(--taocp-accent); }
 .markdown .katex-display .katex { color: var(--taocp-ink); }
+
+/* --- Dark-mode contrast fixes ---
+   In dark mode the primary colour is a light pink, so Infima's white button
+   text drops to ~1.6:1. Put dark ink on filled/hovered primary buttons. */
+[data-theme='dark'] .button--primary,
+[data-theme='dark'] .button--primary:hover,
+[data-theme='dark'] .button--primary:active,
+[data-theme='dark'] .button--outline.button--primary:hover {
+  color: #1a1310;
+}
+/* Keep the primary link colour a touch stronger against the cloth ground. */
+[data-theme='dark'] { --ifm-link-color: #e6adb4; }
 
 /* Footer: a quiet parchment band with a gold foil rule — the museum's calm
    surface, not another plum block. Element selectors beat Infima's footer--dark

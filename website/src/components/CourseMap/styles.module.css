@@ -64,7 +64,7 @@
   font-weight: 600; font-size: 1.06rem; line-height: 1.15; color: var(--taocp-ink);
   text-decoration: none;
 }
-.cardTitle:hover { color: var(--taocp-oxblood); text-decoration: underline; }
+.cardTitle:hover { color: var(--taocp-accent); text-decoration: underline; }
 .cardSrc { font-size: 0.72rem; color: var(--taocp-muted); }
 .ring { margin-left: auto; flex: none; }
 
@@ -72,11 +72,11 @@
 .pip {
   font-size: 0.68rem; font-variant-numeric: tabular-nums;
   display: inline-flex; align-items: center; gap: 0.3rem;
-  background: #efe8db; border: 1px solid var(--taocp-plate-edge); color: var(--taocp-ink-soft);
+  background: var(--taocp-plate-edge); border: 1px solid var(--taocp-plate-edge); color: var(--taocp-ink-soft);
   border-radius: 3px; padding: 0.2rem 0.42rem; cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.pip:hover { border-color: var(--taocp-oxblood); }
+.pip:hover { border-color: var(--taocp-accent); }
 .pip[aria-pressed='true'] { background: var(--taocp-done); border-color: var(--taocp-done); color: #fff; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--taocp-muted); flex: none; }
 .pip[aria-pressed='true'] .dot { background: #fff; }
@@ -86,7 +86,7 @@
   color: var(--taocp-muted); background: none; border: none; cursor: pointer;
   padding: 0; text-transform: uppercase;
 }
-.expand:hover { color: var(--taocp-oxblood); }
+.expand:hover { color: var(--taocp-accent); }
 
 .stagelist { margin: 0.1rem 0 0; padding: 0; list-style: none; }
 .stagelist li {
