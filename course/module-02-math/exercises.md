@@ -27,7 +27,11 @@ readers who own Volume 1.
 ### 1. Induction warm-up: sum of cubes (Nicomachus) (rating 10 · cf. 1.2.1–1)
 
 **Problem.** Prove by mathematical induction that
-$$\sum_{k=1}^{n} k^3 = \left(\frac{n(n+1)}{2}\right)^2 \quad\text{for all } n \ge 1.$$
+
+$$
+\sum_{k=1}^{n} k^3 = \left(\frac{n(n+1)}{2}\right)^2 \quad\text{for all } n \ge 1.
+$$
+
 That is: the sum of the first $n$ cubes equals the square of the $n$-th
 triangular number.
 
@@ -37,9 +41,13 @@ exactly this factoring move.
 
 **Answer sketch.** *Basis:* $1^3 = 1 = (1 \cdot 2 / 2)^2$. *Induction:* assume
 $\sum_{k=1}^{n} k^3 = \big(n(n+1)/2\big)^2$. Then
-$$\sum_{k=1}^{n+1} k^3 = \left(\frac{n(n+1)}{2}\right)^2 + (n+1)^3
+
+$$
+\sum_{k=1}^{n+1} k^3 = \left(\frac{n(n+1)}{2}\right)^2 + (n+1)^3
 = (n+1)^2\left(\frac{n^2}{4} + (n+1)\right)
-= (n+1)^2 \cdot \frac{n^2 + 4n + 4}{4} = \left(\frac{(n+1)(n+2)}{2}\right)^2,$$
+= (n+1)^2 \cdot \frac{n^2 + 4n + 4}{4} = \left(\frac{(n+1)(n+2)}{2}\right)^2,
+$$
+
 which is the formula at $n+1$. $\blacksquare$ (Numerical check: $1+8+27+64 = 100 =
 (4\cdot 5/2)^2 = 10^2$.)
 
@@ -59,8 +67,12 @@ two ways. Last term: $S_{n+1} = S + (n+1)x^{n+1}$. First term (reindex
 $k \to k+1$): $S_{n+1} = \sum_{k=0}^{n}(k+1)x^{k+1} = x\sum_{k=0}^{n} k x^k + x\sum_{k=0}^{n} x^k
 = xS + x\,G$, where $G = \dfrac{x^{n+1}-1}{x-1}$. Equating,
 $S + (n+1)x^{n+1} = xS + xG$, so
-$$S(1-x) = xG - (n+1)x^{n+1} = \frac{x(x^{n+1}-1)}{x-1} - (n+1)x^{n+1},
-\qquad S = \frac{x - (n+1)x^{n+1} + n\,x^{n+2}}{(1-x)^2}\quad (x \ne 1).$$
+
+$$
+S(1-x) = xG - (n+1)x^{n+1} = \frac{x(x^{n+1}-1)}{x-1} - (n+1)x^{n+1},
+\qquad S = \frac{x - (n+1)x^{n+1} + n\,x^{n+2}}{(1-x)^2}\quad (x \ne 1).
+$$
+
 At $x = 2$: denominator $(1-2)^2 = 1$, numerator $2 - (n+1)2^{n+1} + n\,2^{n+2}
 = 2 + 2^{n+1}\big(2n - (n+1)\big) = (n-1)2^{n+1} + 2$. So
 $\sum_{k=0}^{n} k\,2^k = (n-1)2^{n+1} + 2$. (Checks: $n=2$ gives $1\cdot 8 + 2 = 10 =
@@ -78,9 +90,13 @@ watch each row-$(n-1)$ term get counted twice.
 **Answer sketch.** *Basis:* $R_0 = \binom{0}{0} = 1 = 2^0$. *Induction:* assume
 $R_{n-1} = 2^{n-1}$. Using Pascal's rule on every interior term (with the
 boundary convention $\binom{n-1}{-1} = \binom{n-1}{n} = 0$),
-$$R_n = \sum_{k=0}^{n}\binom{n}{k}
+
+$$
+R_n = \sum_{k=0}^{n}\binom{n}{k}
 = \sum_{k=0}^{n}\left(\binom{n-1}{k-1} + \binom{n-1}{k}\right)
-= \sum_{k}\binom{n-1}{k-1} + \sum_{k}\binom{n-1}{k} = R_{n-1} + R_{n-1} = 2R_{n-1}.$$
+= \sum_{k}\binom{n-1}{k-1} + \sum_{k}\binom{n-1}{k} = R_{n-1} + R_{n-1} = 2R_{n-1}.
+$$
+
 Each row-$(n-1)$ entry appears once in each of the two shifted sums, so the total
 doubles. Hence $R_n = 2 \cdot 2^{n-1} = 2^n$. $\blacksquare$ (This is the same
 addition-formula engine that proves every $\binom{n}{k}$ is an integer — the
@@ -91,7 +107,11 @@ recurrence $R_n = 2R_{n-1}$ is Pascal's rule summed across a row.)
 **Problem.** Show directly — *without* invoking Pascal's rule or an induction on
 the triangle — that $k!$ divides the product of any $k$ consecutive integers,
 i.e. that
-$$\binom{n}{k} = \frac{n(n-1)\cdots(n-k+1)}{k!}$$
+
+$$
+\binom{n}{k} = \frac{n(n-1)\cdots(n-k+1)}{k!}
+$$
+
 is always an integer for integers $n \ge k \ge 0$.
 
 **Hint.** The lesson's *combinatorial* definition of $\binom{n}{k}$ is the key:
@@ -114,7 +134,11 @@ also works but is longer; the combinatorial one is the instructive route.)
 
 **Problem.** With Knuth's indexing $F_0 = 0$, $F_1 = 1$, $F_{n+1} = F_n + F_{n-1}$,
 prove **Cassini's identity**
-$$F_{n-1}\,F_{n+1} - F_n^2 = (-1)^n \quad\text{for all } n \ge 1$$
+
+$$
+F_{n-1}\,F_{n+1} - F_n^2 = (-1)^n \quad\text{for all } n \ge 1
+$$
+
 by induction on $n$.
 
 **Hint.** Basis $n = 1$: $F_0 F_2 - F_1^2 = 0 \cdot 1 - 1 = -1 = (-1)^1$. For the
@@ -124,8 +148,12 @@ previous case; the sign flips each time.
 **Answer sketch.** *Basis* ($n=1$): $F_0 F_2 - F_1^2 = 0\cdot 1 - 1^2 = -1 =
 (-1)^1$. ✓ *Induction:* assume $F_{n-1}F_{n+1} - F_n^2 = (-1)^n$. Then, using
 $F_{n+2} = F_{n+1} + F_n$,
-$$F_n F_{n+2} - F_{n+1}^2 = F_n(F_{n+1}+F_n) - F_{n+1}^2
-= F_{n+1}(F_n - F_{n+1}) + F_n^2 = -F_{n+1}F_{n-1} + F_n^2$$
+
+$$
+F_n F_{n+2} - F_{n+1}^2 = F_n(F_{n+1}+F_n) - F_{n+1}^2
+= F_{n+1}(F_n - F_{n+1}) + F_n^2 = -F_{n+1}F_{n-1} + F_n^2
+$$
+
 (since $F_n - F_{n+1} = -F_{n-1}$) $= -\big(F_{n-1}F_{n+1} - F_n^2\big)
 = -(-1)^n = (-1)^{n+1}$, which is Cassini at $n+1$. $\blacksquare$ (Spot check:
 $n = 6$, $F_5 F_7 - F_6^2 = 5\cdot 13 - 8^2 = 65 - 64 = 1 = (-1)^6$.) The sign
@@ -136,7 +164,11 @@ dissection "paradox" mentioned in the lesson.
 
 **Problem.** Algorithm M scans $X[1..n]$ right-to-left and $A$ counts how often
 the running maximum changes (executions of step M4). Its generating function is
-$$G_n(z) = \frac{z+1}{2}\cdot\frac{z+2}{3}\cdots\frac{z+n-1}{n}.$$
+
+$$
+G_n(z) = \frac{z+1}{2}\cdot\frac{z+2}{3}\cdots\frac{z+n-1}{n}.
+$$
+
 Show that $\operatorname{Var}(A) = H_n - H_n^{(2)}$, where $H_n = \sum_{k=1}^{n} 1/k$
 and $H_n^{(2)} = \sum_{k=1}^{n} 1/k^2$, and verify it numerically for $n = 6$
 against the exact histogram of $A$ (counts $120, 274, 225, 85, 15, 1$ for
@@ -150,10 +182,14 @@ $\operatorname{Var}(I_k) = p_k(1 - p_k)$.
 
 **Answer sketch.** Because the $I_k$ are independent Bernoulli$(p_k)$ with
 $p_k = 1/(n-k+1)$, letting $j = n-k+1$ range over $2, 3, \dots, n$,
-$$\operatorname{Var}(A) = \sum_{k=1}^{n-1} p_k(1-p_k)
+
+$$
+\operatorname{Var}(A) = \sum_{k=1}^{n-1} p_k(1-p_k)
 = \sum_{j=2}^{n}\frac{1}{j}\left(1 - \frac{1}{j}\right)
 = \sum_{j=2}^{n}\left(\frac{1}{j} - \frac{1}{j^2}\right)
-= (H_n - 1) - (H_n^{(2)} - 1) = H_n - H_n^{(2)}.$$
+= (H_n - 1) - (H_n^{(2)} - 1) = H_n - H_n^{(2)}.
+$$
+
 (Equivalently this drops out of $\operatorname{Var}(A) = G_n''(1) + G_n'(1) -
 G_n'(1)^2$ with $G_n'(1) = E[A] = H_n - 1$.) *Numerical check, $n = 6$:* the exact
 histogram $(120, 274, 225, 85, 15, 1)/720$ has mean $E[A] = 1044/720 = 1.45 =

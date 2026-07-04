@@ -104,23 +104,43 @@ leaves the pivot equally likely to be the $k$th smallest. Set up and solve the
 recurrence for $C_N$ in closed form, and give its leading asymptotic term.
 
 **Hint.** Start from
-$$C_N = (N-1) + \frac{2}{N}\sum_{k=0}^{N-1} C_k, \qquad C_0 = C_1 = 0.$$
+
+$$
+C_N = (N-1) + \frac{2}{N}\sum_{k=0}^{N-1} C_k, \qquad C_0 = C_1 = 0.
+$$
+
 Multiply by $N$, write the same relation for $N-1$, subtract to eliminate the
 sum, then divide by $N(N+1)$ and telescope. The partial fraction
 $\frac{2(N-1)}{N(N+1)} = \frac{4}{N+1} - \frac{2}{N}$ is the key algebra.
 
 **Answer sketch.** Multiplying by $N$ and subtracting the $N-1$ version kills the
 sum:
-$$N C_N = (N+1) C_{N-1} + 2(N-1).$$
+
+$$
+N C_N = (N+1) C_{N-1} + 2(N-1).
+$$
+
 Dividing by $N(N+1)$ and using the partial fraction gives
-$$\frac{C_N}{N+1} = \frac{C_{N-1}}{N} + \frac{4}{N+1} - \frac{2}{N}.$$
+
+$$
+\frac{C_N}{N+1} = \frac{C_{N-1}}{N} + \frac{4}{N+1} - \frac{2}{N}.
+$$
+
 Telescoping from $C_1 = 0$ yields $\frac{C_N}{N+1} = 2 H_N - 4 + \frac{4}{N+1}$,
 so the exact closed form is
-$$C_N = 2(N+1) H_N - 4N,$$
+
+$$
+C_N = 2(N+1) H_N - 4N,
+$$
+
 where $H_N = 1 + \tfrac12 + \cdots + \tfrac1N$. (Verified against the raw
 recurrence: $N = 5 \to 7.4$, $N = 10 \to 24.4373$, $N = 100 \to 647.8503$, both
 formulas agreeing exactly.) Since $H_N \approx \ln N + \gamma$,
-$$C_N \sim 2N \ln N = (2\ln 2)\,N \lg N \approx 1.386\, N \lg N,$$
+
+$$
+C_N \sim 2N \ln N = (2\ln 2)\,N \lg N \approx 1.386\, N \lg N,
+$$
+
 about 39% above the information-theoretic floor $N \lg N$ (Problem 7).
 Median-of-three pivoting lowers the constant to about $1.19\, N \lg N$.
 
@@ -138,7 +158,11 @@ all heights, and use the closed form of $\sum_{h \ge 0} h x^h$ at $x = \tfrac12$
 
 **Answer sketch.** At most $\lceil n/2^{h+1}\rceil$ nodes have height $h$, each
 costing $\le 2h$ comparisons, so the total is at most
-$$\sum_{h \ge 0} \frac{n}{2^{h+1}} \cdot 2h = n \sum_{h \ge 0} \frac{h}{2^h}.$$
+
+$$
+\sum_{h \ge 0} \frac{n}{2^{h+1}} \cdot 2h = n \sum_{h \ge 0} \frac{h}{2^h}.
+$$
+
 Using $\sum_{h \ge 0} h x^h = \dfrac{x}{(1-x)^2}$ at $x = \tfrac12$, the inner sum
 is $\dfrac{1/2}{(1/2)^2} = 2$. (Verified numerically: $\sum_{h\ge0} h/2^h = 2$.)
 Hence the build costs at most $2n$ comparisons — linear. The intuition: sifting
@@ -177,7 +201,11 @@ $n - 1$ comparisons.)
 each of the $n!$ orderings, so its worst-case height is at least
 $\lceil \lg(n!) \rceil$. Use Stirling's approximation
 $\ln(n!) = n \ln n - n + O(\ln n)$ to show
-$$\lg(n!) = n \lg n - n \lg e + O(\log n) \approx n \lg n - 1.44\,n,$$
+
+$$
+\lg(n!) = n \lg n - n \lg e + O(\log n) \approx n \lg n - 1.44\,n,
+$$
+
 and conclude that every comparison sort needs $\ge n \lg n - O(n)$ comparisons in
 the worst case.
 
@@ -187,8 +215,12 @@ error becomes $O(\log n)$ (bases differ by a constant).
 
 **Answer sketch.** Multiply Stirling's $\ln(n!) = n \ln n - n + O(\ln n)$ by
 $\lg e = 1/\ln 2$:
-$$\lg(n!) = (\lg e)\ln(n!) = n(\lg e)\ln n - n \lg e + O(\log n)
-= n \lg n - n \lg e + O(\log n),$$
+
+$$
+\lg(n!) = (\lg e)\ln(n!) = n(\lg e)\ln n - n \lg e + O(\log n)
+= n \lg n - n \lg e + O(\log n),
+$$
+
 since $(\lg e)\ln n = \lg n$. With $\lg e = 1.44269\ldots$ this is
 $\approx n \lg n - 1.44\,n$. (Verified: $n = 16$ gives $\lg(16!) = 44.25$ vs.
 $n \lg n - n \lg e = 40.92$; $n = 100$ gives $524.77$ vs. $520.12$ — the gap is

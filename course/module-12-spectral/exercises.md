@@ -67,11 +67,15 @@ $j$ ($0 \le j \le t-1$) of the tuple starting at position $n$ is
 $x_{n+j}(c) = a^{n+j}x_0 + S_{n+j}c$. Using $S_{n+j} = a^j S_n + S_j$ (proved by
 splitting the sum $a^{n+j-1} + \cdots + 1$ at the term $a^j$),
 
-$$x_{n+j}(c) = a^j\big(a^n x_0 + S_n c\big) + S_j c = a^j\, x_n(c) + S_j c \pmod m.$$
+$$
+x_{n+j}(c) = a^j\big(a^n x_0 + S_n c\big) + S_j c = a^j\, x_n(c) + S_j c \pmod m.
+$$
 
 Therefore, with $v = (1, a, a^2, \ldots, a^{t-1})$,
 
-$$P_n(c) = x_n(c)\cdot v + w_t \pmod m, \qquad w_t = (S_0 c,\, S_1 c,\, \ldots,\, S_{t-1}c) = (0,\, c,\, (a+1)c,\, (a^2+a+1)c,\, \ldots).$$
+$$
+P_n(c) = x_n(c)\cdot v + w_t \pmod m, \qquad w_t = (S_0 c,\, S_1 c,\, \ldots,\, S_{t-1}c) = (0,\, c,\, (a+1)c,\, (a^2+a+1)c,\, \ldots).
+$$
 
 The first term $x_n(c)\cdot v$ is a lattice point (as $n$ varies, $x_n(c)$ runs
 through the same residues the $c = 0$ sequence does), and $w_t$ is a **single
@@ -101,7 +105,9 @@ m-1\}$, so $u \cdot x$ is maximized by setting $x_i = m - 1$ where $u_i > 0$ and
 $x_i = 0$ where $u_i < 0$, giving $(m-1)P$; it is minimized symmetrically at
 $-(m-1)N$. Thus
 
-$$-(m-1)N \ \le\ u\cdot x \ \le\ (m-1)P.$$
+$$
+-(m-1)N \ \le\ u\cdot x \ \le\ (m-1)P.
+$$
 
 A covering plane has index $k = (u\cdot x)/m$, so $k$ ranges over the integers in
 $[-(m-1)N/m,\ (m-1)P/m]$. Since $(m-1)N/m < N$ and $(m-1)P/m < P$, the integer $k$
@@ -201,7 +207,9 @@ $(9, -6, 1, 0)$, a legal dimension-$4$ dual vector of squared length $118$ (Prob
 (2^{31})^{1/2} = 65536$ for RANDU, so once $B \ge 256$ (here $B^2 \ge 65536$) the
 scan is certified; in fact RANDU certifies at $B = 16$. The computed value is
 
-$$\nu_4^2(\text{RANDU}) = 116,$$
+$$
+\nu_4^2(\text{RANDU}) = 116,
+$$
 
 **strictly below** the padded $118$: the witness $u = (-9, -3, 5, -1)$ satisfies
 $-9 - 3a + 5a^2 - a^3 \equiv 0 \pmod{2^{31}}$ and has squared length

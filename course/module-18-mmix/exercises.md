@@ -215,8 +215,12 @@ $n$ mems: $X[n]$ read once at init, then $X[k]$ read once for each $k = n{-}1,
 (exceeds all of $X[k], \ldots, X[n]$). Position $k$ is the maximum of its
 length-$(n-k+1)$ suffix with probability $1/(n-k+1)$, and $A = \sum_{k=1}^{n-1}
 R_k$ (position $n$ is the initial value, not an update). By linearity,
-$$\mathbb{E}[A] = \sum_{k=1}^{n-1} \frac{1}{\,n-k+1\,} = \sum_{j=2}^{n}
-\frac{1}{j} = H_n - 1.$$
+
+$$
+\mathbb{E}[A] = \sum_{k=1}^{n-1} \frac{1}{\,n-k+1\,} = \sum_{j=2}^{n}
+\frac{1}{j} = H_n - 1.
+$$
+
 Empirically, averaging $A$ over random permutations gives $\approx 1.083$ for
 $n = 4$, $\approx 1.718$ for $n = 8$, $\approx 2.381$ for $n = 16$ — matching
 $H_n - 1 = 1.0833, 1.7179, 2.3807$. This is the *same* $H_n - 1$ you met in

@@ -133,7 +133,9 @@ cyclic binary sequences whose eight $3$-windows are all distinct.
 all length-$8$ cyclic sequences with eight distinct $3$-windows (up to rotation)
 yields exactly **two** necklaces:
 
-$$00011101 \qquad\text{and}\qquad 00010111.$$
+$$
+00011101 \qquad\text{and}\qquad 00010111.
+$$
 
 The lesson's constant $D = \texttt{0x1D} = 00011101$ is the first; its left-shifts
 produce the eight distinct top-$3$-bit windows $000, 001, 011, 111, 110, 101, 010,
@@ -220,7 +222,9 @@ child at level $w > v + 1$, each skipped variable $x_{v+1}, \ldots, x_{w-1}$ is
 pinned to $0$ (absent), contributing a factor of $1^{\,w - v - 1} = 1$ rather than
 $2^{\,w - v - 1}$. The skip-weighted recurrence becomes
 
-$$s(\bot) = 0,\quad s(\top) = 1,\qquad s(p) = 1\cdot s(\mathrm{LO}(p)) + 1\cdot s(\mathrm{HI}(p)),$$
+$$
+s(\bot) = 0,\quad s(\top) = 1,\qquad s(p) = 1\cdot s(\mathrm{LO}(p)) + 1\cdot s(\mathrm{HI}(p)),
+$$
 
 i.e. **drop every $2^{\text{skip}}$ factor** — a two-line change to Algorithm C, and
 no top-of-root factor either. This is exactly why ZDDs compress families of sparse

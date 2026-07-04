@@ -82,8 +82,15 @@ resolution while $R$ still has $\ge 2$ conflict-level literals; (b) the loop
 terminates; (c) the literal it stops at is the **first UIP** and the resulting
 clause is **asserting** (one conflict-level literal). Illustrate on the
 eight-variable example of §4, whose database is
-$$C_0 = \lnot x_1 \lor x_2,\quad C_1 = \lnot x_1 \lor x_3 \lor x_7,\quad C_2 = \lnot x_2 \lor \lnot x_3 \lor x_4,$$
-$$C_3 = \lnot x_4 \lor x_5 \lor x_8,\quad C_4 = \lnot x_4 \lor x_6,\quad C_5 = \lnot x_5 \lor \lnot x_6,$$
+
+$$
+C_0 = \lnot x_1 \lor x_2,\quad C_1 = \lnot x_1 \lor x_3 \lor x_7,\quad C_2 = \lnot x_2 \lor \lnot x_3 \lor x_4,
+$$
+
+$$
+C_3 = \lnot x_4 \lor x_5 \lor x_8,\quad C_4 = \lnot x_4 \lor x_6,\quad C_5 = \lnot x_5 \lor \lnot x_6,
+$$
+
 with decisions $\lnot x_7$@1, $\lnot x_8$@2, $x_1$@3, conflict on $C_5$.
 
 **Hint.** For (a): the *latest* conflict-level literal of $R$ cannot be the

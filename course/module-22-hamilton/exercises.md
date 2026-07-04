@@ -44,7 +44,11 @@ start. After 0, the other $n-1$ vertices can be visited in **any** order (all
 edges exist in $K_n$), giving $(n-1)!$ directed closed walks $0 \to \cdots \to
 0$. But each *undirected* cycle is traced by exactly **two** such walks — one
 each way around — so the undirected count is
-$$\frac{(n-1)!}{2}.$$
+
+$$
+\frac{(n-1)!}{2}.
+$$
+
 This is *counting by symmetry*: fix a representative (start at 0) to remove the
 rotational over-count, then divide by the orbit size (2 directions). For $n = 5$:
 $4!/2 = 12$, matching the value the lab pins for $K_5$. (For $n = 3$ it gives 1 —

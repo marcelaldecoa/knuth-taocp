@@ -29,7 +29,11 @@ exercise of Vol. 3 §5.4 for readers who own it.
 
 **Problem.** Run replacement selection (Algorithm R, §2) by hand with memory
 $P = 4$ on Knuth's sixteen keys
-$$503,\ 087,\ 512,\ 061,\ 908,\ 170,\ 897,\ 275,\ 653,\ 426,\ 154,\ 509,\ 612,\ 677,\ 765,\ 703.$$
+
+$$
+503,\ 087,\ 512,\ 061,\ 908,\ 170,\ 897,\ 275,\ 653,\ 426,\ 154,\ 509,\ 612,\ 677,\ 765,\ 703.
+$$
+
 Give the runs it produces and their lengths, and compare with the $P = 3$
 result from §2 (three runs of lengths $4, 6, 6$). What is special about the
 $P = 4$ answer?
@@ -41,7 +45,11 @@ every in-memory record is frozen.
 
 **Answer sketch.** With $P = 4$ the algorithm produces **two runs, each of
 length exactly $8$**:
-$$[61,\ 87,\ 170,\ 503,\ 512,\ 653,\ 897,\ 908] \quad\big|\quad [154,\ 275,\ 426,\ 509,\ 612,\ 677,\ 703,\ 765].$$
+
+$$
+[61,\ 87,\ 170,\ 503,\ 512,\ 653,\ 897,\ 908] \quad\big|\quad [154,\ 275,\ 426,\ 509,\ 612,\ 677,\ 703,\ 765].
+$$
+
 So $16$ records become $2$ runs of length $8 = 2P$ — a clean illustration of
 Moore's $2P$ law (§2): raising memory from $3$ to $4$ dropped the run count
 from $3$ to $2$ and pushed the average run length from $\tfrac{16}{3} \approx 5.3$
@@ -152,7 +160,11 @@ moves only *part* of the file.
 ### 5. Perfect distributions for $T = 4$; the totals recurrence (rating M20 · cf. 5.4.2–3)
 
 **Problem.** Using the level recurrence of §4 for $T$ tapes,
-$$a_1' = a_1 + a_2,\quad a_2' = a_1 + a_3,\quad \dots,\quad a_{T-1}' = a_1,$$
+
+$$
+a_1' = a_1 + a_2,\quad a_2' = a_1 + a_3,\quad \dots,\quad a_{T-1}' = a_1,
+$$
+
 compute the perfect distributions for $T = 4$ from level $0 = (1, 0, 0)$ up to a
 total of $57$, and verify that the totals obey
 $t_n = t_{n-1} + t_{n-2} + t_{n-3}$ (the "tribonacci" law).
