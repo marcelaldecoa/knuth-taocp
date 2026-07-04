@@ -111,9 +111,29 @@ The reflection construction has a beautiful one-line description:
 
 > **Theorem.** The $k$-th word of $\Gamma_n$ is $g(k) = k \oplus \lfloor k/2 \rfloor$ = `k ^ (k >> 1)`.
 
-*Proof.* We show consecutive $g(k)$ differ in one bit, $g(0) = 0$, and $g$ is a
-bijection on $\{0,\ldots,2^n-1\}$; those three facts pin down the reflected code.
-Consider $g(k) \oplus g(k-1)$. Writing `g(k) = k ^ (k>>1)`,
+*Proof.* We show $g$ reproduces the reflection construction, by induction on
+$n$. The base $n = 0$ is the empty word. For the step, split $0 \le k < 2^n$ at
+the midpoint $2^{n-1}$:
+
+- If $k < 2^{n-1}$, bit $n-1$ of $k$ is $0$, so $g(k) = k \oplus \lfloor k/2 \rfloor$
+  has bit $n-1$ equal to $0$ too, and its value is the same whether read as an
+  $n$- or $(n{-}1)$-bit word; by induction it is the $k$-th word of
+  $\Gamma_{n-1}$. That is exactly $\Gamma_n$'s first half — each $\Gamma_{n-1}$
+  word with a leading $0$.
+- If $k = 2^{n-1} + j$ with $0 \le j < 2^{n-1}$, then
+  $\lfloor k/2 \rfloor = 2^{n-2} + \lfloor j/2 \rfloor$, from which a direct
+  calculation gives $g(k) = 2^{n-1} + g\!\left(2^{n-1} - 1 - j\right)$: bit
+  $n-1$ is $1$, and as $j$ runs $0 \to 2^{n-1}{-}1$ the low $n-1$ bits run
+  through $\Gamma_{n-1}$ *in reverse*. That is exactly $\Gamma_n$'s second
+  half — the reflected copy of $\Gamma_{n-1}$, each word with a leading $1$.
+
+So $g(k)$ is the $k$-th word of $\Gamma_n$. ∎
+
+The formula also makes the one-bit-change property transparent. (Note those
+three facts — $g(0)=0$, bijection, one bit per step — are *consequences*, not a
+proof of the theorem: on their own they pin down only *some* Hamiltonian path
+on the $n$-cube, of which there are many, not the reflected one specifically.)
+Consider $g(k) \oplus g(k-1)$; writing `g(k) = k ^ (k>>1)`,
 
 ```
 g(k) XOR g(k-1) = (k XOR (k-1)) XOR ((k>>1) XOR ((k-1)>>1)).
@@ -124,7 +144,7 @@ $\rho = 0,1,0,2,0,1,0,3,\ldots$ for $k = 1,2,3,\ldots$). Incrementing $k-1$ to $
 lowest $\rho(k)+1$ bits (a run of 1s becomes 0s and the next 0 becomes 1). Working
 the XORs out, all but one of those cancel between the two terms, leaving a
 single set bit at position $\rho(k)$. So consecutive words differ in exactly bit
-$\rho(k)$ — one bit. And $g$ is invertible (next section), hence a bijection. ∎
+$\rho(k)$ — one bit, governed by the ruler sequence.
 
 The flipped-bit-is-$\rho(k)$ fact is worth remembering: it says the bit that changes
 at step k is governed by the *ruler sequence*, exactly the pattern of tick

@@ -227,37 +227,39 @@ Two engineering points that are also correctness points:
 
 Let $C_N$ be the expected number of key comparisons quicksort makes on a
 random permutation of $N$ distinct keys (ignore the $M$-cutoff; set $M = 1$).
-Partitioning a segment of size $N$ costs $N + 1$ comparisons and splits it,
-with the pivot equally likely to be the $k$th smallest for each $k$. So
+Partitioning a segment of size $N$ compares the pivot against the other
+$N - 1$ keys, so it costs $N - 1$ comparisons and splits the segment, with the
+pivot equally likely to be the $k$th smallest for each $k$. So
 
-$$C_N = (N + 1) + \frac{1}{N} \sum_{k=1}^{N} (C_{k-1} + C_{N-k}), \qquad C_0 = C_1 = 0.$$
+$$C_N = (N - 1) + \frac{1}{N} \sum_{k=1}^{N} (C_{k-1} + C_{N-k}), \qquad C_0 = C_1 = 0.$$
 
 The two sums are equal by symmetry, giving
 
-$$C_N = (N + 1) + \frac{2}{N} \sum_{k=0}^{N-1} C_k.$$
+$$C_N = (N - 1) + \frac{2}{N} \sum_{k=0}^{N-1} C_k.$$
 
 Multiply by $N$, write the same relation for $N-1$, and subtract to kill the
 sum:
 
 $$
 \begin{aligned}
-N C_N - (N-1) C_{N-1} &= N(N+1) - (N-1)N + 2 C_{N-1} \\
-N C_N &= (N+1) C_{N-1} + 2N.
+N C_N - (N-1) C_{N-1} &= N(N-1) - (N-1)(N-2) + 2 C_{N-1} \\
+N C_N &= (N+1) C_{N-1} + 2(N-1).
 \end{aligned}
 $$
 
-Divide by $N(N+1)$:
+Divide by $N(N+1)$ and split into partial fractions
+$\frac{2(N-1)}{N(N+1)} = \frac{4}{N+1} - \frac{2}{N}$:
 
-$$\frac{C_N}{N+1} = \frac{C_{N-1}}{N} + \frac{2}{N+1}.$$
+$$\frac{C_N}{N+1} = \frac{C_{N-1}}{N} + \frac{4}{N+1} - \frac{2}{N}.$$
 
-Telescoping from $C_1 = 0$,
+Telescoping from $C_1 = 0$, and using $H_{N+1} = H_N + \frac{1}{N+1}$,
 
-$$\frac{C_N}{N+1} = 2 \sum_{k=2}^{N} \frac{1}{k+1} \approx 2(H_{N+1} - 1.5),$$
+$$\frac{C_N}{N+1} = \sum_{k=2}^{N} \left( \frac{4}{k+1} - \frac{2}{k} \right) = 2 H_N - 4 + \frac{4}{N+1},$$
 
-where $H_N = 1 + 1/2 + \cdots + 1/N$ is the harmonic number (Module 02). Since
-$H_N \approx \ln N + \gamma$,
+where $H_N = 1 + 1/2 + \cdots + 1/N$ is the harmonic number (Module 02). Clearing
+the denominator gives the exact closed form, and since $H_N \approx \ln N + \gamma$,
 
-$$C_N \approx 2(N+1) H_N - 3N \approx 1.386\, N \lg N.$$
+$$C_N = 2(N+1) H_N - 4N \approx 1.386\, N \lg N.$$
 
 So quicksort averages $\sim 2 N \ln N \approx 1.39\, N \lg N$ comparisons — about 39% more
 than the information-theoretic minimum $N \lg N$ (§7 below), but with tiny
