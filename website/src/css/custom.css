@@ -115,11 +115,11 @@
   --ifm-menu-color-active: var(--taocp-oxblood);
   --ifm-toc-border-color: var(--taocp-plate-edge);
 
-  /* Footer = a plum band bookending the plum hero, in both themes. */
-  --ifm-footer-background-color: var(--taocp-oxblood-deep);
-  --ifm-footer-color: #e8dfce;
-  --ifm-footer-link-color: #e8dfce;
-  --ifm-footer-title-color: var(--taocp-gold);
+  /* Footer = a quiet parchment band with a gold foil rule (matches the museum). */
+  --ifm-footer-background-color: var(--taocp-plate);
+  --ifm-footer-color: var(--taocp-ink-soft);
+  --ifm-footer-link-color: var(--taocp-accent);
+  --ifm-footer-title-color: var(--taocp-accent);
 }
 
 [data-theme='dark'] {
@@ -189,17 +189,19 @@ body {
    underline every in-prose link (the brand law). */
 .markdown a { text-decoration: underline; text-underline-offset: 3px; }
 
-/* Footer: force the plum band regardless of Infima's footer--dark class, which
-   re-sets --ifm-footer-background-color at element scope — so use the token
-   directly rather than the (hijackable) variable. */
+/* Footer: a quiet parchment band with a gold foil rule — the museum's calm
+   surface, not another plum block. Element selectors beat Infima's footer--dark
+   class (which re-sets the footer variables at element scope). Colours are
+   mode-aware tokens, so it reads on parchment (light) and cloth (dark) alike. */
 .footer {
-  background-color: var(--taocp-oxblood-deep);
+  background-color: var(--taocp-plate);
   border-top: 2px solid var(--taocp-gold);
+  color: var(--taocp-ink-soft);
 }
-.footer .footer__title { color: var(--taocp-gold); }
-.footer .footer__link-item { color: #e8dfce; }
-.footer .footer__link-item:hover { color: #ffffff; }
-.footer .footer__copyright { color: #b9ab93; }
+.footer .footer__title { color: var(--taocp-accent); }
+.footer .footer__link-item { color: var(--taocp-ink); text-decoration: underline; text-underline-offset: 3px; }
+.footer .footer__link-item:hover { color: var(--taocp-accent); }
+.footer .footer__copyright { color: var(--taocp-muted); }
 .markdown blockquote {
   border-left: 3px solid var(--taocp-gold);
   background: var(--taocp-plate);
