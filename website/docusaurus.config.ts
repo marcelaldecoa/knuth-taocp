@@ -148,8 +148,11 @@ const config: Config = {
         {
           title: 'Course',
           items: [
+            // The course map (homepage) is the real module index — a footer
+            // can't enumerate 22 modules, and a lone "Module 01" read as a
+            // broken list. Offer the map plus a clear entry point instead.
             {label: 'Course map', to: '/'},
-            {label: 'Module 01', to: '/course/module-01-algorithms/'},
+            {label: 'Start the course →', to: '/course/module-01-algorithms/'},
           ],
         },
         {

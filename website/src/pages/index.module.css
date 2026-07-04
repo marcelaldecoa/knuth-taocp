@@ -36,5 +36,13 @@
 }
 .slLabel {
   font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--taocp-accent);
+  color: var(--taocp-accent); font-weight: 600;
 }
+/* The links inherit the theme accent (--ifm-link-color), but plum-on-parchment
+   is only ~1.36:1 against body — colour alone reads as plain text. Underline
+   them (the brand link law) so they register as the shortcuts they are. */
+.startlinks a {
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
+  font-weight: 500;
+}
+.startlinks a:hover { color: var(--ifm-link-hover-color); text-decoration-thickness: 2px; }

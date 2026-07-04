@@ -24,7 +24,7 @@
 }
 .bar > span {
   display: block; height: 100%;
-  background: linear-gradient(90deg, var(--taocp-oxblood), var(--taocp-gold));
+  background: linear-gradient(90deg, var(--taocp-accent), var(--taocp-gold));
   transition: width 0.5s ease;
 }
 
@@ -49,13 +49,13 @@
 /* cards */
 .card {
   background: var(--taocp-plate); border: 1px solid var(--taocp-plate-edge);
-  border-left: 3px solid var(--shelf-ink, var(--taocp-oxblood)); border-radius: 3px;
+  border-left: 3px solid var(--shelf-ink, var(--taocp-accent)); border-radius: 3px;
   padding: 1rem 1.05rem 0.85rem; display: flex; flex-direction: column; gap: 0.55rem;
 }
 .cardDone { border-left-color: var(--taocp-done); }
 .cardTop { display: flex; align-items: flex-start; gap: 0.7rem; }
 .modnum {
-  font-size: 0.78rem; font-weight: 600; color: #fff; background: var(--taocp-oxblood);
+  font-size: 0.78rem; font-weight: 600; color: #fff; background: var(--taocp-accent);
   padding: 0.12rem 0.42rem; border-radius: 3px; flex: none; font-variant-numeric: tabular-nums;
 }
 .modnumDone { background: var(--taocp-done); }

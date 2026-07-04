@@ -39,7 +39,7 @@ function ProgressRing({frac}: {frac: number}) {
       <circle cx="17" cy="17" r="14" fill="none" strokeWidth="4" stroke="var(--taocp-plate-edge)" />
       <circle
         cx="17" cy="17" r="14" fill="none" strokeWidth="4" strokeLinecap="round"
-        stroke={done ? 'var(--taocp-done)' : 'var(--taocp-oxblood)'}
+        stroke={done ? 'var(--taocp-done)' : 'var(--taocp-accent)'}
         transform="rotate(-90 17 17)"
         strokeDasharray={C}
         strokeDashoffset={C * (1 - frac)}
