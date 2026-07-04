@@ -31,6 +31,10 @@ jobs:
           cache-dependency-path: website/package-lock.json
       - run: npm ci
       - run: npm run build
+      # Docusaurus link-checks the pages it renders, but not the hand-written
+      # museum HTML under static/. This validates the museum's links and assets
+      # (and the course↔museum wiring) against the built tree before we deploy.
+      - run: npm run check:museum
       - uses: actions/upload-pages-artifact@v5
         with:
           path: website/build

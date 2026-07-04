@@ -15,7 +15,9 @@
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "check:museum": "node scripts/check-museum-links.mjs",
+    "verify:site": "npm run build && npm run check:museum"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.1",
