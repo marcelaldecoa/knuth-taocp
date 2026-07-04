@@ -184,7 +184,7 @@ For 64-bit inputs we can even be **deterministic**: testing the fixed base set
 $\{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37\}$ is proven to correctly classify
 every $n < 2^{64}$ (Jaeschke, refined by Sinclair — a post-Knuth result). That's
 `is_prime_u64`. The lab pins down the subtle cases: $2047 = 23 \cdot 89$ fools base 2
-but not the full test; 561 is caught; $2^{61}-1$ is prime; $2^{61}+1 = 3 \cdot 715827883 \cdot \ldots$ is
+but not the full test; 561 is caught; $2^{61}-1$ is prime; $2^{61}+1 = 3 \cdot 768614336404564651$ is
 not.
 
 ---
