@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <!--
   THE MUSEUM OF ALGORITHMS
   Wing II — The Engine of Chance · Exhibit 2.1 — The Illusion of Chaos
@@ -201,7 +203,7 @@
 
             <div class="dialwrap">
               <div class="dlabel"><span>The Spectral Dial — multiplier a</span><b id="dialA">a = 7</b></div>
-              <input id="dial" type="range" min="0" max="1000" value="90" />
+              <input id="dial" type="range" min="0" max="1000" value="90" aria-label="Position along the generated sequence" />
               <div class="dscale"><span>a = 1 · coarse stripes</span><span>a → m · white noise</span></div>
             </div>
 
@@ -561,3 +563,4 @@ fit();
 startWeave();
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
 </script>
+</html>
