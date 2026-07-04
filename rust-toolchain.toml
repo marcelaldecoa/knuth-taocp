@@ -1,0 +1,8 @@
+# Pin the course to the stable channel so labs, the reference, and the grader
+# all build the same way for every learner and in CI. The workspace is std-only
+# with zero external crates, so no MSRV gymnastics are needed — "current stable"
+# is the contract. clippy and rustfmt are included because the grader is linted
+# (`cargo clippy -p grader -- -D warnings`) and formatting is checked in CI.
+[toolchain]
+channel = "stable"
+components = ["clippy", "rustfmt"]

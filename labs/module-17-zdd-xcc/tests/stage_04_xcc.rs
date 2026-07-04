@@ -78,6 +78,33 @@ fn color_semantics_unit_cases() {
     assert_eq!(sols, vec![vec![0, 2], vec![1, 3]]);
 }
 
+#[test]
+fn color_zero_is_a_real_color() {
+    // Regression: user color 0 must be a genuine color, not conflated with the
+    // internal "uncolored" sentinel. A naive `color = c` encoding (rather than
+    // `c + 1`) would collide user-color-0 with "no colour yet" and wrongly let
+    // an untouched secondary satisfy a color-0 constraint. Same color 0 on a
+    // shared secondary is compatible; color 0 vs color 1 is not.
+    let mut same = Xcc::new(2, 1);
+    same.add_option(&[0], &[(0, 0)]);
+    same.add_option(&[1], &[(0, 0)]);
+    assert_eq!(
+        same.solve_all(),
+        vec![vec![0, 1]],
+        "two options sharing colour 0 must be compatible"
+    );
+    assert_eq!(same.count_solutions(), 1, "structure restored after solving");
+
+    let mut diff = Xcc::new(2, 1);
+    diff.add_option(&[0], &[(0, 0)]);
+    diff.add_option(&[1], &[(0, 1)]);
+    assert_eq!(
+        diff.count_solutions(),
+        0,
+        "colour 0 and colour 1 must not match"
+    );
+}
+
 /// Latin-square completion. Items (all primary): cell(r,c) = 3r + c,
 /// row-symbol(r,s) = 9 + 3r + s, col-symbol(c,s) = 18 + 3c + s. The
 /// option "put symbol s in cell (r,c)" covers one item of each kind —
