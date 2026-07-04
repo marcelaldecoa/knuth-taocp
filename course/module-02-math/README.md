@@ -377,7 +377,7 @@ stages in order. Everything is exact `u128`/`i128` integer arithmetic except
 
 ### Stage 1 — `sum_first_n`, `sum_squares`, `sum_cubes`, `geometric_sum` (§1.2.3)
 
-Closed forms only — the tests call `sum_first_n(10^12)` and друзья, where a
+Closed forms only — the tests call `sum_first_n(10^12)` and friends, where a
 loop would take hours. Mind two things: **exactness of division** (order
 operations so each division is exact: $n(n+1)/2$ first, and for squares
 multiply that by $(2n+1)$ before dividing by 3) and **the $x = 1$ case** of the

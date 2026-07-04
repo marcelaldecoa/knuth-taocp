@@ -243,7 +243,7 @@ obvious at all — we will *prove* it in §4 with the zero-one principle rather 
 by unwinding the recursion.
 
 **Comparator count.** $C(n) = C(n/2) \cdot 2 + M(n)$ where the merge uses
-$M(n) = M(n/2) \cdot 2 + (n/2 - 1)$ comparators. Solving: $C(n) = (t^2 - t + 4) \cdot 2^{t-1} - 1$
+$M(n) = M(n/2) \cdot 2 + (n/2 - 1)$ comparators. Solving: $C(n) = (t^2 - t + 4) \cdot 2^{t-2} - 1$
 with $t = \lg n$, i.e. $\Theta(n (\lg n)^2)$. Concretely:
 
 | n | 2 | 4 | 8 | 16 | 32 |
