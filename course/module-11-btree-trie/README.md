@@ -22,6 +22,15 @@ tables. This module answers two questions those structures dodge:
    a trie gives **Patricia** — the structure inside your kernel's IP routing
    table right now.
 
+> **Companion exhibit — _The Tree That Holds the World_.** Watch the B-tree of
+> §6.2.4 build itself in the Museum's
+> [Database Simulator](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-3.2-tree-that-holds-the-world.html):
+> inject records and see pages fill, overflow, and split — the median rising
+> into the parent and, when the root splits, the whole tree growing a level
+> taller so every leaf stays at one depth. It reports the height as disk reads
+> per lookup, the number that actually matters when the data lives on a page,
+> not a pointer.
+
 ---
 
 ## 1. Why disks changed the game

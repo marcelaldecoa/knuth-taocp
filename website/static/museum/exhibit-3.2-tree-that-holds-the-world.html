@@ -1,0 +1,482 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing III — The Architecture of Order · Exhibit 3.2 — The Tree That Holds the World
+  A self-contained, single-file interactive essay on B-trees — the balanced,
+  disk-friendly structure that organizes data too large for RAM. After Donald
+  Knuth's TAOCP Vol. 3, §6.2.4.
+
+  No build step. No frameworks. No network: fonts vendored beside this file
+  (./fonts/*.woff2, relative). The Database Simulator holds a real B-tree and
+  animates node splits by tweening the tidy layout after each insertion.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Database Simulator — inject records and watch a B-tree split its pages and push keys upward, staying perfectly balanced for the disk." />
+<title>The Tree That Holds the World · Exhibit 3.2 · The Museum of Algorithms</title>
+
+<style>
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(38px,7.5vw,78px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* THE LAB */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.45fr .82fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .panel .phead .k{ color:var(--gold); }
+
+  canvas#tree{ display:block; width:100%; height:auto; background:radial-gradient(700px 340px at 50% 10%, #10171b 0, #090d10 80%); border:1px solid #05090b; border-radius:2px; }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+  .seg{ display:inline-flex; border:1px solid var(--lab-line); border-radius:2px; overflow:hidden; }
+  .seg .btn{ border:0; border-radius:0; padding:9px 12px; } .seg .btn+.btn{ border-left:1px solid var(--lab-line); }
+  .btn.on{ border-color:var(--gold); color:var(--gold); }
+  .fieldlabel{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#8496a0; margin-right:2px; align-self:center; }
+
+  .readout-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .stat{ flex:1; min-width:64px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:9px 10px; }
+  .stat .lbl{ font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#7f9099; }
+  .stat .val{ font-size:19px; color:#eef3f5; margin-top:2px; }
+  .stat .val.gold{ color:var(--gold); }
+
+  .diskrow{ background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:10px 12px; margin-bottom:12px; font-size:12.5px; color:#b7c6cd; line-height:1.5; }
+  .diskrow b{ color:var(--gold); }
+
+  .console{ height:196px; overflow-y:auto; font-size:12px; line-height:1.55; padding-right:6px; }
+  .console::-webkit-scrollbar{ width:8px; } .console::-webkit-scrollbar-thumb{ background:#2b3a42; border-radius:4px; }
+  .cline{ padding:4px 0; border-bottom:1px dotted #24333a; color:#b7c6cd; }
+  .cline .op{ color:var(--gold); } .cline .sp{ color:#8fd0a8; } .cline.small{ color:#7f9099; font-size:11px; }
+  .cline .key{ color:#eef3f5; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">3.2</div>
+      <p class="eyebrow">Wing III · The Architecture of Order</p>
+      <h1>The Tree That<br/>Holds the World</h1>
+      <p class="sub">B-trees, and keeping order on the disk</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> III — Sorting and Searching</span>
+        <span><b>SECTION</b> 6.2.4</span>
+        <span><b>1970</b> Bayer &amp; McCreight</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">The data that runs the world does not fit in memory. A bank's ledger, a search engine's index, the file table of the disk you are reading this from — each is far too large to hold in RAM, so it lives on storage that is vast, cheap, and agonizingly slow. Reaching a random spot on a spinning disk takes about ten milliseconds; reaching a spot in RAM takes about ten <em>nanoseconds</em>. That is a factor of a million. When your data lives on disk, the only number that matters is how many times you have to go and fetch a page — and the whole art is in fetching as few as possible.</p>
+
+      <p class="reveal">A binary search tree, so elegant in memory, is a catastrophe on disk: a billion keys make it thirty levels deep, and following it to a leaf means thirty separate seeks, a third of a second of pure waiting. In 1970 Rudolf Bayer and Ed McCreight, at Boeing's research labs, asked the obvious question nobody had answered: if a disk read hands you a whole <em>page</em> of thousands of bytes for the same cost as one byte, why store a single key per node? Pack hundreds of keys into each node, make the tree short and enormously bushy, and the billion keys collapse into three or four fetches. They called it the <strong>B-tree</strong>, and it quietly became the most important data structure in the world.</p>
+
+      <blockquote class="pull reveal">"On disk, depth is destiny. Every level of the tree is another seek, and a seek is an eternity. The B-tree's genius is to be almost no levels deep, no matter how much you pour into it."
+        <cite>— after R. Bayer &amp; E. McCreight, 1970</cite></blockquote>
+
+      <h2 class="reveal"><span class="num">I · Growing from the Leaves</span>How a B-tree stays balanced</h2>
+
+      <p class="reveal">A B-tree of order <span class="mono">m</span> obeys one strict discipline: every node holds at most <span class="mono">m−1</span> keys, and every node but the root holds at least half that many, so no page is ever left mostly empty. To insert a key you walk down to the correct leaf and drop it in. If the leaf still fits, you are done. But if the leaf overflows past <span class="mono">m−1</span> keys, it <strong>splits</strong>: the median key is pushed <em>up</em> into the parent, and the node cleaves into two half-full siblings. That push can overflow the parent, which splits in turn — and if the overflow reaches all the way to the root, the root itself splits and the tree grows one level <em>taller</em>.</p>
+
+      <p class="reveal">This is the B-tree's beautiful trick, and you can watch it below. Ordinary trees grow downward at the leaves; a B-tree grows <em>upward at the root</em>. Because every split is symmetric and the height only ever increases at the very top, all the leaves stay at exactly the same depth, forever. The tree is <em>perfectly balanced by construction</em> — not rebalanced after the fact, but incapable of becoming unbalanced in the first place. Inject records and watch the pages fill, split, and lift their medians skyward.</p>
+    </section>
+
+    <!-- THE LAB -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 3.2</div>
+            <div class="title">The Database Simulator</div>
+          </div>
+          <div class="sn">B-TREE · each node is a disk page · splits push medians up</div>
+        </div>
+
+        <div class="lab-grid">
+          <div>
+            <div class="panel">
+              <div class="phead"><span>The B-tree — pages of keys, all leaves at one depth</span><span class="k" id="treeK">empty</span></div>
+              <canvas id="tree" width="720" height="360" role="img" aria-label="A B-tree of keys, its pages splitting and pushing median keys upward as records are inserted"></canvas>
+            </div>
+
+            <div class="controls">
+              <button class="btn primary" id="insBtn">＋ Insert a record</button>
+              <button class="btn" id="ins10Btn">＋ Insert ×12</button>
+              <button class="btn" id="resetBtn">↺ Reset</button>
+              <span class="fieldlabel">Order m</span>
+              <div class="seg" id="orderSeg">
+                <button class="btn" data-m="3">3</button>
+                <button class="btn on" data-m="5">5</button>
+                <button class="btn" data-m="7">7</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Console — the disk's ledger</span><span class="k" id="statusK">ready</span></div>
+
+              <div class="readout-row">
+                <div class="stat"><div class="lbl">Keys</div><div class="val" id="statKeys">0</div></div>
+                <div class="stat"><div class="lbl">Pages</div><div class="val" id="statPages">1</div></div>
+                <div class="stat"><div class="lbl">Height</div><div class="val gold" id="statHeight">1</div></div>
+              </div>
+
+              <div class="diskrow" id="diskrow">A lookup touches <b>1</b> page — one disk read.</div>
+
+              <div class="console" id="console"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">Each box is a page; each cell a key. Insert a record and the path to its leaf lights up. When a page overflows past <span class="mono">m−1</span> keys, its median rises into the parent and the page splits in two — cascading upward, and lifting the whole tree a level taller when the root itself must divide. The height, not the key count, is what a disk pays.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · Bushy Beats Deep</span>Why three reads find a billion keys</h2>
+
+      <p class="reveal">The instrument uses a tiny order — three, five, or seven keys per page — so the splits happen often enough to see. Real B-trees are gargantuan by comparison: a database page is typically sixteen kilobytes, holding hundreds or even a thousand keys, so <span class="mono">m</span> is measured in the hundreds. The consequence is staggering. The height of a B-tree on <span class="mono">N</span> keys is about <span class="mono">log<sub>m</sub>N</span>, and with <span class="mono">m ≈ 1000</span> that logarithm is brutal in the tree's favour: a thousand keys fit in height 2, a million in height 3, a <em>billion</em> in height 4. Four disk reads to find any record among a billion. The same billion in a binary tree would be thirty reads — nearly an order of magnitude more waiting, per lookup, forever.</p>
+
+      <blockquote class="pull reveal">A binary tree asks one yes-or-no question per expensive disk seek. A B-tree asks hundreds. That is the whole difference, and it is the difference between a database that answers and one that hangs.</blockquote>
+
+      <p class="reveal">Knuth analyses these multiway trees in §6.2.4, and their descendants run essentially all of stored data. The <strong>B+ tree</strong> — a variant that keeps every record down in the leaves and threads the leaves together in a linked list — is the index behind virtually every relational database: PostgreSQL, MySQL's InnoDB, Oracle, SQL Server. That leaf-thread is what lets a database answer "every order between March and June" by finding the start and then <em>streaming</em> along the leaves in sorted order, without ever climbing back up. The same structure indexes the files on your disk: NTFS, HFS+, APFS, and ext4 all store their directories as B-trees.</p>
+
+      <h2 class="reveal"><span class="num">III · Order Kept on the Disk</span>The payoff of the sorting room</h2>
+
+      <p class="reveal">This room settles a debt owed by the last one. Merge sort earned its keep, you were told, when the data is too large for RAM and must stream from disk — <em>external</em> sorting. That is exactly how a B-tree is born at scale: to build an index over billions of existing records, you do not insert them one at a time; you external-sort them first, then <em>bulk-load</em> the sorted stream into a B-tree bottom-up, packing each page full. Sorting and searching, the two halves of Volume 3, meet here: the sort puts the world in order, and the tree is what keeps it in order, on the disk, so that any fact among billions is three or four reads away.</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">Fill the simulator until it is several levels deep and watch what never happens: it never tilts, never degenerates, never leaves a page half-wasted. Every leaf sits at one depth; every page is at least half full; every lookup costs the height and nothing more. It is one of those rare inventions that is simultaneously simple to state, subtle to prove, and so practically decisive that half a century later we have found nothing better for the job. The tree that holds the world holds it still.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING III · EXHIBIT 3.2<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 3 — §6.2.4<br/>
+      <a href="exhibit-3.1-sound-of-order.html">← 3.1 The Sound of Order</a> &nbsp;·&nbsp; <a href="index.html">Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">3.3 The Birthday Paradox →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE DATABASE SIMULATOR — a live B-tree
+   Bottom-up insertion: descend to a leaf, insert; on overflow (> m-1 keys)
+   split, pushing the median up — cascading, and growing a new root when the
+   root itself splits, so all leaves stay at one depth. After each insertion
+   the tidy layout is recomputed and every node tweens to its new position,
+   so splits read as one organic reflow.
+   ========================================================================= */
+
+let ID=1;
+function newNode(leaf){ return { id:ID++, keys:[], children:[], leaf, birthFrom:null }; }
+
+/* ---------- B-tree ---------- */
+let m=5, maxKeys=m-1, root=newNode(true);
+const used=new Set();          // keys present (for unique random inserts)
+
+function makeTree(order){ m=order; maxKeys=m-1; root=newNode(true); used.clear(); ID=1; root.id=ID++; }
+
+function splitNode(node, ev){
+  const mid = node.keys.length >> 1;
+  const median = node.keys[mid];
+  const right = newNode(node.leaf);
+  right.birthFrom = node.id;
+  right.keys = node.keys.slice(mid+1);
+  node.keys  = node.keys.slice(0, mid);
+  if(!node.leaf){ right.children = node.children.slice(mid+1); node.children = node.children.slice(0, mid+1); }
+  ev.splits.push({ median });
+  return { median, left:node, right };
+}
+function insertKey(key){
+  const ev={ path:[], splits:[], grew:false, dup:false };
+  function ins(node){
+    ev.path.push(node.id);
+    if(node.keys.includes(key)){ ev.dup=true; return null; }
+    if(node.leaf){
+      let i=0; while(i<node.keys.length && node.keys[i]<key) i++;
+      node.keys.splice(i,0,key);
+    } else {
+      let i=0; while(i<node.keys.length && node.keys[i]<key) i++;
+      const s=ins(node.children[i]);
+      if(ev.dup) return null;
+      if(s){ node.keys.splice(i,0,s.median); node.children.splice(i,1,s.left,s.right); }
+    }
+    if(node.keys.length > maxKeys) return splitNode(node, ev);
+    return null;
+  }
+  const s=ins(root);
+  if(ev.dup) return ev;
+  if(s){ const nr=newNode(false); nr.birthFrom=root.id; nr.keys=[s.median]; nr.children=[s.left,s.right]; root=nr; ev.grew=true; }
+  used.add(key);
+  return ev;
+}
+
+/* ---------- tree metrics ---------- */
+function heightOf(){ let h=1, n=root; while(!n.leaf){ h++; n=n.children[0]; } return h; }
+function allNodes(){ const out=[]; (function w(n){ out.push(n); if(!n.leaf) n.children.forEach(w); })(root); return out; }
+
+/* ---------- tidy layout (targets) ---------- */
+const CELL=30, NH=34, HGAP=20, VGAP=64, PADY=24;
+function layout(){
+  let cursor=0;
+  (function walk(node, depth){
+    node.ty = PADY + depth*VGAP;
+    node.w = Math.max(1,node.keys.length)*CELL;
+    if(node.leaf){ node.tx = cursor + node.w/2; cursor += node.w + HGAP; }
+    else { node.children.forEach(c=>walk(c,depth+1)); node.tx = (node.children[0].tx + node.children[node.children.length-1].tx)/2; }
+  })(root,0);
+}
+
+/* ---------- animated positions ---------- */
+const pos=new Map();           // id -> {x,y}
+function syncPositions(){
+  const nodes=allNodes();
+  const live=new Set(nodes.map(n=>n.id));
+  for(const id of [...pos.keys()]) if(!live.has(id)) pos.delete(id);
+  for(const n of nodes){
+    if(!pos.has(n.id)){
+      const from = n.birthFrom!=null && pos.has(n.birthFrom) ? pos.get(n.birthFrom) : {x:n.tx,y:n.ty};
+      pos.set(n.id, { x:from.x, y:from.y });
+    }
+  }
+}
+
+/* ---------- canvas ---------- */
+const cv=document.getElementById('tree'); const ctx=cv.getContext('2d');
+const LW=720, LH=360; let cssW=LW, cssH=LH;
+function fit(){
+  const r=cv.getBoundingClientRect(); cssW=r.width; cssH=r.width*(LH/LW);
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+  ctx.setTransform(dpr*cssW/LW,0,0,dpr*cssH/LW,0,0);
+}
+let view={s:1, ox:0, oy:0};
+function computeView(){
+  const nodes=allNodes(); let minX=1e9,maxX=-1e9,maxY=-1e9;
+  for(const n of nodes){ minX=Math.min(minX,n.tx-n.w/2); maxX=Math.max(maxX,n.tx+n.w/2); maxY=Math.max(maxY,n.ty+NH); }
+  const treeW=Math.max(1,maxX-minX), treeH=Math.max(1,maxY-PADY+PADY);
+  const pad=18;
+  const s=Math.min((LW-2*pad)/treeW, (LH-2*pad)/(maxY+PADY), 1);
+  view.s=s;
+  view.ox=(LW - treeW*s)/2 - minX*s;
+  view.oy=pad;
+}
+const S = (p)=>({ x: view.ox + p.x*view.s, y: view.oy + p.y*view.s });
+
+let hlPath=new Set(), hlKey=null, hlUntil=0, splitFlash=new Map();
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  const now=performance.now();
+  const hlA = Math.max(0, (hlUntil-now)/1200);
+  const nodes=allNodes();
+
+  // links (parent pointer i -> child)
+  for(const n of nodes){
+    if(n.leaf) continue;
+    const p=pos.get(n.id); const sp=S(p); const s=view.s;
+    const leftEdge=p.x - n.keys.length*CELL/2;
+    for(let i=0;i<n.children.length;i++){
+      const cp=pos.get(n.children[i].id); const scp=S(cp);
+      const px=view.ox + (leftEdge + i*CELL)*s, py=sp.y + NH*s;
+      ctx.strokeStyle='rgba(120,138,146,0.34)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(px,py); ctx.bezierCurveTo(px,(py+scp.y)/2, scp.x,(py+scp.y)/2, scp.x,scp.y); ctx.stroke();
+    }
+  }
+
+  // nodes
+  for(const n of nodes){
+    const p=pos.get(n.id); const sp=S(p); const s=view.s;
+    const w=Math.max(1,n.keys.length)*CELL*s, h=NH*s, x=sp.x-w/2, y=sp.y;
+    const flash=Math.max(0,((splitFlash.get(n.id)||0)-now)/600);
+    // page body
+    ctx.fillStyle = n.leaf ? '#141d22' : '#182028';
+    ctx.strokeStyle = flash>0 ? '#8fd0a8' : (hlPath.has(n.id) ? `rgba(198,166,100,${0.4+0.6*hlA})` : '#33454e');
+    ctx.lineWidth = (flash>0 || hlPath.has(n.id)) ? 2 : 1.2;
+    roundRect(x,y,w,h,4*s); ctx.fill(); ctx.stroke();
+    // key cells
+    ctx.font=`600 ${13*s}px "IBM Plex Mono",monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    for(let k=0;k<n.keys.length;k++){
+      const cx=x + (k+0.5)*CELL*s;
+      if(k>0){ ctx.strokeStyle='rgba(51,69,78,0.8)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+k*CELL*s,y+3); ctx.lineTo(x+k*CELL*s,y+h-3); ctx.stroke(); }
+      const isHl = (n.keys[k]===hlKey && hlA>0);
+      if(isHl){ ctx.fillStyle=`rgba(198,166,100,${0.25*hlA})`; ctx.fillRect(x+k*CELL*s+1,y+2,CELL*s-2,h-4); }
+      ctx.fillStyle = isHl ? '#fff' : (n.leaf?'#c7d8d8':'#dfc9a2');
+      ctx.fillText(String(n.keys[k]), cx, sp.y+h/2);
+    }
+  }
+}
+function roundRect(x,y,w,h,r){ r=Math.min(r,h/2,w/2); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+/* ---------- animation loop (always running; cheap when settled) ---------- */
+function tick(){
+  const byId=new Map(allNodes().map(n=>[n.id,n]));
+  for(const [id,p] of pos){
+    const n=byId.get(id); if(!n) continue;
+    const dx=n.tx-p.x, dy=n.ty-p.y;
+    if(Math.abs(dx)>0.4||Math.abs(dy)>0.4){ p.x+=dx*0.2; p.y+=dy*0.2; } else { p.x=n.tx; p.y=n.ty; }
+  }
+  processQueue();
+  draw();
+  requestAnimationFrame(tick);
+}
+
+/* ---------- insertion + narration ---------- */
+const log=[]; let queue=[], nextAt=0;
+function doInsert(key){
+  const ev=insertKey(key);
+  layout(); computeView(); syncPositions();
+  hlPath=new Set(ev.path); hlKey=key; hlUntil=performance.now()+1200;
+  if(ev.dup){ pushLog(`<span class="op">insert</span> <span class="key">${key}</span> — already present, ignored`,'small'); }
+  else {
+    let msg=`<span class="op">insert</span> <span class="key">${key}</span> → descend ${ev.path.length} level(s)`;
+    if(ev.splits.length){ msg += ` · <span class="sp">split ×${ev.splits.length}</span>, median${ev.splits.length>1?'s':''} ${ev.splits.map(s=>s.median).join(', ')} rise`; }
+    if(ev.grew) msg += ` · <span class="sp">root splits → tree grows to height ${heightOf()}</span>`;
+    pushLog(msg);
+    // flash the pages that split (leaf-most path nodes)
+    if(ev.splits.length){ const now=performance.now(); allNodes().filter(n=>ev.path.includes(n.id)).forEach(n=>splitFlash.set(n.id, now+600)); }
+  }
+  updateStats();
+}
+function randKey(){ if(used.size>=97) return null; let k; do{ k=1+Math.floor(Math.random()*97); }while(used.has(k)); return k; }
+function processQueue(){
+  if(!queue.length) return;
+  const now=performance.now();
+  if(now<nextAt) return;
+  const k=queue.shift();
+  if(k!=null) doInsert(k);
+  nextAt=now+460;
+  if(!queue.length) document.getElementById('statusK').textContent='ready';
+}
+
+/* ---------- readout ---------- */
+function pushLog(html,cls){ log.push({html,cls:cls||''}); if(log.length>40) log.shift();
+  const c=document.getElementById('console'); c.innerHTML=log.map(l=>`<div class="cline ${l.cls}">${l.html}</div>`).join(''); c.scrollTop=c.scrollHeight; }
+function updateStats(){
+  const h=heightOf(), pages=allNodes().length, keys=used.size;
+  document.getElementById('statKeys').textContent=keys;
+  document.getElementById('statPages').textContent=pages;
+  document.getElementById('statHeight').textContent=h;
+  document.getElementById('treeK').textContent= keys===0?'empty':(keys+' keys · order '+m);
+  document.getElementById('diskrow').innerHTML = `A lookup touches <b>${h}</b> page${h>1?'s':''} — ${h} disk read${h>1?'s':''}. `+
+    `At a realistic order m≈1000, this height would hold <b>~${hum[Math.min(h,4)]||'10¹²+'}</b> keys.`;
+}
+const hum=['','1000','a million','a billion','a trillion'];
+
+/* ---------- controls ---------- */
+document.getElementById('insBtn').addEventListener('click', ()=>{ const k=randKey(); if(k!=null){ queue.push(k); nextAt=0; } });
+document.getElementById('ins10Btn').addEventListener('click', ()=>{
+  document.getElementById('statusK').textContent='inserting…';
+  for(let i=0;i<12;i++){ const k=randKey(); if(k==null)break; queue.push(k); } nextAt=0;
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  queue=[]; makeTree(m); pos.clear(); log.length=0; layout(); computeView(); syncPositions();
+  hlPath=new Set(); hlKey=null; pushLog('reset · empty tree, order '+m,'small'); updateStats();
+  document.getElementById('statusK').textContent='ready';
+});
+document.getElementById('orderSeg').addEventListener('click', e=>{
+  const b=e.target.closest('button[data-m]'); if(!b) return;
+  [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.classList.toggle('on', x===b));
+  queue=[]; makeTree(+b.dataset.m); pos.clear(); log.length=0; layout(); computeView(); syncPositions();
+  hlPath=new Set(); pushLog('order set to m='+m+' — max '+(m-1)+' keys/page','small'); updateStats();
+});
+window.addEventListener('resize', ()=>{ fit(); computeView(); });
+
+/* ---------- reveal-on-scroll ---------- */
+const io=new IntersectionObserver((es)=>{ es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } }); },
+  { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
+
+/* ---------- boot ---------- */
+makeTree(5);
+[46,3,71,28,55,12,88,39,63,20,77,5].forEach(k=>queue.push(k));   // a starting flourish
+layout(); computeView(); syncPositions();
+fit(); updateStats();
+document.getElementById('statusK').textContent='inserting…';
+requestAnimationFrame(tick);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
