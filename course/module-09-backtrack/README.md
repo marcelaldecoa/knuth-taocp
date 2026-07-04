@@ -13,6 +13,15 @@ module builds the paradigm three times — a textbook backtracker, a bit-paralle
 one, and then Knuth's *dancing links*, one of the most quietly beautiful data
 structures in all of computing.
 
+> **Companion exhibit — _The Dance of the Pointers_.** See the dancing links of
+> §7.2.2.1 actually dance in the Museum's
+> [Living Board](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-4.2-dance-of-the-pointers.html):
+> Algorithm X tiles a polyomino board while its exact-cover 1-matrix — the real
+> `L/R/U/D` linked structure — unlinks columns and rows on every `cover` and
+> splices them back on every `uncover`, the counts ending exactly equal. It runs
+> the same array-based DLX you build here, advanced one link operation at a time
+> so you can watch a node leave and return to precisely its place.
+
 ---
 
 ## 1. The backtrack paradigm (§7.2.2)
