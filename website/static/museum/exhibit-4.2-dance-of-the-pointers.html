@@ -1,0 +1,465 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing IV — The Ocean of Possibilities · Exhibit 4.2 — The Dance of the Pointers
+  A self-contained, single-file interactive essay on Knuth's Dancing Links (DLX)
+  and Algorithm X for exact cover. After Donald Knuth's TAOCP Vol. 4B, §7.2.2.1.
+
+  No build step. No frameworks. No network: fonts vendored beside this file
+  (./fonts/*.woff2, relative). The DLX search is a generator advanced at a
+  bounded number of events per animation frame (freeze guard); every cover is
+  matched by an uncover that restores the linked structure exactly — verified.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Living Board — watch Knuth's Dancing Links solve an exact-cover tiling, columns and rows unlinking and dancing back into place on every backtrack." />
+<title>The Dance of the Pointers · Exhibit 4.2 · The Museum of Algorithms</title>
+
+<style>
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(40px,8vw,80px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* THE LAB */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.55fr .8fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .panel .phead .k{ color:var(--gold); }
+
+  canvas#stage{ display:block; width:100%; height:auto; background:radial-gradient(700px 340px at 30% 20%, #12191e 0, #090d10 84%); border:1px solid #05090b; border-radius:2px; }
+  .hintbar{ margin-top:10px; font-size:12px; color:#8496a0; line-height:1.5; } .hintbar b{ color:var(--gold); font-weight:500; }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn.on{ border-color:var(--gold); color:var(--gold); }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+  .seg{ display:inline-flex; border:1px solid var(--lab-line); border-radius:2px; overflow:hidden; }
+  .seg .btn{ border:0; border-radius:0; padding:9px 12px; } .seg .btn+.btn{ border-left:1px solid var(--lab-line); }
+  .fieldlabel{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#8496a0; align-self:center; }
+  .sl{ display:flex; align-items:center; gap:9px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#8496a0; margin-top:14px; }
+  .sl input[type=range]{ width:150px; accent-color:var(--gold); } .sl b{ color:var(--gold); font-size:13px; letter-spacing:0; text-transform:none; }
+
+  .readout-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .stat{ flex:1; min-width:62px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:8px 10px; }
+  .stat .lbl{ font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#7f9099; }
+  .stat .val{ font-size:18px; color:#eef3f5; margin-top:2px; }
+  .stat .val.gold{ color:var(--gold); }
+
+  .opline{ background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:9px 12px; margin-bottom:12px; font-size:13px; color:#cdd8de; min-height:38px; line-height:1.4; }
+  .opline b{ color:var(--gold); } .opline .un{ color:#8fd0a8; } .opline .cov{ color:#e79a8f; }
+
+  .console{ height:158px; overflow-y:auto; font-size:12px; line-height:1.5; padding-right:6px; }
+  .console::-webkit-scrollbar{ width:8px; } .console::-webkit-scrollbar-thumb{ background:#2b3a42; border-radius:4px; }
+  .cline{ padding:3px 0; border-bottom:1px dotted #24333a; color:#b7c6cd; }
+  .cline .cov{ color:#e79a8f; } .cline .un{ color:#8fd0a8; } .cline .sol{ color:var(--gold); } .cline.small{ color:#7f9099; font-size:11px; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">4.2</div>
+      <p class="eyebrow">Wing IV · The Ocean of Possibilities</p>
+      <h1>The Dance of<br/>the Pointers</h1>
+      <p class="sub">Dancing Links, Algorithm X, and exact cover</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> IV — Combinatorial Algorithms</span>
+        <span><b>SECTION</b> 7.2.2.1</span>
+        <span><b>2000</b> Knuth · Dancing Links</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">Every hard search in the last room ended the same way: try something, discover it fails, and <em>undo</em> it. Backtracking — the method of exploring a tree of choices, retreating whenever a branch proves hopeless — is the workhorse of combinatorial computing, the engine behind Sudoku solvers, puzzle packers, and constraint systems of every kind. And its secret cost is almost never in the trying. It is in the undoing: to back up cleanly, you must restore the world to exactly the state it was in before you meddled, and doing that quickly, correctly, millions of times, is where naïve programs bog down and careful ones fly.</p>
+
+      <p class="reveal">In 2000 Donald Knuth published a short paper on a data-structure trick so pretty he gave it a name that stuck. Store your problem as a grid of items linked into doubly-linked lists — every element pointing to its left, right, up, and down neighbours. To remove an element, splice it out by making its neighbours point past it. The trick is what happens next: <em>do not erase the removed element's own pointers</em>. It still remembers exactly who its neighbours were. So to put it back — to undo the removal — you simply tell those neighbours to point at it again, and it slots into precisely its old place, in constant time, with no bookkeeping at all. Knuth watched the links flicker out and back as the search advanced and retreated, and called it <strong>dancing links</strong>.</p>
+
+      <blockquote class="pull reveal">"The reverse operation puts x back into its position, as if it had never left. This makes it possible to backtrack extremely efficiently. I can't resist calling the resulting technique 'dancing links.'"
+        <cite>— Donald E. Knuth, "Dancing Links," 2000</cite></blockquote>
+
+      <h2 class="reveal"><span class="num">I · Exact Cover &amp; Algorithm X</span>One problem to rule the puzzles</h2>
+
+      <p class="reveal">The dance solves one abstract problem, and the abstract problem is a chameleon. <strong>Exact cover</strong> asks: given a set of options and a set of requirements, choose a subset of options so that every requirement is met by <em>exactly one</em> chosen option — no gaps, no overlaps. It sounds narrow. It is not. Tiling a region with shapes is exact cover (each cell is a requirement, each placement an option). Sudoku is exact cover. The N-queens problem, crosswords, protein folding models — all of them melt into this one grid of ones and zeros. Solve exact cover well and you solve them all.</p>
+
+      <p class="reveal">Knuth's <strong>Algorithm X</strong> is the natural recursive method: pick the requirement hardest to satisfy — the column with the fewest options — and <em>cover</em> it, deleting that column and every option that conflicts with your choice. Recurse on the smaller problem. If you reach a dead end, <em>uncover</em> — dance the deleted rows and columns back into place — and try the next option. Dancing links is what makes the covering and uncovering instantaneous. Below, watch it tile a board: each column is a cell to fill, each row a way to place a piece, and the matrix of ones on the right is the real linked structure, unlinking and dancing back as the search breathes in and out.</p>
+    </section>
+
+    <!-- THE LAB -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 4.2</div>
+            <div class="title">The Living Board</div>
+          </div>
+          <div class="sn">DANCING LINKS · Algorithm X · cover → recurse → uncover</div>
+        </div>
+
+        <div class="lab-grid">
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Board (left) &amp; the live 1-matrix (right) — rows dance out on cover, back on uncover</span><span class="k" id="stageK">ready</span></div>
+              <canvas id="stage" width="760" height="420" role="img" aria-label="A polyomino board being tiled, beside its exact-cover matrix whose rows and columns unlink and relink as Dancing Links searches"></canvas>
+              <div class="hintbar"><b>Solve</b> runs Algorithm X; <b>Step</b> advances one link operation. Gold cells are the current partial tiling; faded matrix rows have been <b>covered</b> — watch them dance back on every backtrack.</div>
+            </div>
+
+            <div class="controls">
+              <button class="btn primary" id="playBtn">▶ Solve</button>
+              <button class="btn" id="stepBtn">Step ▸</button>
+              <button class="btn" id="resetBtn">↺ Reset</button>
+              <span class="fieldlabel">Board</span>
+              <div class="seg" id="boardSeg">
+                <button class="btn" data-b="2x3">2×3</button>
+                <button class="btn on" data-b="3x4">3×4</button>
+                <button class="btn" data-b="2x6">2×6</button>
+              </div>
+            </div>
+            <label class="sl">Speed <input id="speed" type="range" min="1" max="30" value="6"><b id="speedV">6</b> ops/s</label>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="phead"><span>The ledger</span><span class="k" id="statusK">idle</span></div>
+
+              <div class="readout-row">
+                <div class="stat"><div class="lbl">Covers</div><div class="val" id="statCov">0</div></div>
+                <div class="stat"><div class="lbl">Uncovers</div><div class="val un" id="statUn" style="color:#8fd0a8">0</div></div>
+                <div class="stat"><div class="lbl">Solutions</div><div class="val gold" id="statSol">0</div></div>
+              </div>
+
+              <div class="opline" id="opline">Press <b>Solve</b> to set the links dancing.</div>
+
+              <div class="console" id="console"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">Every <span class="mono">cover</span> that pulls a column and its conflicting rows out of the matrix is matched, on backtracking, by an <span class="mono">uncover</span> that splices them back into exactly their old positions — because the removed nodes never forgot their neighbours. The counts of covers and uncovers end equal, and the structure returns identical to how it began. That perfect reversibility is the whole magic of the dance.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · Why the Dance Is Fast</span>Undoing without remembering</h2>
+
+      <p class="reveal">A naïve backtracking solver, to undo a step, must either copy the entire state before each move — ruinously expensive — or laboriously reconstruct what it deleted. Dancing links does neither. Because a removed node keeps its own <span class="mono">L</span>, <span class="mono">R</span>, <span class="mono">U</span>, <span class="mono">D</span> pointers intact, restoration needs no saved history and no allocation: the four assignments that re-link it are the exact mirror of the four that unlinked it. Deletion and its perfect inverse each cost a handful of pointer writes, independent of how large the matrix is. This is why Algorithm X on dancing links can rip through search trees with millions of nodes that would strangle a copying solver — and why the counts you watch tick upward, covers and uncovers, must end precisely equal when the search returns home.</p>
+
+      <blockquote class="pull reveal">The removed node is not destroyed; it is only stepped over. It waits in the wings, still pointing at the place it belongs, ready to dance back the instant the search changes its mind.</blockquote>
+
+      <p class="reveal">Knuth pairs the technique with one more idea that the instrument quietly uses: always cover the column with the <em>fewest</em> remaining options first. This "minimum remaining values" heuristic prunes the tree brutally — it fails fast, discovering dead ends before wasting effort — and on structured problems it turns an astronomically large search into a brief flurry of dancing. It is the same instinct a human puzzler has, filling the most constrained square first; Knuth simply made it exact, and made the undo free.</p>
+
+      <h2 class="reveal"><span class="num">III · The Method Behind the Puzzles</span>From Sudoku to satisfiability</h2>
+
+      <p class="reveal">Give Algorithm X the 729-row, 324-column exact-cover matrix of a Sudoku and it disgorges the solution in milliseconds; the world's fastest Sudoku solvers are dancing links underneath. Feed it the placements of the twelve pentominoes and it enumerates every way to tile a box. Knuth extended the idea in Volume 4B into <em>colour-controlled covering</em> and generalized it toward the ZDD-based methods of the exhibits' near neighbours — a whole family of exact, exhaustive combinatorial search built on this one reversible trick. Backtracking is the engine of Wing IV, and dancing links is its most beautiful bearing: frictionless, exact, and endlessly reusable.</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">There is a particular joy, Knuth has said, in watching the links dance — the way a solved constraint dissolves the rows that conflict with it, the way a wrong guess is undone as cleanly as it was made, the way the whole matrix breathes as the search descends and rises. It is a rare thing in programming: a technique that is at once maximally practical and frankly gorgeous. Slow the speed down, step through a single cover and its later uncover, and watch a node leave and return to precisely its place. Then let it run, and let the pointers dance.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING IV · EXHIBIT 4.2<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 4B — §7.2.2.1 · "Dancing Links" (2000)<br/>
+      <a href="exhibit-4.1-traveling-salesperson.html">← 4.1 The Traveling Salesperson</a> &nbsp;·&nbsp; <a href="index.html">Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">4.3 The Boolean Maze →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE LIVING BOARD — Knuth's Dancing Links (DLX) + Algorithm X
+   Array representation (L/R/U/D/C/S). The search is a generator yielding
+   cover/select/uncover events, advanced at a bounded number of events per
+   animation frame (freeze guard). Every cover is matched by an uncover that
+   restores the structure exactly — verified in Node before shipping.
+   ========================================================================= */
+
+/* ---------- DLX core ---------- */
+function buildDLX(nCols, rows){
+  const L=[],R=[],U=[],D=[],C=[],S=[],ROW=[]; const root=0;
+  for(let c=0;c<=nCols;c++){ L[c]=c-1<0?nCols:c-1; R[c]=c+1>nCols?0:c+1; U[c]=c; D[c]=c; C[c]=c; S[c]=0; ROW[c]=-1; }
+  L[root]=nCols; R[nCols]=root; let id=nCols+1;
+  rows.forEach((cols,ri)=>{ let first=-1;
+    cols.forEach(cc=>{ const col=cc+1, nn=id++; C[nn]=col; ROW[nn]=ri; S[col]++;
+      U[nn]=U[col]; D[nn]=col; D[U[col]]=nn; U[col]=nn;
+      if(first<0){ first=nn; L[nn]=nn; R[nn]=nn; } else { L[nn]=L[first]; R[nn]=first; R[L[first]]=nn; L[first]=nn; } });
+  });
+  return {L,R,U,D,C,S,ROW,root,nCols,nRows:rows.length};
+}
+function cover(dl,c){ const{L,R,U,D,C,S}=dl; L[R[c]]=L[c]; R[L[c]]=R[c];
+  for(let i=D[c];i!==c;i=D[i]) for(let j=R[i];j!==i;j=R[j]){ U[D[j]]=U[j]; D[U[j]]=D[j]; S[C[j]]--; } }
+function uncover(dl,c){ const{L,R,U,D,C,S}=dl;
+  for(let i=U[c];i!==c;i=U[i]) for(let j=L[i];j!==i;j=L[j]){ S[C[j]]++; U[D[j]]=j; D[U[j]]=j; } L[R[c]]=c; R[L[c]]=c; }
+function chooseCol(dl){ let best=-1,bs=Infinity; for(let c=dl.R[dl.root];c!==dl.root;c=dl.R[c]) if(dl.S[c]<bs){bs=dl.S[c];best=c;} return best; }
+function* search(dl,O){
+  if(dl.R[dl.root]===dl.root){ yield {t:'solution'}; return; }
+  const c=chooseCol(dl); yield {t:'choose', c};
+  if(dl.S[c]===0) return;
+  cover(dl,c); yield {t:'cover', c};
+  for(let r=dl.D[c]; r!==c; r=dl.D[r]){
+    O.push(dl.ROW[r]); yield {t:'select', row:dl.ROW[r]};
+    for(let j=dl.R[r]; j!==r; j=dl.R[j]){ cover(dl,dl.C[j]); yield {t:'cover', c:dl.C[j]}; }
+    yield* search(dl,O);
+    for(let j=dl.L[r]; j!==r; j=dl.L[j]){ uncover(dl,dl.C[j]); yield {t:'uncover', c:dl.C[j]}; }
+    O.pop(); yield {t:'deselect', row:dl.ROW[r]};
+  }
+  uncover(dl,c); yield {t:'uncover', c};
+}
+function activeColSet(dl){ const s=new Set(); for(let c=dl.R[dl.root];c!==dl.root;c=dl.R[c]) s.add(c-1); return s; }
+function activeRowSet(dl){ const s=new Set(); for(let c=dl.R[dl.root];c!==dl.root;c=dl.R[c]) for(let i=dl.D[c];i!==c;i=dl.D[i]) s.add(dl.ROW[i]); return s; }
+
+/* ---------- polyomino instance ---------- */
+function trominoPlacements(W,H){
+  const shapes=[ [[0,0],[1,0],[0,1]],[[0,0],[1,0],[1,1]],[[0,0],[0,1],[1,1]],[[1,0],[0,1],[1,1]] ];
+  const rows=[];
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++) for(const sh of shapes){ const cells=sh.map(([dx,dy])=>[x+dx,y+dy]);
+    if(cells.every(([cx,cy])=>cx>=0&&cx<W&&cy>=0&&cy<H)) rows.push(cells.map(([cx,cy])=>cy*W+cx).sort((a,b)=>a-b)); }
+  return rows;
+}
+
+/* ---------- state ---------- */
+let W=3, H=4, nCols=12, placements=[], dl=null, gen=null, O=[];
+let covers=0, uncovers=0, solutions=0, done=false, playing=false;
+let acol=new Set(), arow=new Set(), lastC=-1, chosenCol=-1, solFlash=0;
+const cellAlpha=new Map();        // key "r,c" -> current alpha (tweened)
+const log=[];
+const PIECE=['#C6A664','#8fd0a8','#89b4c4','#e79a8f','#b48ead','#6fb3a0','#d8b877','#c98a86'];
+
+function buildInstance(w,h){
+  W=w; H=h; nCols=W*H; placements=trominoPlacements(W,H);
+  restart();
+}
+function restart(){
+  dl=buildDLX(nCols, placements); O=[]; gen=search(dl,O);
+  covers=0; uncovers=0; solutions=0; done=false; playing=false; lastC=-1; chosenCol=-1; solFlash=0;
+  acol=activeColSet(dl); arow=activeRowSet(dl); cellAlpha.clear();
+  for(let r=0;r<placements.length;r++) for(const c of placements[r]) cellAlpha.set(r+','+c, 1);
+  log.length=0;
+}
+
+/* ---------- consume one search event ---------- */
+function stepEvent(){
+  if(done) return;
+  const nx=gen.next();
+  if(nx.done){ done=true; playing=false; setStatus('finished'); pushLog(`<span class="sol">search complete</span> — ${solutions} solution(s), ${covers} covers = ${uncovers} uncovers`,'sol'); return; }
+  const ev=nx.value;
+  if(ev.t==='choose'){ chosenCol=ev.c-1; lastC=ev.c-1; setOp(`<b>choose</b> column ${ev.c-1} (fewest options: ${dl.S[ev.c]})`); }
+  else if(ev.t==='cover'){ covers++; lastC=ev.c-1; setOp(`<span class="cov">cover</span> column ${ev.c-1} — its rows dance out`); }
+  else if(ev.t==='uncover'){ uncovers++; lastC=ev.c-1; setOp(`<span class="un">uncover</span> column ${ev.c-1} — its rows dance back`); }
+  else if(ev.t==='select'){ setOp(`<b>select</b> row ${ev.row} into the partial tiling`); pushLog(`try row ${ev.row} at depth ${O.length}`,'small'); }
+  else if(ev.t==='deselect'){ setOp(`backtrack — remove row ${ev.row}`); }
+  else if(ev.t==='solution'){ solutions++; solFlash=performance.now(); setOp(`<span class="sol">★ solution ${solutions} — board tiled!</span>`); pushLog(`<span class="sol">solution ${solutions}</span>: rows {${O.join(', ')}}`,'sol'); }
+  acol=activeColSet(dl); arow=activeRowSet(dl);
+  updateStats();
+}
+
+/* ---------- canvas ---------- */
+const cv=document.getElementById('stage'); const ctx=cv.getContext('2d');
+const LW=760, LH=420; let cssW=LW, cssH=LH;
+function fit(){ const r=cv.getBoundingClientRect(); cssW=r.width; cssH=r.width*(LH/LW);
+  const dpr=Math.min(window.devicePixelRatio||1,2); cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+  ctx.setTransform(dpr*cssW/LW,0,0,dpr*cssH/LW,0,0); draw(); }
+function rr(x,y,w,h,r){ r=Math.min(r,h/2,w/2); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  const now=performance.now();
+
+  /* ----- board (left) ----- */
+  const boardRegionW=250;
+  const cs=Math.min((boardRegionW-40)/W, (LH-90)/H, 52);
+  const bx=(boardRegionW-cs*W)/2+8, by=(LH-cs*H)/2;
+  // which piece-color covers each board cell (from current partial O)
+  const cellColor=new Map();
+  O.forEach((ri,idx)=>{ for(const c of placements[ri]) cellColor.set(c, PIECE[idx%PIECE.length]); });
+  const flash=Math.max(0,(400-(now-solFlash))/400);
+  ctx.font='600 11px "IBM Plex Mono",monospace'; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  ctx.fillStyle='#7f9099'; ctx.fillText('THE BOARD', bx, by-12);
+  for(let cell=0;cell<W*H;cell++){ const cxp=cell%W, cyp=(cell/W|0); const x=bx+cxp*cs, y=by+cyp*cs;
+    const col=cellColor.get(cell);
+    ctx.fillStyle = col ? col : '#141d22';
+    ctx.globalAlpha = col ? (0.9+0.1*flash) : 1;
+    rr(x+1.5,y+1.5,cs-3,cs-3,4); ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle= col? 'rgba(10,15,18,0.6)':'#2a343a'; ctx.lineWidth=1; ctx.stroke();
+  }
+
+  /* ----- matrix (right) ----- */
+  const mReg=LW-boardRegionW-16, mx0=boardRegionW+8;
+  const nR=placements.length;
+  const colW=Math.min(30, (mReg-30)/nCols), rowH=Math.min(12.5, (LH-70)/nR);
+  const mw=colW*nCols, mh=rowH*nR;
+  const mx=mx0+(mReg-mw)/2+8, my=44;
+  ctx.fillStyle='#7f9099'; ctx.font='600 11px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+  ctx.fillText('THE 1-MATRIX  ·  columns = cells, rows = placements', mx, my-24);
+
+  // column headers with live size
+  for(let c=0;c<nCols;c++){ const x=mx+c*colW; const active=acol.has(c);
+    ctx.fillStyle= c===chosenCol? '#4a3c18' : active? '#1c2a30' : '#12181c';
+    ctx.strokeStyle= c===lastC? '#C6A664' : active? '#3a4a52' : '#232d33'; ctx.lineWidth= c===lastC?1.8:1;
+    rr(x+1,my-14,colW-2,12,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle= active? '#9fb0b9':'#4a565d'; ctx.font=`${Math.min(9,colW-2)}px "IBM Plex Mono",monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(String(dl.S[c+1]), x+colW/2, my-8);
+  }
+  ctx.textBaseline='alphabetic';
+
+  // tween alphas toward target (present=1, removed=0.1)
+  const selected=new Set(O);
+  for(let r=0;r<nR;r++) for(const c of placements[r]){ const key=r+','+c;
+    const present = arow.has(r) && acol.has(c);
+    const tgt = present? 1 : 0.10;
+    let a=cellAlpha.get(key); a += (tgt-a)*0.28; cellAlpha.set(key,a);
+  }
+  // vertical dancing links (per active column, between consecutive present cells)
+  ctx.lineWidth=1;
+  for(let c=0;c<nCols;c++){ if(!acol.has(c)) continue; const x=mx+c*colW+colW/2; let prevY=null;
+    for(let r=0;r<nR;r++){ if(!placements[r].includes(c)) continue; if(!(arow.has(r))) continue;
+      const y=my+r*rowH+rowH/2;
+      if(prevY!==null){ ctx.strokeStyle='rgba(198,166,100,0.32)'; ctx.beginPath(); ctx.moveTo(x,prevY); ctx.lineTo(x,y); ctx.stroke(); }
+      prevY=y;
+    }
+  }
+  // horizontal links (per active row)
+  for(let r=0;r<nR;r++){ if(!arow.has(r)) continue; const ys=my+r*rowH+rowH/2; let prevX=null;
+    for(const c of placements[r]){ if(!acol.has(c)) continue; const x=mx+c*colW+colW/2;
+      if(prevX!==null){ ctx.strokeStyle='rgba(120,138,146,0.28)'; ctx.beginPath(); ctx.moveTo(prevX,ys); ctx.lineTo(x,ys); ctx.stroke(); }
+      prevX=x;
+    }
+  }
+  // cells
+  for(let r=0;r<nR;r++){ for(const c of placements[r]){ const key=r+','+c; const a=cellAlpha.get(key);
+    const x=mx+c*colW, y=my+r*rowH; const sz=Math.min(colW,rowH)-3;
+    const sel=selected.has(r), present=arow.has(r)&&acol.has(c);
+    ctx.globalAlpha=a;
+    ctx.fillStyle = sel? '#C6A664' : present? '#5a7f78' : '#33454e';
+    rr(x+(colW-sz)/2, y+(rowH-sz)/2, sz, sz, 2); ctx.fill();
+    ctx.globalAlpha=1;
+  }}
+}
+
+/* ---------- readout ---------- */
+function setOp(html){ document.getElementById('opline').innerHTML=html; }
+function setStatus(s){ document.getElementById('statusK').textContent=s; document.getElementById('stageK').textContent= done?'complete':(playing?'dancing…':'ready'); }
+function pushLog(html,cls){ log.push({html,cls:cls||''}); if(log.length>50) log.shift();
+  const c=document.getElementById('console'); c.innerHTML=log.map(l=>`<div class="cline ${l.cls}">${l.html}</div>`).join(''); c.scrollTop=c.scrollHeight; }
+function updateStats(){
+  document.getElementById('statCov').textContent=covers;
+  document.getElementById('statUn').textContent=uncovers;
+  document.getElementById('statSol').textContent=solutions;
+}
+
+/* ---------- loop (bounded events per frame) ---------- */
+let raf=null, acc=0, lastT=0, speed=6;
+function loop(t){
+  if(!lastT) lastT=t; const dt=(t-lastT)/1000; lastT=t;
+  if(playing && !done){ acc += dt*speed; while(acc>=1 && !done){ acc-=1; stepEvent(); } }
+  draw();
+  raf=requestAnimationFrame(loop);
+}
+
+/* ---------- controls ---------- */
+const playBtn=document.getElementById('playBtn');
+function setPlay(p){ playing=p; playBtn.textContent=p?'❚❚ Pause':'▶ Solve'; playBtn.classList.toggle('on',p); setStatus(p?'searching':'paused'); }
+playBtn.addEventListener('click', ()=>{ if(done){ restart(); updateStats(); } setPlay(!playing); acc=0; lastT=0; });
+document.getElementById('stepBtn').addEventListener('click', ()=>{ if(done) return; playing=false; playBtn.textContent='▶ Solve'; playBtn.classList.remove('on'); stepEvent(); });
+document.getElementById('resetBtn').addEventListener('click', ()=>{ restart(); setPlay(false); setOp('Press <b>Solve</b> to set the links dancing.'); updateStats(); setStatus('ready'); });
+document.getElementById('boardSeg').addEventListener('click', e=>{ const b=e.target.closest('button[data-b]'); if(!b) return;
+  [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.classList.toggle('on', x===b));
+  const [w,h]=b.dataset.b.split('x').map(Number); buildInstance(w,h); setPlay(false); setOp('Press <b>Solve</b> to set the links dancing.'); updateStats(); setStatus('ready'); });
+document.getElementById('speed').addEventListener('input', e=>{ speed=+e.target.value; document.getElementById('speedV').textContent=speed; });
+window.addEventListener('resize', fit);
+
+/* ---------- reveal-on-scroll ---------- */
+const io=new IntersectionObserver((es)=>{ es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } }); },
+  { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
+
+/* ---------- boot ---------- */
+buildInstance(3,4);
+updateStats();
+fit();
+pushLog('exact cover: tile the board so every cell is filled exactly once','small');
+pushLog('each matrix column is a cell; each row is a piece placement','small');
+raf=requestAnimationFrame(loop);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
