@@ -1,0 +1,451 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing IV — The Ocean of Possibilities · Exhibit 4.1 — The Traveling Salesperson and the Ant
+  A self-contained, single-file interactive essay on permutations, combinatorial
+  explosion, and P vs NP — after Donald Knuth's TAOCP Vol. 4A, §7.2.1.2.
+
+  No build step. No frameworks. No network: fonts vendored beside this file
+  (./fonts/*.woff2, relative). The Lost Time Machine enumerates tours with a
+  bounded budget per animation frame (freeze guard); the factorial tour-count
+  and its time estimate are honestly computed with BigInt.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Lost Time Machine — connect cities and watch the number of possible tours explode as (n-1)!/2, while an ant's heuristic finds a good route instantly." />
+<title>The Traveling Salesperson and the Ant · Exhibit 4.1 · The Museum of Algorithms</title>
+
+<style>
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(34px,6.6vw,68px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* THE LAB */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.4fr .9fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .panel .phead .k{ color:var(--gold); }
+
+  canvas#map{ display:block; width:100%; height:auto; background:radial-gradient(600px 320px at 50% 40%, #101a16 0, #090d10 82%); border:1px solid #05090b; border-radius:2px; cursor:crosshair; }
+  .hintbar{ margin-top:10px; font-size:12px; color:#8496a0; line-height:1.5; } .hintbar b{ color:var(--gold); font-weight:500; }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn.ant{ border-color:#3a5f52; color:#8fc4a8; } .btn.ant:hover{ border-color:#a8d5b5; color:#a8d5b5; }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+  .sl{ display:flex; align-items:center; gap:9px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#8496a0; margin-top:14px; }
+  .sl input[type=range]{ width:160px; accent-color:var(--gold); } .sl b{ color:var(--gold); font-size:13px; letter-spacing:0; text-transform:none; }
+
+  .bigp{ background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:12px 13px; margin-bottom:12px; }
+  .bigp .lbl{ font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:#7f9099; }
+  .bigp .pv{ font-family:var(--mono); font-weight:600; font-size:24px; line-height:1.1; margin:4px 0 2px; color:var(--gold); word-break:break-all; }
+  .bigp .eta{ font-size:13px; color:#e79a8f; margin-top:4px; } .bigp .eta.ok{ color:#8fd0a8; }
+  .bigp .note{ font-size:11px; color:#7f9099; margin-top:5px; line-height:1.5; }
+
+  .cmp{ margin-bottom:12px; }
+  .cmp .r{ display:flex; justify-content:space-between; gap:10px; padding:5px 0; border-bottom:1px dotted #24333a; font-size:12.5px; }
+  .cmp .r .who{ color:#9fb0b9; } .cmp .r .who b{ color:#eef3f5; }
+  .cmp .r .v{ color:#d7e0e4; text-align:right; } .cmp .r .v.gold{ color:var(--gold); } .cmp .r .v.ant{ color:#8fd0a8; } .cmp .r .v.muted{ color:#6c7d85; }
+
+  .console{ height:132px; overflow-y:auto; font-size:12px; line-height:1.5; padding-right:6px; }
+  .console::-webkit-scrollbar{ width:8px; } .console::-webkit-scrollbar-thumb{ background:#2b3a42; border-radius:4px; }
+  .cline{ padding:4px 0; border-bottom:1px dotted #24333a; color:#b7c6cd; }
+  .cline .op{ color:var(--gold); } .cline .ant{ color:#8fd0a8; } .cline.warn{ color:#e79a8f; } .cline.small{ color:#7f9099; font-size:11px; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">4.1</div>
+      <p class="eyebrow">Wing IV · The Ocean of Possibilities</p>
+      <h1>The Traveling<br/>Salesperson &amp; the Ant</h1>
+      <p class="sub">Permutations, combinatorial explosion, and P vs NP</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> IV — Combinatorial Algorithms</span>
+        <span><b>SECTION</b> 7.2.1.2</span>
+        <span><b>1930 · 1972</b> Menger · Karp</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">A salesperson must visit a list of cities, each exactly once, and return home, and would like the shortest possible route. That is the entire problem. A child can understand it; a shipping company, a circuit-board driller, and a telescope scheduling its night all live and die by it. And it is, notoriously, one of the hardest problems humanity has ever posed to itself — not because any single tour is hard to measure, but because there are so unspeakably many of them. To be <em>sure</em> you have the shortest, you must, it seems, look at them all. And "all," here, is a number that eats the universe.</p>
+
+      <p class="reveal">Count them. Fix your home city and line up the others in some order — that is a tour. There are <span class="mono">(n−1)!</span> such orderings, and since a route and its exact reverse have the same length, the number of genuinely distinct tours is <span class="mono">(n−1)!/2</span>. For five cities that is twelve — you could check them on a napkin. For ten cities it is already over a hundred and eighty thousand. For fifteen, it is forty-three billion. For twenty-five, it exceeds the number of grains of sand that would fill the observable universe. The factorial does not grow; it detonates.</p>
+
+      <blockquote class="pull reveal">"Exponential growth is a dragon that sleeps until you are one city too greedy, and then no computer that will ever be built can wake in time to help you."
+        <cite>— the tyranny of the factorial</cite></blockquote>
+
+      <h2 class="reveal"><span class="num">I · The Lost Time Machine</span>Watch the counter detonate</h2>
+
+      <p class="reveal">The instrument below is a machine for feeling this in your body rather than believing it in the abstract. Drop cities on the map, or let it scatter them, and it does two things at once. It counts the tours — the honest <span class="mono">(n−1)!/2</span>, as a real number with real digits — and it estimates how long a very fast computer, checking a billion tours every second, would need to examine them all. Press <em>brute force</em> and it begins that examination for real, one tour at a time, drawing each as it goes and climbing the counter. On a handful of cities it finishes in a blink and shows you the provably perfect route. Add a few more and the machine gets <em>lost in time</em>: the counter crawls, the estimate swells past your lifetime, past recorded history, past the age of the universe, and the perfect answer recedes forever out of reach.</p>
+
+      <p class="reveal">Then meet the ant. Ants do not compute optimal tours; they follow a simple rule — go to the nearest place you have not yet been — and the colony's collective path is startlingly good. Press <em>nearest neighbour</em> and a decent route appears <em>instantly</em>, at any number of cities, because the ant's method costs only about <span class="mono">n²</span> steps instead of <span class="mono">n!</span>. Polish it with <em>2-opt</em>, untangling crossed edges, and it gets better still. It is almost never perfect — but it arrives before the heat death of the universe, which the salesperson's certainty does not.</p>
+    </section>
+
+    <!-- THE LAB -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 4.1</div>
+            <div class="title">The Lost Time Machine</div>
+          </div>
+          <div class="sn">TRAVELING SALESPERSON · brute force vs. the ant · bounded per frame</div>
+        </div>
+
+        <div class="lab-grid">
+          <div>
+            <div class="panel">
+              <div class="phead"><span>The map — home city in gold; click to add cities</span><span class="k" id="mapK">idle</span></div>
+              <canvas id="map" width="720" height="400" role="img" aria-label="A map of cities with a tour drawn between them, being optimized by brute force or by a nearest-neighbour heuristic"></canvas>
+              <div class="hintbar"><b>Click</b> the map to add a city · the slider scatters a fresh set · <b>brute force</b> searches every tour (bounded, never freezing) while <b>the ant</b> answers instantly.</div>
+            </div>
+
+            <div class="controls">
+              <button class="btn primary" id="bruteBtn">🔦 Brute force</button>
+              <button class="btn" id="stopBtn" disabled>⏹ Stop</button>
+              <button class="btn ant" id="nnBtn">🐜 Nearest neighbour</button>
+              <button class="btn ant" id="optBtn">✨ 2-opt</button>
+              <button class="btn" id="newBtn">🎲 New cities</button>
+            </div>
+            <label class="sl">Cities n <input id="nSize" type="range" min="4" max="30" value="9"><b id="nSizeV">9</b></label>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="phead"><span>The reckoning</span><span class="k" id="statusK">ready</span></div>
+
+              <div class="bigp">
+                <div class="lbl">Distinct tours — (n−1)!/2</div>
+                <div class="pv" id="tourCount">—</div>
+                <div class="eta" id="bruteEta">—</div>
+                <div class="note" id="bruteNote">A billion tours per second is optimistic; the ant needs none of them.</div>
+              </div>
+
+              <div class="cmp" id="cmp">
+                <div class="r"><span class="who">🔦 <b>Brute force</b> (optimal)</span><span class="v gold" id="optV">— examined 0</span></div>
+                <div class="r"><span class="who">🐜 <b>Nearest neighbour</b></span><span class="v ant" id="nnV">—</span></div>
+                <div class="r"><span class="who">✨ <b>2-opt</b></span><span class="v ant" id="twoV">—</span></div>
+              </div>
+
+              <div class="console" id="console"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">Every dot is a city; every line an edge of the current tour. The salesperson wants certainty and must pay the factorial for it; the ant wants only a good route and pays a mere polynomial. The gap between them — a blink versus the age of the universe — is the visceral shape of the question <span class="mono">P ≟ NP</span>.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · The Factorial and the Polynomial</span>Two kinds of hard</h2>
+
+      <p class="reveal">What you are watching is the central drama of theoretical computer science. Some problems are <em>easy</em> in a precise sense: the time to solve them grows as a polynomial in the input size — <span class="mono">n</span>, <span class="mono">n²</span>, <span class="mono">n³</span> — and stays humane as <span class="mono">n</span> grows. The ant's nearest-neighbour method is one of these, costing about <span class="mono">n²</span>. Other problems appear to demand time that grows <em>exponentially</em> or worse — <span class="mono">2ⁿ</span>, <span class="mono">n!</span> — and become physically impossible almost immediately. The whole class of "easy" problems is called <strong>P</strong>. The traveling salesperson, in its exact form, has resisted every attempt to place it there.</p>
+
+      <p class="reveal">Yet notice a strange asymmetry the instrument makes plain: while <em>finding</em> the best tour is agonizing, <em>checking</em> a proposed tour is trivial — add up the distances, done in <span class="mono">n</span> steps. Problems whose answers are easy to <em>verify</em>, even if fiendish to <em>find</em>, form the class <strong>NP</strong>, and TSP is not merely in NP; Richard Karp proved in 1972 that it is <strong>NP-complete</strong> — as hard as any problem in the class. If anyone ever found a polynomial algorithm for it, every problem in NP would fall at once, and <span class="mono">P</span> would equal <span class="mono">NP</span>.</p>
+
+      <blockquote class="pull reveal">Does the ease of <em>checking</em> an answer imply the ease of <em>finding</em> one? That is the question <span class="mono">P ≟ NP</span> — worth a million-dollar prize, unsolved for half a century, and quietly present every time you watch the counter detonate.</blockquote>
+
+      <h2 class="reveal"><span class="num">III · The Wisdom of the Ant</span>Good enough, right now</h2>
+
+      <p class="reveal">Faced with a dragon it cannot slay, computer science learned to negotiate. If the perfect tour is unreachable, get a <em>provably good</em> one fast: Christofides' algorithm guarantees a route no worse than 1.5× optimal in polynomial time; the Lin–Kernighan heuristic and 2-opt routinely land within a percent or two; Marco Dorigo's <em>ant colony optimization</em> literally simulates pheromone-laying ants to breed excellent tours. And when certainty is truly required, solvers like Concorde combine branch-and-bound with cutting planes to prove optimality on instances of tens of thousands of cities — by being clever enough to <em>avoid</em> looking at almost all of the <span class="mono">(n−1)!/2</span> tours, even though the worst case remains exponential.</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">Knuth devotes the fourth volume of his life's work to exactly this ocean — the art of generating and searching through combinatorial possibilities without drowning in them. The traveling salesperson is its emblem: a problem so simple a child grasps it and so hard the universe cannot brute-force it, sitting on the knife-edge between the possible and the impossible that the next two rooms — Knuth's own dancing links, and the logic of satisfiability — are built to walk. Drop one more city on the map and watch certainty slip away. Then ask the ant, and go home before dark.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING IV · EXHIBIT 4.1<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 4A — §7.2.1.2<br/>
+      <a href="index.html">← Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">4.2 The Dance of the Pointers →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE LOST TIME MACHINE — traveling salesperson
+   Brute force enumerates tours by bounded next-permutation steps per frame
+   (freeze guard) and finds the provable optimum for small n; a nearest-
+   neighbour heuristic + 2-opt (the ant) answer instantly at any n. The tour
+   count (n-1)!/2 and its brute-force ETA are computed honestly with BigInt.
+   ========================================================================= */
+
+const REF_RATE=1e9, YEAR=3.15576e7, UNIVERSE_YR=1.38e10, BUDGET=4000;
+
+/* ---------- state ---------- */
+let cities=[], n=9;
+let nnTour=null, nnLen=null, twoTour=null, twoLen=null, optTour=null, optLen=null;
+let display=null, displayColor='#8fd0a8';
+let brute=null;                 // {perm, best, bestTour, examined, total(BigInt), done, cur}
+let running=false, raf=null;
+const log=[];
+
+/* ---------- geometry ---------- */
+const LW=720, LH=400;
+function dist(a,b){ const dx=cities[a].x-cities[b].x, dy=cities[a].y-cities[b].y; return Math.hypot(dx,dy); }
+function tourLen(order){ let s=0; for(let i=0;i<order.length;i++) s+=dist(order[i], order[(i+1)%order.length]); return s; }
+
+function newCities(k){
+  cities=[]; const mx=48, my=40;
+  for(let i=0;i<k;i++) cities.push({ x:mx+Math.random()*(LW-2*mx), y:my+Math.random()*(LH-2*my) });
+  n=k; resetSolutions();
+}
+function resetSolutions(){ nnTour=nnLen=twoTour=twoLen=optTour=optLen=null; brute=null; running=false; display=null; }
+
+/* ---------- factorial tour count (BigInt) ---------- */
+function tourCountBig(){ let f=1n; for(let i=2n;i<=BigInt(n-1);i++) f*=i; return n>=3 ? f/2n : 1n; }
+
+/* ---------- the ant: nearest neighbour + 2-opt ---------- */
+function nearestNeighbour(){
+  const vis=Array(n).fill(false); const order=[0]; vis[0]=true;
+  for(let k=1;k<n;k++){ const cur=order[order.length-1]; let best=-1,bd=Infinity;
+    for(let j=0;j<n;j++) if(!vis[j]){ const d=dist(cur,j); if(d<bd){bd=d;best=j;} }
+    order.push(best); vis[best]=true; }
+  return order;
+}
+function twoOpt(order){
+  order=order.slice(); let improved=true, passes=0;
+  while(improved && passes<n+4){ improved=false; passes++;
+    for(let i=1;i<n-1;i++) for(let j=i+1;j<n;j++){
+      const a=order[i-1], b=order[i], c=order[j], d=order[(j+1)%n];
+      if(a===c||b===d) continue;
+      if(dist(a,b)+dist(c,d) > dist(a,c)+dist(b,d)+1e-9){
+        for(let l=i,r=j;l<r;l++,r--){ const t=order[l]; order[l]=order[r]; order[r]=t; } improved=true;
+      }
+    }
+  }
+  return order;
+}
+
+/* ---------- brute force (bounded per frame) ---------- */
+function nextPerm(a){ let i=a.length-2; while(i>=0 && a[i]>=a[i+1]) i--; if(i<0) return false;
+  let j=a.length-1; while(a[j]<=a[i]) j--; const t=a[i]; a[i]=a[j]; a[j]=t;
+  for(let l=i+1,r=a.length-1;l<r;l++,r--){ const u=a[l]; a[l]=a[r]; a[r]=u; } return true; }
+function startBrute(){
+  if(running || n<4) return;
+  brute={ perm:Array.from({length:n-1},(_,k)=>k+1), best:Infinity, bestTour:null, examined:0, total:tourCountBig(), done:false, cur:null };
+  running=true;
+  document.getElementById('bruteBtn').disabled=true; document.getElementById('stopBtn').disabled=false;
+  pushLog(`<span class="op">brute force</span> begins — ${fmtBig(brute.total)} tours to examine`);
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(loop);
+}
+function stopBrute(){ running=false; document.getElementById('bruteBtn').disabled=false; document.getElementById('stopBtn').disabled=true; }
+
+/* ---------- animation / search loop ---------- */
+function loop(){
+  if(running && brute && !brute.done){
+    let budget=BUDGET;
+    const p=brute.perm;
+    while(budget-- > 0){
+      if(p[0] < p[p.length-1]){                    // canonical orientation (skip reflections)
+        let len=dist(0,p[0]);
+        for(let i=0;i<p.length-1;i++) len+=dist(p[i],p[i+1]);
+        len+=dist(p[p.length-1],0);
+        brute.examined++;
+        if(len<brute.best){ brute.best=len; brute.bestTour=[0,...p]; }
+      }
+      if(!nextPerm(p)){ brute.done=true; break; }
+    }
+    brute.cur=[0,...p];
+    if(brute.done){
+      optTour=brute.bestTour; optLen=brute.best; running=false;
+      document.getElementById('bruteBtn').disabled=false; document.getElementById('stopBtn').disabled=true;
+      display=optTour; displayColor='#C6A664';
+      pushLog(`<span class="op">optimal found</span> — length ${Math.round(optLen)} after ${brute.examined.toLocaleString('en-US')} tours`);
+    } else { display=brute.bestTour||brute.cur; displayColor='#C6A664'; }
+    updateReadout();
+  }
+  draw();
+  if(running) raf=requestAnimationFrame(loop);
+}
+
+/* ---------- canvas ---------- */
+const cv=document.getElementById('map'); const ctx=cv.getContext('2d');
+let cssW=LW, cssH=LH;
+function fit(){ const r=cv.getBoundingClientRect(); cssW=r.width; cssH=r.width*(LH/LW);
+  const dpr=Math.min(window.devicePixelRatio||1,2); cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+  ctx.setTransform(dpr*cssW/LW,0,0,dpr*cssH/LW,0,0); draw(); }
+function drawTour(order, color, w, alpha){
+  if(!order||order.length<2) return;
+  ctx.globalAlpha=alpha; ctx.strokeStyle=color; ctx.lineWidth=w; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(cities[order[0]].x, cities[order[0]].y);
+  for(let i=1;i<order.length;i++) ctx.lineTo(cities[order[i]].x, cities[order[i]].y);
+  ctx.lineTo(cities[order[0]].x, cities[order[0]].y); ctx.stroke(); ctx.globalAlpha=1;
+}
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  // faint "current attempt" during brute force
+  if(running && brute && brute.cur) drawTour(brute.cur, '#e79a8f', 1, 0.28);
+  if(display) drawTour(display, displayColor, 2.2, 0.95);
+  // cities
+  for(let i=0;i<n;i++){ const c=cities[i];
+    if(i===0){ ctx.beginPath(); ctx.arc(c.x,c.y,9,0,Math.PI*2); ctx.strokeStyle='#C6A664'; ctx.lineWidth=2; ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(c.x,c.y,5,0,Math.PI*2); ctx.fillStyle= i===0?'#C6A664':'#cdd8de'; ctx.fill();
+    ctx.strokeStyle='#0a0f12'; ctx.lineWidth=1.2; ctx.stroke();
+  }
+}
+cv.addEventListener('click', e=>{
+  if(running || n>=30) return;
+  const r=cv.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width*LW, y=(e.clientY-r.top)/r.height*LH;
+  cities.push({x,y}); n=cities.length; document.getElementById('nSize').value=n; document.getElementById('nSizeV').textContent=n;
+  resetSolutions(); pushLog(`added city ${n-1} — now ${n} cities`,'small'); updateReadout(); draw();
+});
+
+/* ---------- number formatting ---------- */
+function fmtBig(b){ const s=b.toString(); if(s.length<=13) return Number(b).toLocaleString('en-US');
+  return s[0]+'.'+s.slice(1,3)+'×10^'+(s.length-1); }
+function fmtTime(secs){
+  if(!isFinite(secs)) return 'beyond counting'; const yr=secs/YEAR;
+  if(secs<1e-3) return (secs*1e6).toFixed(0)+' µs';
+  if(secs<1) return (secs*1e3).toFixed(1)+' ms';
+  if(secs<60) return secs.toFixed(1)+' s';
+  if(secs<3600) return (secs/60).toFixed(1)+' min';
+  if(secs<86400) return (secs/3600).toFixed(1)+' hours';
+  if(yr<1) return (secs/86400).toFixed(1)+' days';
+  if(yr<1e3) return Math.round(yr).toLocaleString('en-US')+' years';
+  if(yr<1e6) return (yr/1e3).toFixed(1)+' thousand years';
+  if(yr<1e9) return (yr/1e6).toFixed(1)+' million years';
+  if(yr<1e12) return (yr/1e9).toFixed(2)+' billion years';
+  return yr.toExponential(2).replace('e+','×10^')+' years';
+}
+function universeCmp(secs){ const yr=secs/YEAR; if(!isFinite(yr)) return null; const x=yr/UNIVERSE_YR;
+  if(x<1) return null; return x<1e6? '≈ '+Math.round(x).toLocaleString('en-US')+'× the age of the universe'
+    : '≈ '+x.toExponential(1).replace('e+','×10^')+'× the age of the universe'; }
+
+/* ---------- readout ---------- */
+function pushLog(html,cls){ log.push({html,cls:cls||''}); if(log.length>40) log.shift();
+  const c=document.getElementById('console'); c.innerHTML=log.map(l=>`<div class="cline ${l.cls}">${l.html}</div>`).join(''); c.scrollTop=c.scrollHeight; }
+function updateReadout(){
+  const total=tourCountBig(); const secs=Number(total)/REF_RATE;
+  document.getElementById('tourCount').textContent=fmtBig(total);
+  const eta=document.getElementById('bruteEta'); const cmp=universeCmp(secs);
+  eta.textContent='brute force @ 10⁹/s: '+fmtTime(secs)+(cmp?'  '+cmp:'');
+  eta.className='eta'+(secs<3?' ok':'');
+  document.getElementById('bruteNote').textContent = n<=11
+    ? 'Small enough to brute-force live — press 🔦 to see the provable optimum.'
+    : 'Too large to finish live; the counter will crawl. The ant answers anyway.';
+
+  // comparison rows
+  const optV=document.getElementById('optV');
+  if(optLen!=null) optV.textContent='length '+Math.round(optLen);
+  else if(brute) optV.innerHTML='examined '+brute.examined.toLocaleString('en-US')+(brute.total? ' <span class="muted">/ '+fmtBig(brute.total)+'</span>':'');
+  else optV.textContent='—';
+  document.getElementById('nnV').textContent = nnLen!=null ? ('length '+Math.round(nnLen)+gap(nnLen)) : '—';
+  document.getElementById('twoV').textContent = twoLen!=null ? ('length '+Math.round(twoLen)+gap(twoLen)) : '—';
+
+  document.getElementById('nSizeV').textContent=n;
+  document.getElementById('mapK').textContent= running?'searching…':(optLen!=null?'optimal shown':(display?'tour shown':'idle'));
+  document.getElementById('statusK').textContent= running?'brute-forcing':'ready';
+}
+function gap(len){ if(optLen==null||optLen===0) return ''; const g=(len-optLen)/optLen*100; return g<0.05?' (optimal)':` (+${g.toFixed(0)}%)`; }
+
+/* ---------- controls ---------- */
+document.getElementById('bruteBtn').addEventListener('click', startBrute);
+document.getElementById('stopBtn').addEventListener('click', ()=>{ stopBrute(); updateReadout(); });
+document.getElementById('nnBtn').addEventListener('click', ()=>{ if(running) return; nnTour=nearestNeighbour(); nnLen=tourLen(nnTour);
+  display=nnTour; displayColor='#8fd0a8'; pushLog(`<span class="ant">nearest neighbour</span> — length ${Math.round(nnLen)}, instantly`); updateReadout(); draw(); });
+document.getElementById('optBtn').addEventListener('click', ()=>{ if(running) return; const base=twoTour||nnTour||nearestNeighbour();
+  twoTour=twoOpt(base); twoLen=tourLen(twoTour); if(nnLen==null){ nnTour=nearestNeighbour(); nnLen=tourLen(nnTour); }
+  display=twoTour; displayColor='#a8d5b5'; pushLog(`<span class="ant">2-opt</span> — improved to length ${Math.round(twoLen)}`); updateReadout(); draw(); });
+document.getElementById('newBtn').addEventListener('click', ()=>{ if(running) return; newCities(n); pushLog('scattered '+n+' fresh cities','small'); updateReadout(); draw(); });
+document.getElementById('nSize').addEventListener('input', e=>{ if(running){ e.target.value=n; return; } newCities(+e.target.value); updateReadout(); draw(); });
+window.addEventListener('resize', fit);
+
+/* ---------- reveal-on-scroll ---------- */
+const io=new IntersectionObserver((es)=>{ es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } }); },
+  { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
+
+/* ---------- boot ---------- */
+newCities(9);
+fit(); updateReadout();
+pushLog('9 cities · 20,160 distinct tours. Try brute force, then the ant.','small');
+draw();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>

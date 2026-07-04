@@ -21,6 +21,16 @@ small feature* between consecutive objects. By the end you will have generated
 five classical families the way Knuth does, each with a step-labeled algorithm
 you can trace on paper.
 
+> **Companion exhibit — _The Traveling Salesperson and the Ant_.** Lexicographic
+> permutation generation (§7.2.1.2) is not an abstraction in the Museum's
+> [Lost Time Machine](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-4.1-traveling-salesperson.html):
+> it enumerates every tour of a set of cities by exactly the next-permutation
+> step you build here, bounded per animation frame so it never freezes. Watch
+> the count `(n−1)!/2` detonate — 43 billion tours at 15 cities, past the age of
+> the universe beyond ~25 — while a nearest-neighbour "ant" answers instantly.
+> It is combinatorial *generation* meeting combinatorial *explosion*, and the
+> visceral face of P vs NP.
+
 ---
 
 ## 1. Three things that are not the same
