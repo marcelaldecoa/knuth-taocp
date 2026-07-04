@@ -1,0 +1,462 @@
+<!--
+  THE MUSEUM OF ALGORITHMS
+  Wing III — The Architecture of Order · Exhibit 3.3 — The Birthday Paradox
+  A self-contained, single-file interactive essay on hash tables — addressing by
+  computation, collisions, and their resolution. After Donald Knuth's TAOCP
+  Vol. 3, §6.4.
+
+  No build step. No frameworks. No network: fonts vendored beside this file
+  (./fonts/*.woff2, relative). The Name Collider computes an honest, visible
+  polynomial hash and runs linear probing and separate chaining side by side on
+  one key stream, with the birthday-collision probability computed live.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="The Name Collider — a visible hash function scatters words into buckets while linear probing and chaining resolve the collisions the birthday paradox makes inevitable." />
+<title>The Birthday Paradox · Exhibit 3.3 · The Museum of Algorithms</title>
+
+<style>
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('fonts/plexmono-500.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:600; font-style:normal; font-display:swap; src:url('fonts/plexmono-600.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --parchment-2:#F4F1E1;
+    --plum:#5C1D2A; --plum-2:#8E2C24; --gold:#C6A664; --gold-2:#C69B4B; --ink:#1D2A33;
+    --lab-bg:#12181c; --lab-bg-2:#0c1114; --lab-line:#2b3a42;
+    --serif:'Spectral',Georgia,'Times New Roman',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --measure:680px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #fbf6ea 0%, transparent 60%), var(--parchment);
+    color:var(--ink); font-family:var(--serif); font-weight:400; font-size:19px; line-height:1.72;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; margin:0;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:repeating-linear-gradient(0deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(29,42,51,.015) 0 1px,transparent 1px 3px); }
+
+  .wrap{ position:relative; z-index:1; }
+  .col{ max-width:var(--measure); margin-inline:auto; padding-inline:22px; }
+  .wide{ max-width:1120px; margin-inline:auto; padding-inline:22px; }
+
+  .plate{ max-width:820px; margin:0 auto; padding:0 22px; }
+  .cover{ margin-top:8vh; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink), 14px 16px 0 rgba(29,42,51,.10);
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 100%); color:var(--parchment);
+    padding:clamp(28px,5vw,54px); position:relative; overflow:hidden; }
+  .cover::after{ content:""; position:absolute; inset:14px; border:1px solid var(--gold); opacity:.55; pointer-events:none; }
+  .backlink{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); text-decoration:none; margin-bottom:22px; opacity:.85; }
+  .backlink:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+  .eyebrow{ font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin:0 0 18px; }
+  .cover h1{ font-family:var(--display); font-weight:700; line-height:.98; font-size:clamp(40px,8vw,82px); margin:.02em 0 .12em; color:var(--parchment); letter-spacing:.005em; }
+  .cover .sub{ font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(19px,3vw,26px); color:#e9dcc0; margin:0 0 26px; opacity:.95; }
+  .cover .rule{ height:2px; background:var(--gold); width:100%; margin:22px 0; opacity:.85; }
+  .cover .meta{ display:flex; flex-wrap:wrap; gap:8px 26px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:#e7d9bd; }
+  .cover .meta b{ color:var(--gold); font-weight:600; }
+  .cover .volnum{ position:absolute; right:clamp(20px,5vw,44px); top:clamp(20px,4vw,38px); font-family:var(--display); font-weight:700; font-size:clamp(50px,9vw,104px); color:rgba(198,166,100,.16); line-height:1; }
+
+  .prose{ margin-top:64px; }
+  .prose h2{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.4vw,40px); line-height:1.06; margin:2.2em 0 .5em; letter-spacing:.005em; color:var(--ink); }
+  .prose h2 .num{ display:block; font-family:var(--mono); font-size:12.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--plum-2); margin-bottom:.7em; font-weight:600; }
+  .prose p{ margin:1.15em 0; }
+  .lede::first-letter{ font-family:var(--display); font-weight:700; float:left; font-size:4.4em; line-height:.72; padding:.06em .1em 0 0; color:var(--plum-2); }
+  .mono{ font-family:var(--mono); font-size:.86em; background:rgba(92,29,42,.06); padding:.06em .38em; border-radius:3px; color:var(--plum); }
+  .prose .pull{ margin:1.8em 0; padding:.35em 0 .35em 26px; border-left:4px solid var(--gold); font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(22px,3.4vw,29px); line-height:1.28; color:var(--plum); }
+  .prose .pull cite{ display:block; font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.1em; color:var(--ink); opacity:.7; margin-top:.8em; }
+  .fig-note{ font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; color:#5b6b73; text-align:center; margin:.9em auto 0; max-width:680px; }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.visible{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{scroll-behavior:auto;} }
+
+  /* THE LAB */
+  .lab-shell{ margin:78px 0; }
+  .lab{ background:radial-gradient(900px 500px at 15% -10%, #1a242a 0%, transparent 60%), linear-gradient(180deg, var(--lab-bg) 0%, var(--lab-bg-2) 100%);
+    border:1px solid #000; border-radius:2px; box-shadow:0 30px 70px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+    color:#cdd8de; padding:clamp(18px,3vw,30px); font-family:var(--mono); }
+  .lab-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); padding-bottom:14px; margin-bottom:20px; }
+  .lab-top .tag{ color:var(--gold); font-size:12px; letter-spacing:.22em; text-transform:uppercase; }
+  .lab-top .title{ font-family:var(--display); font-style:italic; font-weight:600; font-size:22px; color:#eef3f5; letter-spacing:.01em; }
+  .lab-top .sn{ font-size:11.5px; letter-spacing:.15em; color:#6c7d85; }
+
+  .lab-grid{ display:grid; grid-template-columns: 1.5fr .85fr; gap:22px; }
+  @media (max-width:900px){ .lab-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:rgba(0,0,0,.28); border:1px solid var(--lab-line); border-radius:2px; padding:14px; }
+  .panel .phead{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#7f9099; margin:0 0 10px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .panel .phead .k{ color:var(--gold); }
+
+  canvas#tables{ display:block; width:100%; height:auto; background:radial-gradient(700px 340px at 50% 0%, #10171b 0, #090d10 82%); border:1px solid #05090b; border-radius:2px; }
+
+  .hashline{ margin-top:12px; padding:9px 12px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; font-size:12.5px; color:#9fb0b9; word-break:break-all; line-height:1.55; min-height:38px; }
+  .hashline b{ color:var(--gold); } .hashline .code{ color:#89b4c4; }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+  .wordin{ background:#05090b; border:1px solid var(--lab-line); color:#eef3f5; font-family:var(--mono); font-size:14px; padding:9px 11px; border-radius:2px; outline:none; width:150px; text-transform:uppercase; letter-spacing:.08em; }
+  .wordin:focus{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(198,166,100,.18); }
+  .btn{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; background:#05090b; color:#dfe8ec; border:1px solid var(--lab-line); padding:9px 14px; border-radius:2px; cursor:pointer; transition:.15s; user-select:none; }
+  .btn:hover{ border-color:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--gold); color:#20160a; border-color:var(--gold); font-weight:600; }
+  .btn.primary:hover{ background:#d8b877; }
+  .btn:disabled{ opacity:.32; cursor:not-allowed; }
+  .sl{ display:flex; align-items:center; gap:9px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#8496a0; margin-top:14px; }
+  .sl input[type=range]{ width:150px; accent-color:var(--gold); } .sl b{ color:var(--gold); font-size:13px; letter-spacing:0; text-transform:none; }
+
+  .bigp{ background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:12px 13px; margin-bottom:12px; }
+  .bigp .lbl{ font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:#7f9099; }
+  .bigp .pv{ font-family:var(--display); font-weight:700; font-size:34px; line-height:1; margin:4px 0 6px; }
+  .bigp .pv.lo{ color:#8fd0a8; } .bigp .pv.mid{ color:var(--gold); } .bigp .pv.hi{ color:#e79a8f; }
+  .pbar{ height:8px; background:#0e1519; border:1px solid var(--lab-line); border-radius:4px; overflow:hidden; }
+  .pbar > div{ height:100%; background:linear-gradient(90deg,#8fd0a8,#C6A664,#e79a8f); }
+  .bigp .note{ font-size:11px; color:#7f9099; margin-top:7px; line-height:1.5; }
+
+  .readout-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .stat{ flex:1; min-width:60px; background:#05090b; border:1px solid var(--lab-line); border-radius:2px; padding:8px 10px; }
+  .stat .lbl{ font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#7f9099; }
+  .stat .val{ font-size:17px; color:#eef3f5; margin-top:2px; }
+  .stat .val.gold{ color:var(--gold); }
+
+  .console{ height:150px; overflow-y:auto; font-size:12px; line-height:1.5; padding-right:6px; }
+  .console::-webkit-scrollbar{ width:8px; } .console::-webkit-scrollbar-thumb{ background:#2b3a42; border-radius:4px; }
+  .cline{ padding:4px 0; border-bottom:1px dotted #24333a; color:#b7c6cd; }
+  .cline .op{ color:var(--gold); } .cline .col{ color:#e79a8f; } .cline .key{ color:#eef3f5; } .cline.small{ color:#7f9099; font-size:11px; }
+
+  footer.foot{ margin:90px 0 60px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#6b7a82; }
+  footer.foot a{ color:var(--plum-2); text-decoration:none; }
+  .footrule{ width:60px; height:2px; background:var(--gold); margin:0 auto 22px; }
+</style>
+
+<div class="wrap">
+
+  <header class="plate">
+    <div class="cover">
+      <a class="backlink" href="index.html">← The Museum of Algorithms</a>
+      <div class="volnum">3.3</div>
+      <p class="eyebrow">Wing III · The Architecture of Order</p>
+      <h1>The Birthday<br/>Paradox</h1>
+      <p class="sub">Hashing — finding without searching</p>
+      <div class="rule"></div>
+      <div class="meta">
+        <span><b>VOLUME</b> III — Sorting and Searching</span>
+        <span><b>SECTION</b> 6.4</span>
+        <span><b>1953</b> Amdahl · Luhn</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="prose">
+
+    <section class="col">
+      <p class="lede reveal">Gather twenty-three strangers in a room and it is more likely than not that two of them share a birthday. Almost no one believes this the first time they hear it — twenty-three against three hundred and sixty-five feels absurdly lopsided — and the disbelief is the point. We instinctively compare each person to <em>ourselves</em>, but the collision can happen between <em>any</em> pair, and twenty-three people make two hundred and fifty-three pairs. Coincidence scales with pairs, not with people, and pairs grow as the square. This is the <strong>birthday paradox</strong>, and it is the single most important fact about hash tables — because a hash table is a room, its buckets are the days of the year, and the keys are the strangers walking in.</p>
+
+      <p class="reveal">A hash table performs a small miracle: it finds an item without searching for it. Instead of comparing your key against the stored ones — the whole enterprise of the trees in the last two rooms — it <em>computes</em> an address directly from the key and goes straight there. A function <span class="mono">h(key)</span> grinds the key into a bucket number, and that bucket is where the item lives. No traversal, no comparisons, no depth: on average, a single step. It is the fastest lookup we know, and databases, compilers, caches, and the dictionary in every programming language are built on it.</p>
+
+      <blockquote class="pull reveal">"A hash table trades order for speed. It cannot tell you the smallest key or list them in sequence — it scattered them on purpose. What it gives back for that sacrifice is the answer to 'is X here, and where?' in one step."
+        <cite>— after D. E. Knuth, TAOCP Vol. 3, §6.4</cite></blockquote>
+
+      <h2 class="reveal"><span class="num">I · The Inevitable Collision</span>When two keys want one bucket</h2>
+
+      <p class="reveal">The miracle has a catch, and the birthday paradox is its name. Because the hash function scatters many possible keys across few buckets, two different keys will eventually compute the <em>same</em> address — a <strong>collision</strong> — and, exactly as with birthdays, collisions arrive far sooner than intuition expects. In a table of <span class="mono">m</span> buckets, the first collision is likely once you have inserted only about <span class="mono">1.18·√m</span> keys — a mere handful for a small table. You cannot hash your way out of this; the pigeonhole principle guarantees it. So the real design question is never "how do I avoid collisions?" but "what do I do when they happen?" There are two classic answers, and the instrument below runs them side by side on the very same keys.</p>
+
+      <p class="reveal">Type a word — or let it deal you random ones — and watch our honest little hash function, <span class="mono">h = (h·31 + letter) mod m</span>, chew the letters into a bucket number in full view. Then watch the key drop into two tables at once. On the left, <strong>linear probing</strong>: if the bucket is taken, walk forward to the next free slot. On the right, <strong>separate chaining</strong>: hang the key on a little list dangling from the bucket. Keep going, and feel the birthday paradox arrive.</p>
+    </section>
+
+    <!-- THE LAB -->
+    <section class="wide lab-shell reveal">
+      <div class="lab" id="lab">
+        <div class="lab-top">
+          <div>
+            <div class="tag">Instrument 3.3</div>
+            <div class="title">The Name Collider</div>
+          </div>
+          <div class="sn">HASH TABLE · linear probing vs chaining · visible h(key)</div>
+        </div>
+
+        <div class="lab-grid">
+          <div>
+            <div class="panel">
+              <div class="phead"><span>Two tables, one key stream — probing (left) vs chaining (right)</span><span class="k" id="tablesK">empty</span></div>
+              <canvas id="tables" width="720" height="384" role="img" aria-label="Two hash tables side by side, resolving collisions by linear probing and by separate chaining"></canvas>
+            </div>
+
+            <div class="hashline" id="hashline">Type a word and press Insert to see <b>h(key)</b> computed letter by letter.</div>
+
+            <div class="controls">
+              <input class="wordin" id="wordIn" maxlength="7" placeholder="A WORD…" autocomplete="off" spellcheck="false" />
+              <button class="btn primary" id="insBtn">＋ Insert</button>
+              <button class="btn" id="randBtn">🎲 Random</button>
+              <button class="btn" id="rand5Btn">🎲 ×5</button>
+              <button class="btn" id="resetBtn">↺ Reset</button>
+            </div>
+            <label class="sl">Buckets m <input id="mSize" type="range" min="11" max="29" step="2" value="23"><b id="mSizeV">23</b> &nbsp;<span style="color:#6c7d85">(prime is best)</span></label>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="phead"><span>The birthday odds</span><span class="k" id="statusK">ready</span></div>
+
+              <div class="bigp">
+                <div class="lbl">P(at least one collision)</div>
+                <div class="pv lo" id="pval">0%</div>
+                <div class="pbar"><div id="pbar" style="width:0%"></div></div>
+                <div class="note" id="pnote">With m=23 buckets, a collision becomes likely after ~<b style="color:var(--gold)">6</b> keys (≈1.18·√m).</div>
+              </div>
+
+              <div class="readout-row">
+                <div class="stat"><div class="lbl">Keys</div><div class="val" id="statN">0</div></div>
+                <div class="stat"><div class="lbl">Load α</div><div class="val" id="statAlpha">0.00</div></div>
+                <div class="stat"><div class="lbl">1st collision</div><div class="val gold" id="statFirst">—</div></div>
+              </div>
+
+              <div class="console" id="console"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-note reveal">Both tables receive identical keys and compute the identical bucket <span class="mono">h(key)</span>; they differ only in what they do when that bucket is already taken. Linear probing keeps the data compact and cache-friendly but forms clusters that lengthen every future search; chaining stays fast under load but pays in scattered list nodes — and, unlike probing, can never fill up.</p>
+    </section>
+
+    <section class="col">
+      <h2 class="reveal"><span class="num">II · Load, Clusters &amp; the Cost of Fullness</span>What collisions cost</h2>
+
+      <p class="reveal">The health of a hash table is measured by one number: the <strong>load factor</strong> <span class="mono">α = n/m</span>, the fraction of buckets in use. As long as <span class="mono">α</span> stays modest, both methods answer in nearly constant time. But their fates diverge as the table fills. Separate chaining degrades gracefully — the average chain has length <span class="mono">α</span>, so even a table loaded beyond capacity just grows slightly longer lists. Linear probing degrades <em>viciously</em>: Knuth's celebrated analysis in §6.4 shows the average number of probes for an unsuccessful search grows like <span class="mono">½(1 + 1/(1−α)²)</span> — which is fine at <span class="mono">α = 0.5</span> but explodes toward infinity as <span class="mono">α → 1</span>. And because open addressing stores everything <em>in</em> the table, it has a hard ceiling: at <span class="mono">α = 1</span> it is full and can take no more, while a chained table shrugs and keeps going.</p>
+
+      <blockquote class="pull reveal">Linear probing's flaw is that clusters breed clusters: a full run of slots catches every key that hashes anywhere into it, so it grows, so it catches more. Knuth was the first to prove exactly how bad this "primary clustering" gets.</blockquote>
+
+      <p class="reveal">Fill the simulator past a load of one-half and watch the left table congeal into long amber runs while the right table's chains stay stubbily short. This is the engineer's real choice. Open addressing wins where memory and cache locality are precious and the load can be kept low (it is how the fastest in-memory tables are built, with cleverer probe sequences than the naïve linear step). Chaining wins where the load is unpredictable or high, and where deletions — awkward under probing, since a hole can break a probe chain — must be simple. Knuth quantifies both so you can choose with a theorem instead of a hunch.</p>
+
+      <h2 class="reveal"><span class="num">III · Order Traded for Speed</span>The other half of the bargain</h2>
+
+      <p class="reveal">Return, for a moment, to the tree in the previous room. A B-tree keeps every key in sorted order, so it can answer "what comes next?" and "everything between March and June" — range queries — as naturally as it answers "is X here?". A hash table cannot. By scattering keys deliberately across buckets it <em>destroys</em> their order, and with it the ability to enumerate, to find neighbours, to ask for a range. That is the bargain named in the pull-quote above: order traded for the fastest possible single lookup. The two structures are not rivals but complements, and real databases keep both — a B-tree index for range scans, a hash index for point lookups — over the very same data.</p>
+
+      <blockquote class="pull reveal">"An algorithm must be seen to be believed."
+        <cite>— D. E. Knuth</cite></blockquote>
+
+      <p class="reveal">Hashing radiates far beyond the dictionary. It deduplicates files, powers the load balancers that spread traffic across servers, underlies Bloom filters and caches, and — with cryptographic hash functions — gives every commit in Git and every block in a blockchain its content-addressed name. All of it descends from Hans Peter Luhn's 1953 memo at IBM and the theory Knuth laid down in §6.4, and all of it lives with the birthday paradox: collisions are not a bug to be eliminated but a certainty to be managed. Keep dealing keys into the room, and count how few it takes before two of them want the same day.</p>
+    </section>
+
+    <footer class="foot reveal">
+      <div class="footrule"></div>
+      THE MUSEUM OF ALGORITHMS · WING III · EXHIBIT 3.3<br/>
+      After D. E. Knuth, <em>The Art of Computer Programming</em>, Vol. 3 — §6.4<br/>
+      <a href="exhibit-3.2-tree-that-holds-the-world.html">← 3.2 The Tree That Holds the World</a> &nbsp;·&nbsp; <a href="index.html">Atrium</a> &nbsp;·&nbsp; <span style="opacity:.6">Wing IV →</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   THE NAME COLLIDER — a hash table workbench
+   An honest, visible polynomial hash  h = (h*31 + code) mod m  drives two
+   tables on one key stream: linear probing (open addressing) and separate
+   chaining. The birthday-collision probability 1 - Π (m-i)/m is computed live.
+   ========================================================================= */
+
+let m=23;
+let probe=[];        // open-addressing slots (null or key)
+let chain=[];        // array of buckets, each an array of keys
+let homeCount=[];    // how many inserted keys have home bucket b (birthday view)
+const inserted=new Set();
+let n=0, firstCollision=null, probingFull=false;
+const log=[];
+
+/* highlight of the most recent insertion (fades) */
+let hl=null;         // {home, probePath:[idx], probeFinal, chainBucket, chainLen, t, collided}
+
+function reset(size){
+  m=size; probe=Array(m).fill(null); chain=Array.from({length:m},()=>[]);
+  homeCount=Array(m).fill(0); inserted.clear(); n=0; firstCollision=null; probingFull=false;
+  log.length=0; hl=null;
+}
+
+/* ---------- honest, visible hash ---------- */
+function hashTrace(word){
+  let h=0; const steps=[];
+  for(const ch of word){ const code=ch.charCodeAt(0); const prev=h; h=(h*31+code)%m; steps.push({ch,code,prev,val:h}); }
+  return { h, steps };
+}
+function hashExpr(word){
+  const {h,steps}=hashTrace(word);
+  const parts=steps.map(s=>`<span class="code">${s.ch}</span>(${s.code})→${s.val}`).join(' · ');
+  return `<b>h("${word}")</b> = ${parts} &nbsp;⇒&nbsp; bucket <b>${h}</b>`;
+}
+
+/* ---------- birthday probability ---------- */
+function collisionProb(k){ if(k>m) return 1; let p=1; for(let i=0;i<k;i++) p*=(m-i)/m; return 1-p; }
+function threshold(){ return Math.max(1, Math.round(1.1774*Math.sqrt(m))); }
+
+/* ---------- insertion (both tables, shared h) ---------- */
+function insert(word){
+  word=(word||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,7);
+  if(!word) return;
+  const {h}=hashTrace(word);
+  if(inserted.has(word)){
+    pushLog(`<span class="op">insert</span> <span class="key">${word}</span> → bucket ${h} · already present, ignored`,'small');
+    hl={home:h, probePath:[], probeFinal:null, chainBucket:h, chainLen:chain[h].length, t:performance.now(), collided:false, word};
+    render(); return;
+  }
+  const homeTaken = homeCount[h] > 0;
+  homeCount[h]++;
+  const birthdayCollision = homeTaken;
+  if(birthdayCollision && firstCollision===null) firstCollision=n+1;
+
+  // --- linear probing ---
+  let path=[], finalIdx=null;
+  if(!probingFull){
+    let i=0;
+    while(i<m && probe[(h+i)%m]!==null){ path.push((h+i)%m); i++; }
+    if(i>=m){ probingFull=true; }
+    else { finalIdx=(h+i)%m; probe[finalIdx]=word; }
+  }
+  // --- chaining ---
+  chain[h].push(word);
+
+  inserted.add(word); n++;
+
+  // narrate
+  let msg=`<span class="op">insert</span> <span class="key">${word}</span> → bucket ${h}`;
+  if(finalIdx!==null && finalIdx!==h) msg += ` · probe ${path.length} → slot ${finalIdx}`;
+  else if(finalIdx===h) msg += ` · slot free`;
+  else if(probingFull) msg += ` · <span class="col">probing table FULL</span>`;
+  msg += ` · chain[${h}] len ${chain[h].length}`;
+  if(birthdayCollision) msg += ` · <span class="col">collision!</span>`;
+  pushLog(msg);
+
+  hl={home:h, probePath:path.slice(), probeFinal:finalIdx, chainBucket:h, chainLen:chain[h].length, t:performance.now(), collided:birthdayCollision, word};
+  render();
+}
+
+/* ---------- canvas ---------- */
+const cv=document.getElementById('tables'); const ctx=cv.getContext('2d');
+const LW=720, LH=384; let cssW=LW, cssH=LH;
+function fit(){
+  const r=cv.getBoundingClientRect(); cssW=r.width; cssH=r.width*(LH/LW);
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+  ctx.setTransform(dpr*cssW/LW,0,0,dpr*cssH/LW,0,0); draw();
+}
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  const now=performance.now();
+  const hlA = hl ? Math.max(0,(1300-(now-hl.t))/1300) : 0;
+
+  const headY=8, top=32, botPad=8;
+  const rowH=(LH-top-botPad)/m;
+  const gap=18, panelW=(LW-gap)/2 - 6;
+  const leftX=6, rightX=leftX+panelW+gap;
+
+  // headers
+  ctx.textBaseline='middle'; ctx.font='600 12px "IBM Plex Mono",monospace';
+  ctx.textAlign='left'; ctx.fillStyle='#c7d2d8';
+  ctx.fillText('LINEAR PROBING', leftX+22, headY+8);
+  ctx.fillText('SEPARATE CHAINING', rightX+22, headY+8);
+
+  for(let b=0;b<m;b++){
+    const y=top + b*rowH;
+    // index labels
+    ctx.font='9px "IBM Plex Mono",monospace'; ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillStyle= (hl&&hl.home===b&&hlA>0)?'#C6A664':'#5f7079';
+    ctx.fillText(String(b), leftX+16, y+rowH/2);
+    ctx.fillText(String(b), rightX+16, y+rowH/2);
+
+    // ---- probing slot ----
+    const px=leftX+22, pw=panelW-22, ph=Math.max(6,rowH-2);
+    const onPath = hl && hl.probePath.includes(b) && hlA>0;
+    const isFinal = hl && hl.probeFinal===b && hlA>0;
+    ctx.fillStyle= probe[b]!==null ? (isFinal?'#4a3c18':'#1c2a25') : '#0e1519';
+    ctx.strokeStyle= isFinal?`rgba(198,166,100,${0.5+0.5*hlA})` : onPath?`rgba(231,154,143,${0.4+0.5*hlA})` : '#24333a';
+    ctx.lineWidth= (isFinal||onPath)?1.8:1;
+    rrect(px,y+1,pw,ph,3); ctx.fill(); ctx.stroke();
+    if(probe[b]!==null){ ctx.fillStyle=isFinal?'#fff':'#a8c9b6'; ctx.font=`600 ${Math.min(12,rowH-3)}px "IBM Plex Mono",monospace`; ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText(probe[b], px+7, y+rowH/2); }
+
+    // ---- chaining bucket ----
+    const cx0=rightX+22, ch=Math.max(6,rowH-2);
+    ctx.fillStyle='#0e1519'; ctx.strokeStyle= (hl&&hl.home===b&&hlA>0)?`rgba(198,166,100,${0.4+0.5*hlA})`:'#24333a'; ctx.lineWidth=(hl&&hl.home===b&&hlA>0)?1.6:1;
+    rrect(cx0,y+1,14,ch,3); ctx.fill(); ctx.stroke();
+    // chain cells
+    const cellW=Math.min(46, (panelW-40)/Math.max(1,chain[b].length));
+    let x=cx0+18;
+    for(let c=0;c<chain[b].length;c++){
+      if(x+cellW>rightX+panelW-4){ ctx.fillStyle='#7f9099'; ctx.font='9px "IBM Plex Mono",monospace'; ctx.textAlign='left'; ctx.fillText('+'+(chain[b].length-c), x, y+rowH/2); break; }
+      const fresh = hl&&hl.home===b&&c===chain[b].length-1&&hlA>0;
+      ctx.strokeStyle='rgba(120,138,146,0.4)'; ctx.beginPath(); ctx.moveTo(x-4,y+rowH/2); ctx.lineTo(x,y+rowH/2); ctx.stroke();
+      ctx.fillStyle= fresh?'#4a3c18':'#182a24'; ctx.strokeStyle= fresh?`rgba(198,166,100,${0.5+0.5*hlA})`:'#3a5548'; ctx.lineWidth=fresh?1.6:1;
+      rrect(x,y+1,cellW-4,ch,3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle= fresh?'#fff':'#a8c9b6'; ctx.font=`${Math.min(10,rowH-4)}px "IBM Plex Mono",monospace`; ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText(chain[b][c], x+4, y+rowH/2);
+      x+=cellW;
+    }
+  }
+}
+function rrect(x,y,w,h,r){ r=Math.min(r,h/2,w/2); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+/* ---------- readout ---------- */
+function pushLog(html,cls){ log.push({html,cls:cls||''}); if(log.length>40) log.shift();
+  const c=document.getElementById('console'); c.innerHTML=log.map(l=>`<div class="cline ${l.cls}">${l.html}</div>`).join(''); c.scrollTop=c.scrollHeight; }
+function render(){
+  document.getElementById('hashline').innerHTML = hl ? hashExpr(hl.word) : document.getElementById('hashline').innerHTML;
+  const p=collisionProb(n);
+  const pv=document.getElementById('pval'); pv.textContent=(p*100).toFixed(p<0.995?1:0)+'%';
+  pv.className='pv '+(p<0.33?'lo':p<0.75?'mid':'hi');
+  document.getElementById('pbar').style.width=(p*100)+'%';
+  document.getElementById('pnote').innerHTML=`With m=${m} buckets, a collision becomes likely after ~<b style="color:var(--gold)">${threshold()}</b> keys (≈1.18·√m).`;
+  document.getElementById('statN').textContent=n;
+  document.getElementById('statAlpha').textContent=(n/m).toFixed(2);
+  document.getElementById('statFirst').textContent= firstCollision!==null ? ('key #'+firstCollision) : '—';
+  document.getElementById('tablesK').textContent= n===0?'empty':(n+' keys · m='+m+(probingFull?' · probing FULL':''));
+  document.getElementById('statusK').textContent= probingFull?'probing full':'ready';
+  draw();
+}
+
+/* ---------- words ---------- */
+const WORDS=['CAT','DOG','FOX','OWL','BEE','ANT','ELK','BAT','COD','EEL','JAY','RAT','HEN','SOW','PIG','EWE','DOE','ASP','GNU','KOB','YAK','APE','RAM','HOG','CUB','PUP','KIT','FRY','ROE','CARP','MOLE','LARK','WREN','SEAL','HARE','LION','BEAR','WOLF','CRAB','TOAD'];
+function randWord(){ const avail=WORDS.filter(w=>!inserted.has(w)); if(!avail.length) return null; return avail[Math.floor(Math.random()*avail.length)]; }
+
+/* ---------- insertion pacing (queue) ---------- */
+let queue=[], nextAt=0;
+function tick(){
+  const now=performance.now();
+  if(queue.length && now>=nextAt){ const w=queue.shift(); insert(w); nextAt=now+420; if(!queue.length) document.getElementById('statusK').textContent= probingFull?'probing full':'ready'; }
+  else draw();     // keep highlight fading smoothly
+  requestAnimationFrame(tick);
+}
+
+/* ---------- controls ---------- */
+const wordIn=document.getElementById('wordIn');
+function doInsertFromInput(){ const w=wordIn.value.trim(); if(w){ insert(w); wordIn.value=''; } else { const r=randWord(); if(r) insert(r); } }
+document.getElementById('insBtn').addEventListener('click', doInsertFromInput);
+wordIn.addEventListener('keydown', e=>{ if(e.key==='Enter') doInsertFromInput(); });
+document.getElementById('randBtn').addEventListener('click', ()=>{ const r=randWord(); if(r) insert(r); else pushLog('out of distinct sample words — type your own','small'); });
+document.getElementById('rand5Btn').addEventListener('click', ()=>{ document.getElementById('statusK').textContent='inserting…'; for(let i=0;i<5;i++){ const r=randWord(); if(r) queue.push(r); } nextAt=0; });
+document.getElementById('resetBtn').addEventListener('click', ()=>{ queue=[]; reset(m); pushLog('reset · m='+m+' buckets, empty','small'); render(); });
+document.getElementById('mSize').addEventListener('input', e=>{
+  m=+e.target.value; document.getElementById('mSizeV').textContent=m; queue=[]; reset(m);
+  pushLog('table resized to m='+m+' buckets','small'); render();
+});
+window.addEventListener('resize', fit);
+
+/* ---------- reveal-on-scroll ---------- */
+const io=new IntersectionObserver((es)=>{ es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } }); },
+  { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
+
+/* ---------- boot ---------- */
+reset(23);
+render();
+fit();
+['CAT','DOG','FOX','OWL','BEE'].forEach(w=>queue.push(w));   // a small opening deal
+document.getElementById('statusK').textContent='inserting…';
+requestAnimationFrame(tick);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>

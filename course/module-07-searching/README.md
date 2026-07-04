@@ -21,6 +21,16 @@ that rank them: the `floor(lg N) + 1` bound for binary search, the `1.386 lg n`
 average depth of a random binary search tree, the Fibonacci-tree proof that
 AVL trees stay `~1.44 lg n` tall, and Knuth's 1962 linear-probing formula.
 
+> **Companion exhibit — _The Birthday Paradox_.** The hashing half of this
+> module comes alive in the Museum's
+> [Name Collider](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-3.3-birthday-paradox.html):
+> type words and watch an honest `h = (h·31 + c) mod m` compute each bucket in
+> full view, then land in **linear probing** and **separate chaining** side by
+> side on the same key stream. It shows the birthday-collision probability
+> `1 − ∏(m−i)/m` live — with m=23 buckets, six keys already pass 50% — and lets
+> you push the load factor until linear probing's clusters (Knuth's 1962
+> formula) visibly congeal.
+
 ---
 
 ## 1. The landscape
