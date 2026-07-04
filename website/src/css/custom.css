@@ -255,8 +255,16 @@ body {
   color: var(--taocp-ink-soft);
 }
 .footer .footer__title { color: var(--taocp-accent); }
-.footer .footer__link-item { color: var(--taocp-ink); text-decoration: underline; text-underline-offset: 3px; }
-.footer .footer__link-item:hover { color: var(--taocp-accent); }
+/* Quick links carry the theme accent + underline so they read as links (dark
+   ink alone looked like loose prose — the lone "Module 01" felt lost) and
+   follow the picked cover. */
+.footer .footer__link-item {
+  color: var(--taocp-accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.footer .footer__link-item:hover { color: var(--ifm-link-hover-color); text-decoration-thickness: 2px; }
 .footer .footer__copyright { color: var(--taocp-muted); }
 .markdown blockquote {
   border-left: 3px solid var(--taocp-gold);
@@ -338,9 +346,3 @@ body {
   color: #ffffff;
   background: rgba(198, 166, 100, 0.18);
 }
-
-/* --- Footer quick links: on the quiet parchment band a lone "Module 01" read
-   as loose text. Give the links medium weight and a gold marker on hover so
-   they clearly register as the shortcuts they are. --- */
-.footer .footer__link-item { font-weight: 500; }
-.footer .footer__item { position: relative; }
