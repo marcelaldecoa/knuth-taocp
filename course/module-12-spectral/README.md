@@ -90,7 +90,7 @@ the quality of any run.
 
 ---
 
-## 3. Dual vectors, families of planes, and ν_t
+## 3. Dual vectors, families of planes, and $\nu_t$
 
 Call $u = (u_1, \ldots, u_t) \in \mathbb{Z}^t$ a **dual vector** ($u \ne 0$) if
 
@@ -189,11 +189,11 @@ G4. [Done?]       If |v1| >= |v2|, terminate; v2 is a shortest nonzero
 Hand-trace it on the module's toy generator $a = 137$, $m = 256$ (do this on
 paper — it is the module's Fibonacci-trace moment):
 
-| pass | v1 | v2 | ‖v1‖² | ‖v2‖² | v1·v2 | q | new v1 | new ‖v1‖² |
+| pass | $v_1$ | $v_2$ | $\|v_1\|^2$ | $\|v_2\|^2$ | $v_1\cdot v_2$ | $q$ | new $v_1$ | new $\|v_1\|^2$ |
 |---|---|---|---|---|---|---|---|---|
-| 1 | (256, 0) | (−137, 1) | 65536 | 18770 | −35072 | −2 | (−18, 2) | 328 |
-| 2 | (−137, 1) | (−18, 2) | 18770 | 328 | 2468 | 8 | (7, −15) | 274 |
-| 3 | (−18, 2) | (7, −15) | 328 | 274 | −156 | −1 | (−11, −13) | 290 ≥ 274: **stop** |
+| 1 | $(256, 0)$ | $(-137, 1)$ | 65536 | 18770 | $-35072$ | $-2$ | $(-18, 2)$ | 328 |
+| 2 | $(-137, 1)$ | $(-18, 2)$ | 18770 | 328 | 2468 | 8 | $(7, -15)$ | 274 |
+| 3 | $(-18, 2)$ | $(7, -15)$ | 328 | 274 | $-156$ | $-1$ | $(-11, -13)$ | $290 \ge 274$: **stop** |
 
 Answer: shortest vector $(7, -15)$, so **$\nu_2^2 = 274$**. Sanity: is $(7, -15)$
 dual? The congruence for $(-7, 15)$: $-7 + 137\cdot 15 = 2048 = 8\cdot 256$ ✓ (a lattice
@@ -283,7 +283,7 @@ afford at $t = 3$.
 
 ---
 
-## 6. Figures of merit: how good could ν_t possibly be?
+## 6. Figures of merit: how good could $\nu_t$ possibly be?
 
 Raw $\nu_t$ values are incomparable across moduli — $\nu_3 = 639$ is meaningless
 until you know how large $\nu_3$ *could* be for that $m$. Two normalizations:
@@ -494,30 +494,30 @@ the story — several assume the full Algorithm S.)
 
 | Ex. | Rating | Statement |
 |---|---|---|
-| ▶W1 | M10 | Prove ν_{t+1} ≤ ν_t for every a, m. (Pad a dual vector with a zero.) So generators only get worse as t grows. |
-| W2 | M18 | Write out the translation proof of §1 in full: exhibit the fixed vector w_t for general t and verify P_n(c) = P_n(0) + w_t (mod m per coordinate). |
-| W3 | M22 | Prove the plane-count formula: a dual u with both signs present yields exactly N + P − 1 planes meeting [0, m)^t, assuming each candidate plane contains at least one integer point of the cube. Where is that assumption used? |
-| ▶W4 | M24 | Fill in every inequality of the Gauss–Lagrange optimality proof, and show the reduced basis also achieves the *second* minimum: v_1 is a shortest vector independent of v_2. |
-| W5 | 22 | Instrument Algorithm C: report the final B and total iterations for RANDU, 16807, 48271. Verify the doubling schedule's cost is ≤ 4/3 of the final scan. |
-| ▶W6 | 30 | Extend the certified search to t = 4 (scan (u₂,u₃,u₄), centered u₁; same certification). Estimate the cost from the Hermite bound γ_4 = √2, then measure. Reproduce ν_4 for RANDU. |
-| W7 | M28 | For m = 2^31 − 1, the multiplier 48271 was found by exhaustive spectral search (Fishman–Moore style). Search all a in a range of your choice maximizing min(μ_2, μ_3) and see how close to 48271-quality you get. |
+| ▶W1 | M10 | Prove $\nu_{t+1} \le \nu_t$ for every $a, m$. (Pad a dual vector with a zero.) So generators only get worse as $t$ grows. |
+| W2 | M18 | Write out the translation proof of §1 in full: exhibit the fixed vector $w_t$ for general $t$ and verify $P_n(c) = P_n(0) + w_t$ (mod $m$ per coordinate). |
+| W3 | M22 | Prove the plane-count formula: a dual $u$ with both signs present yields exactly $N + P - 1$ planes meeting $[0, m)^t$, assuming each candidate plane contains at least one integer point of the cube. Where is that assumption used? |
+| ▶W4 | M24 | Fill in every inequality of the Gauss–Lagrange optimality proof, and show the reduced basis also achieves the *second* minimum: $v_1$ is a shortest vector independent of $v_2$. |
+| W5 | 22 | Instrument Algorithm C: report the final $B$ and total iterations for RANDU, 16807, 48271. Verify the doubling schedule's cost is $\le 4/3$ of the final scan. |
+| ▶W6 | 30 | Extend the certified search to $t = 4$ (scan $(u_2,u_3,u_4)$, centered $u_1$; same certification). Estimate the cost from the Hermite bound $\gamma_4 = \sqrt{2}$, then measure. Reproduce $\nu_4$ for RANDU. |
+| W7 | M28 | For $m = 2^{31} - 1$, the multiplier 48271 was found by exhaustive spectral search (Fishman–Moore style). Search all $a$ in a range of your choice maximizing $\min(\mu_2, \mu_3)$ and see how close to 48271-quality you get. |
 
 ## 12. Proof techniques you practiced
 
-- **Reduction to a canonical case** — dropping c by exhibiting the point
+- **Reduction to a canonical case** — dropping $c$ by exhibiting the point
   sets as translates (§1); one line of algebra deleted a parameter from the
   whole theory.
 - **Proof by generators** — the lattice theorem and dual-vector
   annihilation were verified on basis vectors only, and linearity did the
   rest (§2, §3).
-- **Counting by bounding a linear form** — the plane count N + P − 1 came
-  from trapping u·x in an interval and counting multiples of m inside it
+- **Counting by bounding a linear form** — the plane count $N + P - 1$ came
+  from trapping $u\cdot x$ in an interval and counting multiples of $m$ inside it
   (§3); the same move produced Lamé-style bounds in module 01.
 - **Invariant + strictly decreasing integer quantity** — termination of
   Gauss–Lagrange reduction (§4), the course's oldest pattern, here with
   unimodularity as the invariant and the squared norm as the descent.
 - **Optimality via a quadratic-form inequality** — the exchange argument
-  α² − |αβ| + β² ≥ 1 turned "locally reduced" into "globally shortest"
+  $\alpha^2 - |\alpha\beta| + \beta^2 \ge 1$ turned "locally reduced" into "globally shortest"
   (§4), with integrality load-bearing.
 - **Certified enumeration** — a search bound justified *a posteriori* by
   the best value found, plus an a priori Hermite bound to guarantee the
@@ -533,7 +533,7 @@ the story — several assume the full Algorithm S.)
   entry point to **lattice algorithms at large**: LLL, BKZ, and the
   shortest-vector problems underlying post-quantum cryptography — where
   §4's optimality argument reappears as the base case of LLL's analysis.
-- Knuth's **Algorithm S** (t ≤ 8) adds simultaneous primal/dual basis
+- Knuth's **Algorithm S** ($t \le 8$) adds simultaneous primal/dual basis
   updates and ellipsoid enumeration — a finished branch-and-bound built on
   stage 3's certification idea.
 - The statistical companion is §3.3.2's serial test and the empirical

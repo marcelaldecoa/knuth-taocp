@@ -300,7 +300,7 @@ cycles) of a **weighted** graph, find the **cheapest**. The cyclic version is
 the **Traveling Salesman Problem** (TSP), perhaps the most-studied optimization
 problem in existence.
 
-Brute force enumerates all `n!` orders — hopeless past `n ≈ 12`. The
+Brute force enumerates all $n!$ orders — hopeless past $n \approx 12$. The
 **Held–Karp** dynamic program (1962) does far better by a classic move: notice
 that a partial tour's future depends only on *which* vertices remain and *where*
 we currently stand — not on the order in which the visited ones were visited.
@@ -543,11 +543,11 @@ something, and prove it correct.
 
 - **Vol. 4B/4C, §7.2.2.3–7.2.2.4** develop constraint satisfaction and
   Hamiltonian paths in depth, with far stronger pruning than we used here.
-- **Approximation algorithms** (Christofides' 3/2-approximation for metric TSP)
+- **Approximation algorithms** (Christofides' $3/2$-approximation for metric TSP)
   and **local search** (2-opt, Lin–Kernighan) are the practical sequel to
-  Held–Karp when `2^n` is too much.
+  Held–Karp when $2^n$ is too much.
 - **Parameterized complexity** studies exactly *how* exponential these problems
-  must be — Held–Karp's `2^n` is conjectured optimal under the Strong
+  must be — Held–Karp's $2^n$ is conjectured optimal under the Strong
   Exponential Time Hypothesis.
 - **The whole course** now lives in [`docs/toolkit.md`](../../docs/toolkit.md):
   read it, and see how far you've come.

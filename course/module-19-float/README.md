@@ -27,7 +27,7 @@ recovers the bits everyone else throws away.
 > **Companion exhibit — _The Floating-Point Abyss_.** That Patriot missile is
 > not a metaphor here: the Museum's
 > [Catastrophe Simulator](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-2.2-floating-point-abyss.html)
-> lets you set the bits used to store $0.1$ and the hours of uptime, then watch
+> lets you set the bits used to store `0.1` and the hours of uptime, then watch
 > the accumulated chopping error drift the clock until the interceptor misses —
 > and flip _chop_ to _round_ to see the same precision, spent more wisely, save
 > the day. It reproduces the real figures from the 1991 Dhahran failure
@@ -345,12 +345,12 @@ more generally the leading cancellation here is benign), so $(t - s) - y$
 evaluates to the exact difference $(s + y) - t = -(\text{the part of } s+y \text{ that } t \text{ threw away})$. Thus $c$ holds, to first order in $u$, exactly the rounding error of the
 step — and subtracting it next iteration cancels that error. The upshot is a
 total error bound of $O(u) \cdot \sum|x_i|$ **independent of n**, versus $O(nu) \cdot \sum|x_i|$
-for naive. The lab makes this vivid: sum $0.1$ a hundred thousand times and
-Kahan lands on $10000$ to the bit while naive drifts; sum $[10^{16}, 1, 1, \ldots, 1,
--10^{16}]$ and naive returns $0$ (every $1$ was swamped) while Kahan recovers all
+for naive. The lab makes this vivid: sum `0.1` a hundred thousand times and
+Kahan lands on `10000` to the bit while naive drifts; sum $[10^{16}, 1, 1, \ldots, 1,
+-10^{16}]$ and naive returns `0` (every `1` was swamped) while Kahan recovers all
 ten thousand ones.
 
-Kahan does about 4× the flops per element (the lab's benchmark shows the
+Kahan does about $4\times$ the flops per element (the lab's benchmark shows the
 constant factor), which is why it is a *choice* — but when accuracy matters it
 is nearly free next to the alternative of using double the precision.
 
@@ -379,7 +379,7 @@ Implement `new` (raw pack), `zero`, `normalize` (shift the leading 1 to bit 52),
 `from_f64`/`to_f64` (the bias arithmetic of §2), `ulp` (return `2^exp`), and
 `classify`. Keep `from_f64` and `to_f64` exact inverses on the normal range —
 that bit-for-bit round-trip is what lets every later stage cross-check against
-hardware. The $0.1$ test encodes the "not exactly 1/10, but within a ulp" fact
+hardware. The `0.1` test encodes the "not exactly 1/10, but within a ulp" fact
 as an *integer* inequality `|10·frac − 2^{-exp}| < 10`, so no bignums needed.
 
 ### Stage 2 — Addition and subtraction (Algorithm A)
@@ -421,8 +421,8 @@ inputs. This is where representation turns into *numerical analysis*.
    while a naive division might need several? (The exact product fits in 106
    bits; the exact quotient is infinite, so you must generate guard/round/sticky
    yourself.)
-5. In Kahan's loop, what does `c` hold after the `n`-th step, and why does
-   subtracting it next time help? (The low bits lost when `t = fl(s+y)` rounded;
+5. In Kahan's loop, what does $c$ hold after the $n$-th step, and why does
+   subtracting it next time help? (The low bits lost when $t = \mathrm{fl}(s+y)$ rounded;
    feeding them back cancels that step's error to first order.)
 
 ## 11. Exercises from the text
@@ -435,10 +435,10 @@ work in `course/module-19-float/exercises.md`.
 |---|---|---|
 | 4.2.1-1 | 10 | Give the normalized binary form of a few decimal fractions; which are exact? |
 | ▶4.2.1-3 | 20 | Show why the sticky bit (not just guard+round) is needed for correct rounding of addition. |
-| 4.2.1-6 | 22 | When can `x · y` overflow even though `x` and `y` are well inside range? Analyze the exponent sum. |
-| ▶4.2.2-9 | 25 | Prove Sterbenz's lemma: if `y/2 ≤ x ≤ 2y` then `x − y` is computed exactly. |
-| 4.2.2-15 | 28 | Bound the error of naive summation of `n` terms; then Kahan's, showing the `n`-independence. |
-| ▶4.2.2-21 | 30 | Analyze `(a+b)+c` vs `a+(b+c)`: characterize when they differ and by how much. |
+| 4.2.1-6 | 22 | When can $x \cdot y$ overflow even though $x$ and $y$ are well inside range? Analyze the exponent sum. |
+| ▶4.2.2-9 | 25 | Prove Sterbenz's lemma: if $y/2 \le x \le 2y$ then $x - y$ is computed exactly. |
+| 4.2.2-15 | 28 | Bound the error of naive summation of $n$ terms; then Kahan's, showing the $n$-independence. |
+| ▶4.2.2-21 | 30 | Analyze $(a+b)+c$ vs $a+(b+c)$: characterize when they differ and by how much. |
 
 ## Why it's done this way
 
@@ -449,7 +449,7 @@ work in `course/module-19-float/exercises.md`.
 - **A biased exponent** makes the raw bit pattern sort in numeric order, so
   hardware can compare floats with integer instructions.
 - **Round to nearest, *even*** is the unique tie rule that is unbiased (errors
-  cancel, drift is `√n` not `n`) *and* composes without double-rounding — which
+  cancel, drift is $\sqrt{n}$ not $n$) *and* composes without double-rounding — which
   is why it is everyone's default.
 - **Guard/round/sticky** is the minimum state that makes rounding correct after
   a shift or an infinite quotient; carry those three bits and you never need the
@@ -486,18 +486,18 @@ work in `course/module-19-float/exercises.md`.
 ## Proof techniques you practiced
 
 - **Nearest-point + spacing bound** — the fundamental theorem falls out of
-  "adjacent representables are one ulp apart," turned into `|δ| ≤ u/2`.
-- **The `(1+δ)` model** — replace each rounded operation by an exact one times
-  `(1 + δ)`, `|δ| ≤ u/2`, then bound the accumulated product. The backbone of all
+  "adjacent representables are one ulp apart," turned into $|\delta| \le u/2$.
+- **The $(1+\delta)$ model** — replace each rounded operation by an exact one times
+  $(1 + \delta)$, $|\delta| \le u/2$, then bound the accumulated product. The backbone of all
   rounding-error analysis.
 - **Exact error extraction (TwoSum/TwoProduct)** — recover the rounding error
   itself in floating point with no extra precision; used both to *verify* the
   bound and to *build* Kahan summation.
 - **Bias/no-drift argument** — the mean-zero, random-walk reasoning that makes
-  round-to-even's error grow like `√n` instead of `n`.
+  round-to-even's error grow like $\sqrt{n}$ instead of $n$.
 - **Counterexample by construction** — non-associativity proved by exhibiting
-  `1, 2^{-53}, 2^{-53}` and tracing both groupings.
-- **Invariant maintenance** — Kahan's `c` maintains "the bits lost so far,"
+  $1, 2^{-53}, 2^{-53}$ and tracing both groupings.
+- **Invariant maintenance** — Kahan's $c$ maintains "the bits lost so far,"
   proved preserved each iteration (a loop invariant, as in Module 01).
 
 ## 12. Where this leads
@@ -505,7 +505,7 @@ work in `course/module-19-float/exercises.md`.
 - **Interval and higher-precision arithmetic** (double-double, the `TwoSum`/
   `TwoProduct` "error-free transformations") build directly on stage 4 to get
   guaranteed bounds and extra digits from ordinary hardware.
-- **Numerical linear algebra** — the `(1+δ)` model is how you prove Gaussian
+- **Numerical linear algebra** — the $(1+\delta)$ model is how you prove Gaussian
   elimination, QR, and iterative solvers are backward-stable; the conditioning of
   a problem times the stability of an algorithm bounds the error.
 - **The rest of Vol. 2** — §4.2.3 (double precision), §4.2.4 (distribution of

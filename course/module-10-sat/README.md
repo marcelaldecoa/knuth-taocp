@@ -467,4 +467,3 @@ to the field.
 - **Proof complexity.** Haken's theorem is the doorway to a rich theory of *why*
   certain formulas are hard, connecting SAT solving to the deepest questions in
   complexity — ultimately P vs NP.
-</content>

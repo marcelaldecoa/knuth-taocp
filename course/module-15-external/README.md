@@ -60,8 +60,8 @@ Pass 0 (run formation): read the file through memory, write initial runs.
 Merge passes:           combine runs into fewer, longer runs, until one.
 ```
 
-Fewer initial runs ⇒ fewer merge passes. Higher merge order ⇒ fewer merge
-passes. Cleverer scheduling ⇒ cheaper passes. Those are stages 1, 2 and 3.
+Fewer initial runs $\Rightarrow$ fewer merge passes. Higher merge order $\Rightarrow$ fewer merge
+passes. Cleverer scheduling $\Rightarrow$ cheaper passes. Those are stages 1, 2 and 3.
 
 ---
 
@@ -121,9 +121,9 @@ Stage 1 pins this exact example.
 
 Two boundary behaviours worth internalizing (both tested):
 
-- **Already-sorted input ⇒ one run, for any $P$.** Nothing ever arrives
+- **Already-sorted input $\Rightarrow$ one run, for any $P$.** Nothing ever arrives
   smaller than the last output; nothing freezes; the run never ends.
-- **Reverse-sorted input ⇒ runs of length exactly $P$.** Every arrival
+- **Reverse-sorted input $\Rightarrow$ runs of length exactly $P$.** Every arrival
   freezes, so each run is precisely the $P$ records present at its start.
   This is the worst case; $P = 1$ similarly degenerates to the input's
   natural ascending runs (module 06's `count_runs` counts them).
@@ -425,8 +425,8 @@ Answer before moving on (hints in parentheses).
    backward reconstruction *force* Fibonacci for T = 3? (Hint: with one
    input tape, a "merge" copies. Reverse a perfect phase and count what
    returns to each tape.)
-5. Your laptop's SSD does random reads a mere ~100× slower than sequential,
-   not ~100 000× like a tape seek. Which parts of this module survive that
+5. Your laptop's SSD does random reads a mere ~$100\times$ slower than sequential,
+   not ~$100\,000\times$ like a tape seek. Which parts of this module survive that
    change and which soften? (Hint: think per-record cost of a k-way merge
    with $k = 1000$ — memory for input buffers is $k \times \text{buffer size}$; what
    does shrinking the buffer do to I/O granularity?)
