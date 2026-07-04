@@ -30,6 +30,9 @@ jobs:
           cache: npm
           cache-dependency-path: website/package-lock.json
       - run: npm ci
+      # KaTeX renders with throwOnError:false, so a malformed formula ships as
+      # red error text instead of failing the build. Catch those first.
+      - run: npm run check:math
       - run: npm run build
       # Docusaurus link-checks the pages it renders, but not the hand-written
       # museum HTML under static/. This validates the museum's links and assets
