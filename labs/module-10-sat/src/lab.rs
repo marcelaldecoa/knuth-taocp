@@ -74,7 +74,9 @@ impl Cnf {
     /// formula false under every assignment, and the empty formula is true.
     ///
     /// Panics if `assignment.len() < num_vars` (an incomplete assignment has
-    /// no truth value — that is what stage 2's partial assignments are for).
+    /// no truth value — that is what stage 2's partial assignments are for);
+    /// the grader checks the panic message contains "covers" (the assignment
+    /// must cover every variable).
     pub fn evaluate(&self, assignment: &[bool]) -> bool {
         let _ = assignment;
         todo!("evaluate under a complete assignment")
@@ -117,7 +119,9 @@ pub enum Propagation {
 /// `Propagation::Implied(forced)`. Satisfied clauses are skipped; pre-assigned
 /// variables are respected and never overwritten.
 ///
-/// Panics if `assignment.len() != cnf.num_vars`.
+/// Panics if `assignment.len() != cnf.num_vars`; the grader checks the panic
+/// message contains "per variable" (the partial assignment holds one slot
+/// per variable).
 pub fn unit_propagate(cnf: &Cnf, assignment: &mut Vec<Option<bool>>) -> Propagation {
     let _ = (cnf, assignment);
     todo!("run unit propagation to a fixed point")

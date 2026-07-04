@@ -89,7 +89,8 @@ impl Lcg {
 /// is m (for every seed) iff c ⟂ m, a ≡ 1 (mod p) for every prime p | m,
 /// and a ≡ 1 (mod 4) if 4 | m.
 ///
-/// Panic if `m == 0` (this function is for finite small moduli only).
+/// Panic if `m == 0` (this function is for finite small moduli only); the
+/// grader checks the panic message contains the words "finite modulus".
 pub fn period(a: u64, c: u64, m: u64, seed: u64) -> u64 {
     let _ = (a, c, m, seed);
     todo!("direct cycle detection: first repeated state closes the cycle")
@@ -112,7 +113,9 @@ pub fn period(a: u64, c: u64, m: u64, seed: u64) -> u64 {
 /// freedom (k = number of categories).
 ///
 /// Panic if the slices differ in length, are empty, or some expected
-/// count is not positive.
+/// count is not positive. The grader checks the panic messages contain,
+/// respectively, "same number" (length mismatch), "at least one category"
+/// (empty), and "positive" (non-positive expected count).
 pub fn chi_square(observed: &[u64], expected: &[f64]) -> f64 {
     let _ = (observed, expected);
     todo!("V = sum of (observed - expected)^2 / expected")
@@ -121,7 +124,9 @@ pub fn chi_square(observed: &[u64], expected: &[f64]) -> f64 {
 /// Stage 2 — chi-square against the *uniform* hypothesis: with k
 /// categories and n total observations, every category expects n/k.
 ///
-/// Panic if `counts` is empty or sums to zero.
+/// Panic if `counts` is empty or sums to zero; the grader checks the panic
+/// message contains "at least one category" (empty) or "at least one
+/// observation" (zero total).
 pub fn chi_square_uniform(counts: &[u64]) -> f64 {
     let _ = counts;
     todo!("equal expected counts n/k, then delegate to chi_square")
