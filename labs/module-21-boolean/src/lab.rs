@@ -209,7 +209,9 @@ pub fn threshold_at_least(bits: &[bool], k: usize) -> bool {
 }
 
 /// A symmetric function of `n` variables: `weights[j]` is the value when
-/// exactly `j` inputs are true (`weights.len() == n + 1`).
+/// exactly `j` inputs are true (`weights.len() == n + 1`). Panic if `weights`
+/// is not exactly `n + 1` long; the grader checks the panic message contains
+/// "one weight per popcount".
 pub fn symmetric_function(n: u32, weights: &[bool]) -> BoolFunc {
     let _ = (n, weights);
     todo!("value at x = weights[popcount(x)]")

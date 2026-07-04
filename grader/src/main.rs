@@ -211,7 +211,7 @@ fn grade_module(
             }
             println!();
             println!(
-                "    {} course/{}/README.md — stage {} walkthrough",
+                "    {} course/{}/README.md — the stage {} lesson",
                 style.yellow("Read:"),
                 module.dir,
                 n

@@ -151,7 +151,8 @@ pub fn plain_changes(n: u32) -> Vec<Vec<u32>> {
 /// ```
 ///
 /// The main loop of Algorithm T assumes `0 < k < n`; handle the single-visit
-/// edge cases `k = 0` and `k = n` directly. Panic if `k > n`.
+/// edge cases `k = 0` and `k = n` directly. Panic if `k > n`; the grader checks
+/// the panic message contains "k <= n".
 pub fn combinations(n: u32, k: u32) -> Vec<Vec<u32>> {
     let _ = (n, k);
     todo!("implement Algorithm 7.2.1.3T")
