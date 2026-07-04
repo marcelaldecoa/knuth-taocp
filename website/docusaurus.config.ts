@@ -20,7 +20,7 @@ const contentPlugins = {
 const config: Config = {
   title: 'The Art of Computer Programming',
   tagline: "Knuth's essence, implemented — a hands-on course in Rust",
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.svg',
 
   future: {
     v4: true,

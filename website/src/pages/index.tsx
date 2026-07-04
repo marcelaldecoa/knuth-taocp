@@ -12,6 +12,11 @@ export default function Home(): React.ReactElement {
       description="A hands-on course on the essence of Donald Knuth's The Art of Computer Programming — you implement every algorithm yourself in Rust.">
       <header className={styles.hero}>
         <div className="container">
+          <div className={styles.banner}>
+            <hr />
+            <p className={styles.cw}>The classic work · implemented in Rust</p>
+            <hr />
+          </div>
           <p className={styles.eyebrow}>A hands-on course in Rust</p>
           <h1 className={styles.title}>
             The Art of Computer Programming, <em>implemented</em>
@@ -23,14 +28,12 @@ export default function Home(): React.ReactElement {
           </p>
           <div className={styles.buttons}>
             <Link
-              className="button button--lg"
-              style={{background: '#f4efe4', color: 'var(--taocp-oxblood-deep)'}}
+              className="button button--primary button--lg"
               to="/course/module-01-algorithms/">
               Start Module 01 →
             </Link>
             <Link
-              className="button button--outline button--lg"
-              style={{color: '#f4efe4', borderColor: '#f4efe4'}}
+              className="button button--outline button--primary button--lg"
               to="/handbook/for-newcomers">
               New to Knuth?
             </Link>

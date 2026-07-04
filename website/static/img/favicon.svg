@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TAOCP">
+  <rect width="64" height="64" rx="12" fill="#5C1D2A"/>
+  <rect x="6" y="6" width="52" height="52" rx="8" fill="none" stroke="#C6A664" stroke-width="2" opacity="0.65"/>
+  <text x="32" y="47" text-anchor="middle"
+        font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif"
+        font-size="46" font-weight="700" fill="#C6A664">K</text>
+</svg>
