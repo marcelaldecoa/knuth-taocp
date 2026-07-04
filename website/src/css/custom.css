@@ -245,6 +245,29 @@ body {
 .markdown .katex { color: var(--taocp-accent); }
 .markdown .katex-display .katex { color: var(--taocp-ink); }
 
+/* Keyboard keys: Infima's default is a cool light-grey-on-grey (~1.3:1 on our
+   warm parchment — fails WCAG). Restyle as a small ivory keycap with warm ink
+   and a plate-edge bevel: ~14:1, and it matches the book palette. */
+kbd {
+  color: var(--taocp-ink);
+  background: var(--taocp-plate);
+  border: 1px solid var(--taocp-plate-edge);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  box-shadow: none;
+  padding: 0.05em 0.45em;
+  font-size: 0.85em;
+}
+/* The local-search box ships its own "ctrl K" hint chip with a ~1.5:1
+   grey-on-grey (fails WCAG). Its hashed CSS-module class outweighs the bare
+   `kbd` rule above, so target it hash-agnostically and raise it to AA. */
+kbd[class*='searchHint'] {
+  color: var(--taocp-ink-soft);
+  background: var(--taocp-plate);
+  border-color: var(--taocp-plate-edge);
+  box-shadow: none;
+}
+
 /* Footer: a quiet parchment band with a gold foil rule — the museum's calm
    surface, not another plum block. Element selectors beat Infima's footer--dark
    class (which re-sets the footer variables at element scope). Colours are

@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <!--
   THE MUSEUM OF ALGORITHMS
   Wing IV — The Ocean of Possibilities · Exhibit 4.3 — The Boolean Maze
@@ -207,7 +209,7 @@
             </div>
             <div class="panel">
               <div class="phead"><span>Gates — each clause needs one true literal</span><span class="k" id="clK">0 / 0 lit</span></div>
-              <div class="clausewrap"><div class="clausegrid" id="clausegrid"></div></div>
+              <div class="clausewrap" tabindex="0" role="group" aria-label="Clause list (scrollable)"><div class="clausegrid" id="clausegrid"></div></div>
               <div class="exit" id="exit">
                 <div class="track"><div class="fill" id="exitFill"></div></div>
                 <div class="flag" id="exitFlag">⚑ EXIT</div>
@@ -233,7 +235,7 @@
                 <div class="stat"><div class="lbl">Backtracks</div><div class="val" id="statBack" style="color:#e79a8f">0</div></div>
               </div>
               <div class="opline" id="opline">Flip switches to light every gate — or press <b>Solve</b>.</div>
-              <div class="console" id="console"></div>
+              <div class="console" id="console" tabindex="0" role="log" aria-label="Solver trace (scrollable)"></div>
             </div>
           </div>
         </div>
@@ -455,3 +457,4 @@ buildDOM(); manualInit(); render();
 pushLog('CNF: '+clauses.length+' clauses over '+n+' variables — flip switches or Solve','small');
 raf=requestAnimationFrame(loop);
 </script>
+</html>

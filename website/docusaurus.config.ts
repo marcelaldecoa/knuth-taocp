@@ -5,6 +5,27 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rewriteLinks from './src/remark/rewriteLinks.mjs';
 
+// Three oneLight token colours fall below WCAG AA (4.5:1) on the light code
+// background (#fafafa): the variable/operator/function blue, the string/
+// punctuation green, and the comment grey. Darken each one's *lightness* at the
+// theme source — hue/saturation unchanged, so the palette still reads as
+// oneLight — so every code block clears AA with no per-token !important hacks.
+const CODE_CONTRAST_FIXES: Record<string, string> = {
+  'hsl(221, 87%, 60%)': 'hsl(221, 87%, 42%)', // variable / operator / function
+  'hsl(119, 34%, 47%)': 'hsl(119, 34%, 34%)', // string / punctuation / builtin
+  'hsl(230, 4%, 64%)': 'hsl(230, 4%, 42%)', // comment
+  'hsl(35, 99%, 36%)': 'hsl(35, 99%, 30%)', // class-name / number / constant
+};
+function accessibleCodeTheme(theme: typeof prismThemes.oneLight) {
+  return {
+    ...theme,
+    styles: theme.styles.map((entry) => {
+      const fixed = entry.style?.color && CODE_CONTRAST_FIXES[entry.style.color];
+      return fixed ? {...entry, style: {...entry.style, color: fixed}} : entry;
+    }),
+  };
+}
+
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 // Shared Markdown pipeline: rewrite cross-instance/repo links to site routes,
@@ -82,6 +103,25 @@ const config: Config = {
         sidebarPath: './sidebars-handbook.ts',
         editUrl: 'https://github.com/marcelaldecoa/knuth-taocp/edit/main/',
         ...contentPlugins,
+      },
+    ],
+  ],
+
+  // Offline local search — builds a lunr index at build time and serves it from
+  // the site itself; no Algolia, no CDN, no runtime network call (matches the
+  // course's offline ethos). Indexes both docs instances (course + handbook).
+  themes: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        hashed: true,
+        // This site has no docs instance with the default id "default" — the
+        // course preset uses id "course" and the handbook uses "handbook".
+        // Point the search bar at the course instance so version lookup works.
+        docsPluginIdForPreferredVersion: 'course',
+        docsRouteBasePath: ['course', 'handbook'],
+        indexBlog: false,
+        highlightSearchTermsOnTargetPage: true,
       },
     ],
   ],
@@ -176,7 +216,7 @@ const config: Config = {
       copyright: `Course material after Donald E. Knuth's <em>The Art of Computer Programming</em>. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.oneLight,
+      theme: accessibleCodeTheme(prismThemes.oneLight),
       darkTheme: prismThemes.oneDark,
       additionalLanguages: ['rust', 'bash', 'toml'],
     },

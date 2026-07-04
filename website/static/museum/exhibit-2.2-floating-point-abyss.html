@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <!--
   THE MUSEUM OF ALGORITHMS
   Wing II — The Engine of Chance · Exhibit 2.2 — The Floating-Point Abyss
@@ -198,12 +200,12 @@
             <div class="sliders">
               <div class="srow">
                 <div class="slabel"><span>Precision — fraction bits stored for 0.1</span><b id="bitsLbl">23 bits</b></div>
-                <input id="bits" type="range" min="8" max="52" value="23" />
+                <input id="bits" type="range" min="8" max="52" value="23" aria-label="Mantissa bits of precision" />
                 <div class="snote" id="bitsNote"></div>
               </div>
               <div class="srow">
                 <div class="slabel"><span>Uptime — hours running continuously</span><b id="hoursLbl">100 h</b></div>
-                <input id="hours" type="range" min="0" max="120" step="1" value="100" />
+                <input id="hours" type="range" min="0" max="120" step="1" value="100" aria-label="Uptime in hours running continuously" />
                 <div class="snote" id="hoursNote"></div>
               </div>
             </div>
@@ -534,3 +536,4 @@ updateReadout();
 fit();
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
 </script>
+</html>
