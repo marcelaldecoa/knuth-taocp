@@ -40,7 +40,32 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_2.outputs.page_url || steps.deployment_3.outputs.page_url }}
+    # The Pages backend intermittently returns "Deployment failed, try again
+    # later" from its status poll even though the artifact built and uploaded
+    # fine. deploy-pages treats that as terminal, so we re-invoke it up to three
+    # times with a pause between attempts; only a third straight failure fails
+    # the job. (nick-fields/retry can't wrap a `uses:` action, hence this form.)
     steps:
+      # Attempt 1
       - id: deployment
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      # Attempt 2 — only if attempt 1 failed
+      - name: Pause before retry
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 60
+      - id: deployment_2
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      # Attempt 3 (final) — only if attempts 1 and 2 both failed; not
+      # continue-on-error, so its failure is the one that fails the job.
+      - name: Pause before final retry
+        if: steps.deployment.outcome == 'failure' && steps.deployment_2.outcome == 'failure'
+        run: sleep 90
+      - id: deployment_3
+        if: steps.deployment.outcome == 'failure' && steps.deployment_2.outcome == 'failure'
         uses: actions/deploy-pages@v5
