@@ -123,55 +123,94 @@
   --ifm-footer-title-color: var(--taocp-accent);
 }
 
-[data-theme='dark'] {
-  /* Dark = the cloth cover: plum-black ground, cream ink, gold foil unchanged. */
-  --taocp-paper: #17110f;
-  --taocp-plate: #201713;
-  --taocp-plate-edge: #3a2a22;
-  --taocp-ink: #ece2cf;
-  --taocp-ink-soft: #cabfaa;
-  --taocp-muted: #9a8f7d;
-
-  /* Volume inks lightened for the cloth-dark ground so shelf keys stay legible. */
-  --v1: #64a6b6;  /* petrol */
-  --v2: #d46ba4;  /* magenta */
-  --v3: #d98a4a;  /* amber */
-  --v4: #57a98d;  /* green */
-  --v4c: #6fb7b2; /* teal */
-  --taocp-code-tint: rgba(217, 138, 151, 0.13); /* faint pink wash on the cloth-dark ground */
-
-  --ifm-color-primary: #d98a97;
-  --ifm-color-primary-dark: #cf7382;
-  --ifm-color-primary-darker: #c8656f;
-  --ifm-color-primary-darkest: #b84557;
-  --ifm-color-primary-light: #e3a1ab;
-  --ifm-color-primary-lighter: #e8afb7;
-  --ifm-color-primary-lightest: #f0c9cf;
-
-  --ifm-background-color: #17110f;
-  --ifm-background-surface-color: #201713;
-  --ifm-font-color-base: #ece2cf;
-  --ifm-heading-color: #f3ead7;
-  --ifm-link-color: #e0a0a9;
-  --ifm-link-hover-color: #ecc0c6;
-  --ifm-code-background: #2a1e18;
-  --docusaurus-highlighted-code-line-bg: rgba(217, 138, 151, 0.15);
-
-  --ifm-navbar-background-color: #2a0f16;
-  --ifm-toc-border-color: #3a2a22;
-
-  /* Lighten the label/eyebrow accent so it reads on the cloth-dark ground. */
-  --taocp-accent: #d98a97;
-  --ifm-footer-background-color: #2a0f16;
+/* ============================================================================
+   COVER-ACCENT THEMES
+   There is no light/dark split. Every theme shares the parchment paper and dark
+   ink (so body text, display equations, and code listings stay crisp and AA-
+   legible), and only recolours the BRAND ACCENT — eyebrows, foil rules, links,
+   buttons, the navbar cloth, and the inline math / inline code highlight — to
+   one of the TAOCP volume covers. The default (no attribute) is the boxed-set
+   oxblood defined in :root above. Each block below keys `data-taocp-theme` to a
+   volume, using the text-safe volume inks (--v1..--v4c). The picker lives in the
+   navbar (swizzled src/theme/ColorModeToggle). Because the highlight colour is
+   just --taocp-accent, math/formula/syntax standout is preserved in every theme,
+   simply retinted to the chosen cover.
+   ============================================================================ */
+:root[data-taocp-theme='v1'] {              /* Vol. 1 · petrol */
+  --taocp-accent: var(--v1);
+  --ifm-link-color: var(--v1);
+  --ifm-link-hover-color: #09232b;
+  --ifm-color-primary: #0F3642;
+  --ifm-color-primary-dark: #0d2f3a;
+  --ifm-color-primary-darker: #0b2a34;
+  --ifm-color-primary-darkest: #09232b;
+  --ifm-color-primary-light: #143f4d;
+  --ifm-color-primary-lighter: #164757;
+  --ifm-color-primary-lightest: #1c576a;
+  --ifm-navbar-background-color: #0a2028;
+  --taocp-code-tint: rgba(15, 54, 66, 0.07);
+}
+:root[data-taocp-theme='v2'] {              /* Vol. 2 · magenta */
+  --taocp-accent: var(--v2);
+  --ifm-link-color: var(--v2);
+  --ifm-link-hover-color: #560234;
+  --ifm-color-primary: #7C024C;
+  --ifm-color-primary-dark: #6f0244;
+  --ifm-color-primary-darker: #66023e;
+  --ifm-color-primary-darkest: #560234;
+  --ifm-color-primary-light: #8a0355;
+  --ifm-color-primary-lighter: #99035e;
+  --ifm-color-primary-lightest: #b30470;
+  --ifm-navbar-background-color: #3f0126;
+  --taocp-code-tint: rgba(124, 2, 76, 0.07);
+}
+:root[data-taocp-theme='v3'] {              /* Vol. 3 · amber */
+  --taocp-accent: var(--v3);
+  --ifm-link-color: var(--v3);
+  --ifm-link-hover-color: #703305;
+  --ifm-color-primary: #A34A08;
+  --ifm-color-primary-dark: #954307;
+  --ifm-color-primary-darker: #883d06;
+  --ifm-color-primary-darkest: #703305;
+  --ifm-color-primary-light: #b45209;
+  --ifm-color-primary-lighter: #c25a0a;
+  --ifm-color-primary-lightest: #d9640b;
+  --ifm-navbar-background-color: #4a2104;
+  --taocp-code-tint: rgba(163, 74, 8, 0.07);
+}
+:root[data-taocp-theme='v4'] {              /* Vol. 4 · green */
+  --taocp-accent: var(--v4);
+  --ifm-link-color: var(--v4);
+  --ifm-link-hover-color: #004334;
+  --ifm-color-primary: #00634E;
+  --ifm-color-primary-dark: #005a47;
+  --ifm-color-primary-darker: #005141;
+  --ifm-color-primary-darkest: #004334;
+  --ifm-color-primary-light: #007058;
+  --ifm-color-primary-lighter: #007d62;
+  --ifm-color-primary-lightest: #009476;
+  --ifm-navbar-background-color: #003a2d;
+  --taocp-code-tint: rgba(0, 99, 78, 0.07);
+}
+:root[data-taocp-theme='v4c'] {             /* Vol. 4C · teal */
+  --taocp-accent: var(--v4c);
+  --ifm-link-color: var(--v4c);
+  --ifm-link-hover-color: #193f3c;
+  --ifm-color-primary: #245C58;
+  --ifm-color-primary-dark: #21534f;
+  --ifm-color-primary-darker: #1e4b47;
+  --ifm-color-primary-darkest: #193f3c;
+  --ifm-color-primary-light: #276661;
+  --ifm-color-primary-lighter: #2b706b;
+  --ifm-color-primary-lightest: #33847e;
+  --ifm-navbar-background-color: #163734;
+  --taocp-code-tint: rgba(36, 92, 88, 0.07);
 }
 
 /* --- parchment grain: a faint monochrome noise over the paper ground --- */
 body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   background-repeat: repeat;
-}
-[data-theme='dark'] body {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
 /* --- book-like touches: strong horizontal blocking, gold foil rules --- */
@@ -206,18 +245,6 @@ body {
 .markdown .katex { color: var(--taocp-accent); }
 .markdown .katex-display .katex { color: var(--taocp-ink); }
 
-/* --- Dark-mode contrast fixes ---
-   In dark mode the primary colour is a light pink, so Infima's white button
-   text drops to ~1.6:1. Put dark ink on filled/hovered primary buttons. */
-[data-theme='dark'] .button--primary,
-[data-theme='dark'] .button--primary:hover,
-[data-theme='dark'] .button--primary:active,
-[data-theme='dark'] .button--outline.button--primary:hover {
-  color: #1a1310;
-}
-/* Keep the primary link colour a touch stronger against the cloth ground. */
-[data-theme='dark'] { --ifm-link-color: #e6adb4; }
-
 /* Footer: a quiet parchment band with a gold foil rule — the museum's calm
    surface, not another plum block. Element selectors beat Infima's footer--dark
    class (which re-sets the footer variables at element scope). Colours are
@@ -251,3 +278,69 @@ body {
 .navbar__brand:hover .navbar__title {
   color: #ffffff;
 }
+
+/* --- Top navbar shortcuts: mark the current section and give a clear hover.
+   The plum ground means colour alone is a weak signal, so the active item
+   gets a gold-foil underline (the brand's rule device) plus brighter ink. --- */
+.navbar__link {
+  position: relative;
+  letter-spacing: 0.03em;
+  padding-bottom: 3px;
+}
+.navbar__link:hover,
+.navbar__link--active {
+  color: #ffffff;
+}
+.navbar__link--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--taocp-gold);
+  border-radius: 1px;
+}
+.navbar__link:hover::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(198, 166, 100, 0.55);
+  border-radius: 1px;
+}
+
+/* --- Mobile hamburger: the toggle renders an SVG in `currentColor`; with no
+   colour set it inherits near-black and disappears against the plum navbar.
+   Pin it to the same cream as the nav links. --- */
+.navbar__toggle {
+  color: #f2ecdc;
+}
+
+/* --- Mobile slide-out sidebar: carry the cloth-plum identity inside it so the
+   gold spine title, the links, and the close button all stay legible. The
+   default surface is parchment, on which the gold title and dark SVGs vanish. */
+.navbar-sidebar {
+  background-color: var(--ifm-navbar-background-color);
+  color: #f2ecdc;
+}
+.navbar-sidebar .navbar__title { color: var(--taocp-gold); }
+.navbar-sidebar .navbar__brand:hover .navbar__title { color: #ffffff; }
+.navbar-sidebar .clean-btn { color: #f2ecdc; }
+.navbar-sidebar .menu__link,
+.navbar-sidebar .navbar-sidebar__back {
+  color: #f2ecdc;
+}
+.navbar-sidebar .menu__link:hover,
+.navbar-sidebar .menu__link--active {
+  color: #ffffff;
+  background: rgba(198, 166, 100, 0.18);
+}
+
+/* --- Footer quick links: on the quiet parchment band a lone "Module 01" read
+   as loose text. Give the links medium weight and a gold marker on hover so
+   they clearly register as the shortcuts they are. --- */
+.footer .footer__link-item { font-weight: 500; }
+.footer .footer__item { position: relative; }
