@@ -86,6 +86,10 @@ const config: Config = {
     ],
   ],
 
+  // Apply the saved cover-accent theme before React hydrates, so the accent
+  // never flashes from the oxblood default to the chosen volume on load.
+  clientModules: ['./src/clientModules/themeInit.ts'],
+
   // Self-hosted KaTeX stylesheet (no CDN — the course never touches the network).
   stylesheets: [
     {
@@ -96,8 +100,15 @@ const config: Config = {
 
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
+    // No light/dark split: every theme is a parchment-based "cover accent".
+    // The classic light/dark toggle slot is repurposed (swizzled
+    // src/theme/ColorModeToggle) into a TAOCP volume-cover palette picker, so
+    // disableSwitch stays false to keep that navbar slot rendering. The page is
+    // pinned to light and never follows the OS dark preference.
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'light',
+      disableSwitch: false,
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: 'TAOCP',

@@ -1,0 +1,81 @@
+/* Cover-accent picker — sits in the navbar where the light/dark toggle was. */
+.picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid rgba(198, 166, 100, 0.55); /* gold hairline ring */
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.trigger:hover {
+  border-color: var(--taocp-gold);
+  box-shadow: 0 0 0 2px rgba(198, 166, 100, 0.25);
+}
+
+/* the little cover-colour chip */
+.dot {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  flex: 0 0 auto;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 200;
+  min-width: 12.5rem;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  background: var(--taocp-plate);
+  border: 1px solid var(--taocp-plate-edge);
+  border-top: 2px solid var(--taocp-gold); /* foil rule, like the footer/hero */
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(31, 27, 22, 0.22);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--taocp-ink);
+  font-family: var(--taocp-serif);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+.item:hover {
+  background: rgba(198, 166, 100, 0.16);
+}
+.item[aria-checked='true'] {
+  font-weight: 600;
+}
+
+.label {
+  flex: 1 1 auto;
+  white-space: nowrap;
+}
+.check {
+  color: var(--taocp-accent);
+  font-weight: 700;
+}
