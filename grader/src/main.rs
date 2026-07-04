@@ -6,6 +6,7 @@
 //! ./grade                 show course progress
 //! ./grade 6               grade module 06, stage by stage (stops at first failure)
 //! ./grade 6 --stage 3     grade a single stage of module 06
+//! ./grade watch 6         re-grade module 06 on every save to its lab.rs
 //! ./grade all             grade every module in order
 //! ./grade verify          course self-check: lab tests against reference solutions
 //! ./grade reset           forget recorded progress
@@ -906,6 +907,57 @@ fn bench(root: &PathBuf, style: &Style, module: &Module) -> ExitCode {
     }
 }
 
+/// `./grade watch <module> [-s <stage>]` — re-grade a module every time its
+/// `lab.rs` is saved. Std-only: polls the file's modified-time (no external
+/// crates, no OS-specific inotify). Runs until interrupted with Ctrl-C, so it
+/// never returns.
+fn watch(
+    root: &PathBuf,
+    style: &Style,
+    module: &Module,
+    only_stage: Option<usize>,
+    solutions: bool,
+    verbose: bool,
+) -> ExitCode {
+    use std::time::{Duration, SystemTime};
+
+    let lab = root.join("labs").join(module.dir).join("src").join("lab.rs");
+    let mtime = |p: &Path| -> Option<SystemTime> { fs::metadata(p).and_then(|m| m.modified()).ok() };
+
+    println!(
+        "{} module {} — re-grading on every save to {}",
+        style.bold("watch:"),
+        module.id,
+        style.dim(&format!("labs/{}/src/lab.rs", module.dir)),
+    );
+    println!("{}", style.dim("  edit, save, watch it re-run — Ctrl-C to stop."));
+
+    let mut last = mtime(&lab);
+    loop {
+        println!();
+        println!("{}", style.dim(&"─".repeat(60)));
+        let mut progress = load_progress(root);
+        let (passed, total) =
+            grade_module(root, style, module, only_stage, solutions, verbose, &mut progress);
+        let graded = if only_stage.is_some() { 1 } else { total };
+        println!();
+        if passed >= graded {
+            report_module_pass(root, style, module, only_stage.is_some());
+        }
+        println!("{}", style.dim("  watching for changes…"));
+
+        // Block until lab.rs changes on disk (or Ctrl-C ends the process).
+        loop {
+            std::thread::sleep(Duration::from_millis(400));
+            let now = mtime(&lab);
+            if now != last {
+                last = now;
+                break;
+            }
+        }
+    }
+}
+
 fn main() -> ExitCode {
     let root = repo_root();
     let style = Style::new();
@@ -996,6 +1048,13 @@ fn main() -> ExitCode {
             Some(m) => bench(&root, &style, m),
             None => {
                 eprintln!("usage: ./grade bench <module>   e.g. ./grade bench 6");
+                ExitCode::FAILURE
+            }
+        },
+        Some("watch") => match positional.get(1).and_then(|q| find_module(q)) {
+            Some(m) => watch(&root, &style, m, only_stage, solutions, verbose),
+            None => {
+                eprintln!("usage: ./grade watch <module> [-s <stage>]   e.g. ./grade watch 6");
                 ExitCode::FAILURE
             }
         },
@@ -1150,6 +1209,7 @@ USAGE:
     ./grade                    show progress across all modules
     ./grade <module>           grade a module stage by stage (e.g. ./grade 3)
     ./grade <module> -s <n>    grade a single stage
+    ./grade watch <module>     re-grade a module every time you save its lab.rs
     ./grade next               jump to the module with your next unsolved stage
     ./grade all                grade every module
     ./grade verify             self-check: run all lab tests against the
@@ -1170,6 +1230,7 @@ EXAMPLES:
     ./grade 6                  start Module 06 (sorting)
     ./grade 6 -s 3 --hint      stuck on stage 3? get a nudge
     ./grade 6 -s 3 --hint 2    the next, more specific hint
+    ./grade watch 6            re-grade on every save while you work
     ./grade bench 6            watch the sorts' growth curves
 "
     );
