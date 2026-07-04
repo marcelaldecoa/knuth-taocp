@@ -31,9 +31,14 @@ jobs:
           cache-dependency-path: website/package-lock.json
       - run: npm ci
       # KaTeX renders with throwOnError:false, so a malformed formula ships as
-      # red error text instead of failing the build. Catch those first.
+      # red error text instead of failing the build. Fast pre-build lint of
+      # every $…$ expression; catches most problems before the slower build.
       - run: npm run check:math
       - run: npm run build
+      # Authoritative KaTeX gate: grep the *built* pages for render errors that
+      # the pre-build lint can miss (e.g. a display block whose $$ is glued to
+      # content or indented in a list, which remark-math splits).
+      - run: npm run check:built-math
       # Docusaurus link-checks the pages it renders, but not the hand-written
       # museum HTML under static/. This validates the museum's links and assets
       # (and the course↔museum wiring) against the built tree before we deploy.

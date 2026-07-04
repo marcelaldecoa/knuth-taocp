@@ -239,10 +239,12 @@ $$C_N = (N + 1) + \frac{2}{N} \sum_{k=0}^{N-1} C_k.$$
 Multiply by $N$, write the same relation for $N-1$, and subtract to kill the
 sum:
 
-$$\begin{aligned}
+$$
+\begin{aligned}
 N C_N - (N-1) C_{N-1} &= N(N+1) - (N-1)N + 2 C_{N-1} \\
 N C_N &= (N+1) C_{N-1} + 2N.
-\end{aligned}$$
+\end{aligned}
+$$
 
 Divide by $N(N+1)$:
 

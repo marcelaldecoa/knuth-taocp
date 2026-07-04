@@ -166,7 +166,7 @@ T5. [Insert.]     Allocate Q; KEY(Q) <- K, LLINK(Q) <- RLINK(Q) <- Λ; hang Q
 
 Inserting `503, 87, 512, 61, 908, 170, ...` builds a tree whose inorder is the
 sorted list, no matter what order the keys arrive. We store nodes in an
-**index-based arena** (a `Vec<Node>` with `usize` links, `usize::MAX` = Λ),
+**index-based arena** (a `Vec<Node>` with `usize` links, `usize::MAX` = $\Lambda$),
 which is both faithful to Knuth's MIX link fields and idiomatic Rust — no
 `Rc<RefCell<...>>` needed.
 

@@ -217,11 +217,13 @@ take any nonzero lattice vector $w = \alpha\cdot v_1 + \beta\cdot v_2$ ($\alpha,
 - If $\alpha = 0$: $\|w\| = |\beta|\cdot\|v_2\| \ge \|v_2\|$.
 - Otherwise,
 
-  $$\begin{aligned}
+  $$
+  \begin{aligned}
   \|w\|^2 &= \alpha^2\|v_1\|^2 + 2\alpha\beta(v_1\cdot v_2) + \beta^2\|v_2\|^2 \\
           &\ge \alpha^2\|v_2\|^2 - 2|\alpha||\beta|\cdot(\|v_2\|^2/2) + \beta^2\|v_2\|^2 \\
           &= (\alpha^2 - |\alpha||\beta| + \beta^2)\cdot\|v_2\|^2 \ge \|v_2\|^2,
-  \end{aligned}$$
+  \end{aligned}
+  $$
 
 because $\alpha^2 - |\alpha||\beta| + \beta^2 = ((|\alpha| - |\beta|)^2 + \alpha^2 + \beta^2)/2 \ge 1$ for nonzero
 integers. So $v_2$ is genuinely shortest. ∎ Note where integrality did the
@@ -291,10 +293,12 @@ until you know how large $\nu_3$ *could* be for that $m$. Two normalizations:
 **Hermite's constants.** For any rank-$t$ lattice of determinant $d$, the
 shortest nonzero vector satisfies $\lambda_1^2 \le \gamma_t\cdot d^{2/t}$, where
 
-$$\begin{aligned}
+$$
+\begin{aligned}
 \gamma_2 &= 2/\sqrt{3} \approx 1.1547 \quad\text{(hexagonal lattice, Lagrange/Gauss),} \\
 \gamma_3 &= 2^{1/3} \approx 1.2599 \quad\text{(face-centered cubic packing, Gauss).}
-\end{aligned}$$
+\end{aligned}
+$$
 
 Our dual lattice $L^* = \{u : \sum u_i a^{i-1} \equiv 0 \pmod{m}\}$ has index $m$ in $\mathbb{Z}^t$
 (one congruence mod $m$), hence determinant $m$. Therefore

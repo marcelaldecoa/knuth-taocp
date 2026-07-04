@@ -189,15 +189,15 @@ level 3 then runs C0, C1, C2, C3, C4 in turn and crashes into C5:
 
 | t | literal | level | reason |
 |---|---------|-------|--------|
-| 0 | ¬x7 | 1 | (decision) |
-| 1 | ¬x8 | 2 | (decision) |
-| 2 | x1  | 3 | (decision) |
-| 3 | x2  | 3 | C0 |
-| 4 | x3  | 3 | C1 |
-| 5 | x4  | 3 | C2 |
-| 6 | x5  | 3 | C3 |
-| 7 | x6  | 3 | C4 |
-|   | Λ   |   | C5 all false — conflict |
+| 0 | $\lnot x_7$ | 1 | (decision) |
+| 1 | $\lnot x_8$ | 2 | (decision) |
+| 2 | $x_1$ | 3 | (decision) |
+| 3 | $x_2$ | 3 | C0 |
+| 4 | $x_3$ | 3 | C1 |
+| 5 | $x_4$ | 3 | C2 |
+| 6 | $x_5$ | 3 | C3 |
+| 7 | $x_6$ | 3 | C4 |
+|   | $\Lambda$ | | C5 all false — conflict |
 
 The implication graph (`@d` = assigned at level $d$; $x_1$, $\lnot x_7$, $\lnot x_8$ are the
 decisions):
