@@ -50,8 +50,12 @@ $a \cdot b \cdots = n!$.
 They agree for $n \le 4$ but **diverge from $n = 5$ on** ($B(5) = 8 > 7$), so the
 identity is *false*. What is always true is $B(n) \ge \lceil \lg n! \rceil$:
 since $\lceil \lg(ab) \rceil \le \lceil \lg a \rceil + \lceil \lg b \rceil$,
-$$\lceil \lg n! \rceil = \Big\lceil \lg \textstyle\prod_{k=1}^n k \Big\rceil
-\le \sum_{k=1}^{n} \lceil \lg k \rceil = B(n).$$
+
+$$
+\lceil \lg n! \rceil = \Big\lceil \lg \textstyle\prod_{k=1}^n k \Big\rceil
+\le \sum_{k=1}^{n} \lceil \lg k \rceil = B(n).
+$$
+
 So binary insertion is *never below* the lower bound and matches it only when no
 comparison is "wasted." A comparison is wasted exactly when it searches a range
 whose size is not one less than a power of two — this is the very inefficiency
@@ -63,7 +67,11 @@ you can check against the table.)
 
 **Problem.** Algorithm M (Ford–Johnson merge insertion) sorts $n$ elements. Show
 that its worst-case comparison count is
-$$F(n) = \sum_{k=1}^{n} \left\lceil \lg \tfrac{3k}{4} \right\rceil,$$
+
+$$
+F(n) = \sum_{k=1}^{n} \left\lceil \lg \tfrac{3k}{4} \right\rceil,
+$$
+
 equivalently $F(n) = F(n-1) + \lceil \lg(3n/4) \rceil$ with $F(1) = 0$.
 
 **Hint.** Track one increment. When the algorithm has already placed the first
@@ -161,7 +169,11 @@ applying this comparator by comparator, running the network on
 $f(x) = (f(x_1),\dots,f(x_n))$ yields $f(y)$, where $y$ is the network's output
 on $x$. Now suppose the network fails on some $x$, so its output $y$ has an
 inversion $y_k > y_{k+1}$. Take the threshold function
-$$f(v) = \begin{cases} 0 & v < y_k,\\ 1 & v \ge y_k, \end{cases}$$
+
+$$
+f(v) = \begin{cases} 0 & v < y_k,\\ 1 & v \ge y_k, \end{cases}
+$$
+
 which is nondecreasing. Then the network on the 0-1 input $f(x)$ outputs $f(y)$,
 which has $f(y_k) = 1$ immediately before $f(y_{k+1}) = 0$ — unsorted. So $f(x)$
 is a 0-1 input the network fails to sort, contradicting the hypothesis. Hence the
@@ -239,7 +251,11 @@ lesson asks about $S(n)$: is the cheap bound the truth?
 **Answer sketch.** The counting bound $\lceil \lg n! \rceil$ gives $0,1,3,5,7,10,
 13,16,19,22$ for $n = 1,\dots,10$, but the **true minima** — established by
 decades of construction and, for $n = 9, 10$, exhaustive computer search — are
-$$\hat S(n) = 0,\,1,\,3,\,5,\,9,\,12,\,16,\,19,\,25,\,29 \quad (n = 1,\dots,10).$$
+
+$$
+\hat S(n) = 0,\,1,\,3,\,5,\,9,\,12,\,16,\,19,\,25,\,29 \quad (n = 1,\dots,10).
+$$
+
 So the bound is **tight only for $n \le 4$** and grows loose afterward (gaps
 $0,0,0,0,2,2,3,3,6,7$) — the very same "cheap bound vs. hard truth" phenomenon
 the lesson highlights for $S(n)$ at $n = 12$. Batcher's odd–even network hits the

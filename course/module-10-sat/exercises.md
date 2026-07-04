@@ -93,8 +93,12 @@ to the exhaustive check your solver performs — `solve(&waerden_cnf(3,3,9))`
 returns `None`.
 
 **Answer sketch.** *(a) Witness.* The colouring
-$$\begin{array}{c|cccccccc} i & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ \hline
-\text{colour} & R & R & B & B & R & R & B & B \end{array}$$
+
+$$
+\begin{array}{c|cccccccc} i & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ \hline
+\text{colour} & R & R & B & B & R & R & B & B \end{array}
+$$
+
 (RRBBRRBB) has *no* monochromatic 3-AP. There are exactly twelve 3-APs inside
 $1..8$; listing their colour triples:
 $(1,2,3){=}RRB$, $(2,3,4){=}RBB$, $(3,4,5){=}BBR$, $(4,5,6){=}BRR$,
@@ -125,7 +129,11 @@ counter, introduce one "carry" variable $s_i$ per position (bar the last) and
 write the three implications that propagate a used slot forward.
 
 **Answer sketch.** *Pairwise.* One clause per unordered pair, so exactly
-$$\binom{n}{2} = \frac{n(n-1)}{2} = O(n^2)$$
+
+$$
+\binom{n}{2} = \frac{n(n-1)}{2} = O(n^2)
+$$
+
 clauses and **zero** auxiliary variables. E.g. $n=3 \to 3$, $n=4 \to 6$,
 $n=5 \to 10$, and $n = 1000 \to \binom{1000}{2} = 499{,}500$ clauses — the
 $\approx 500{,}000$ figure the README cites for one Sudoku row.

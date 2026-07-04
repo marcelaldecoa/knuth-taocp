@@ -107,11 +107,15 @@ Evaluate both bounds for $m = 8$, $n = 10\,000$.
 **Answer sketch.** In a completely full tree of height $h$, level $j$ has
 $m^{j-1}$ nodes ($1, m, m^2, \ldots$), each carrying $m - 1$ keys, so
 
-$$n \le (m-1)\big(1 + m + \cdots + m^{h-1}\big) = (m-1)\cdot\frac{m^h - 1}{m - 1} = m^h - 1.$$
+$$
+n \le (m-1)\big(1 + m + \cdots + m^{h-1}\big) = (m-1)\cdot\frac{m^h - 1}{m - 1} = m^h - 1.
+$$
 
 Hence $n + 1 \le m^h$, i.e. $h \ge \log_m(n+1)$. Together with Theorem B,
 
-$$\log_m(n+1) \ \le\ h \ \le\ 1 + \log_t\!\Big(\tfrac{n+1}{2}\Big).$$
+$$
+\log_m(n+1) \ \le\ h \ \le\ 1 + \log_t\!\Big(\tfrac{n+1}{2}\Big).
+$$
 
 The upper bound is attained by the minimal tree Knuth's proof exhibits (root with
 $1$ key and $2$ children, every deeper node with exactly $t$ children); the lower
@@ -143,7 +147,9 @@ span. Two of them are promoted upward as the pair of new separators, leaving
 $2m - 2$ keys to distribute over three new nodes — at least $\lfloor (2m-2)/3
 \rfloor$ per node. Dividing by the capacity $m - 1$,
 
-$$\frac{(2m-2)/3}{m-1} = \frac{2}{3},$$
+$$
+\frac{(2m-2)/3}{m-1} = \frac{2}{3},
+$$
 
 so occupancy approaches $2/3$ as $m$ grows (finite $m$ gives values like
 $169/255 \approx 0.66$ at $m = 256$), against the ordinary split's guarantee of
@@ -270,7 +276,9 @@ branching ceases near depth $\lg n$: a random trie is about as shallow as a
 perfectly balanced BST, with no balancing code at all. The **exact** average depth
 of a random binary trie has the form
 
-$$\lg n + \frac{\gamma}{\ln 2} + \tfrac12 + P(\lg n),$$
+$$
+\lg n + \frac{\gamma}{\ln 2} + \tfrac12 + P(\lg n),
+$$
 
 whose constant is $\approx 1.33$ and whose $P$ is a periodic fluctuation of
 minuscule amplitude ($\sim 10^{-6}$) — matching the lesson's "$\lg n + 1.33\ldots$

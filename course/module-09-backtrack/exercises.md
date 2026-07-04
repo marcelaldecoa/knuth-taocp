@@ -82,11 +82,19 @@ tree's shape.
 ### 3. Prove `cover`/`uncover` are exact inverses (rating 26 · cf. 7.2.2.1–8)
 
 **Problem.** In dancing links, removing a node $x$ from its doubly linked list is
-$$\text{right}[\text{left}[x]] \leftarrow \text{right}[x], \qquad
-\text{left}[\text{right}[x]] \leftarrow \text{left}[x],$$
+
+$$
+\text{right}[\text{left}[x]] \leftarrow \text{right}[x], \qquad
+\text{left}[\text{right}[x]] \leftarrow \text{left}[x],
+$$
+
 and restoring it is
-$$\text{right}[\text{left}[x]] \leftarrow x, \qquad
-\text{left}[\text{right}[x]] \leftarrow x.$$
+
+$$
+\text{right}[\text{left}[x]] \leftarrow x, \qquad
+\text{left}[\text{right}[x]] \leftarrow x.
+$$
+
 `cover(c)` removes column header $c$ and, for every row using $c$, removes that
 row's other nodes; `uncover(c)` reverses this, walking rows and nodes in the
 **opposite order**. Prove that `cover(c)` immediately followed by `uncover(c)`
@@ -167,8 +175,12 @@ without traversing it: take a single **random** walk from the root; at each node
 count its children $c$, pick one child uniformly, and accumulate. Formally, if
 $c_0, c_1, c_2, \dots$ are the child-counts along the random path (with a uniform
 choice at each step), the estimator is
-$$\hat{C} = 1 + c_0 + c_0 c_1 + c_0 c_1 c_2 + \cdots
-= 1 + \sum_{d \ge 1} \prod_{i=0}^{d-1} c_i.$$
+
+$$
+\hat{C} = 1 + c_0 + c_0 c_1 + c_0 c_1 c_2 + \cdots
+= 1 + \sum_{d \ge 1} \prod_{i=0}^{d-1} c_i.
+$$
+
 Prove that $\mathbb{E}[\hat{C}]$ equals the exact number of nodes in the tree,
 and confirm it empirically against the true $n$-queens tree sizes for $n \le 12$.
 
@@ -183,11 +195,19 @@ $d$ is $w(v) = \prod_{i=0}^{d-1} c_i$ (the product of branching factors of $v$'s
 ancestors; for the root $d = 0$ the empty product is $1$). The walk reaches a
 specific node $v$ iff it makes the correct uniform choice at each of $v$'s $d$
 ancestors, so
-$$\Pr[\text{reach } v] = \prod_{i=0}^{d-1} \frac{1}{c_i}
-= \frac{1}{w(v)}.$$
+
+$$
+\Pr[\text{reach } v] = \prod_{i=0}^{d-1} \frac{1}{c_i}
+= \frac{1}{w(v)}.
+$$
+
 By linearity of expectation,
-$$\mathbb{E}[\hat{C}] = \sum_v \Pr[\text{reach } v]\cdot w(v)
-= \sum_v \frac{1}{w(v)}\cdot w(v) = \sum_v 1 = (\text{number of nodes}).$$
+
+$$
+\mathbb{E}[\hat{C}] = \sum_v \Pr[\text{reach } v]\cdot w(v)
+= \sum_v \frac{1}{w(v)}\cdot w(v) = \sum_v 1 = (\text{number of nodes}).
+$$
+
 So $\hat{C}$ is an *unbiased* estimator of the tree size — each node contributes
 expected value exactly $1$, regardless of the tree's shape. (Its *variance* can be
 large for very irregular trees, which is why one averages several probes.)

@@ -47,7 +47,11 @@ $(UV^\top)^\top = V U^\top$ and $(mI)^\top = mI$). Compare with the adjugate law
 $V \operatorname{adj}(V) = (\det V)\, I = \pm m I$. Both say "$V$ times something
 $= (\text{scalar})\,I$"; since $V$ is invertible, that something is unique:
 $V^{-1} = U^\top/m = \operatorname{adj}(V)/\det V$, hence
-$$\operatorname{adj}(V) = \frac{\det V}{m} U^\top = \pm U^\top,$$
+
+$$
+\operatorname{adj}(V) = \frac{\det V}{m} U^\top = \pm U^\top,
+$$
+
 the sign being $\det V / m = \pm 1$. So the cofactor column $g_i$ (column $i$ of
 $\operatorname{adj}(V)$) equals $\pm$(row $i$ of $U$). E2's box edges
 $z_i = \lfloor \sqrt{\operatorname{best}\cdot |g_i|^2 / (\det V)^2} \rfloor$ therefore use
@@ -62,7 +66,11 @@ integer matrix $U$ all along. $\blacksquare$
 $z_i = \lfloor \sqrt{\lfloor N/D \rfloor} \rfloor$ with $N = \operatorname{best}\cdot|g_i|^2$ and
 $D = (\det V)^2$, rather than $\lfloor \sqrt{N/D} \rfloor$. Prove these are equal:
 for positive integers $N, D$ and an integer $x \ge 0$,
-$$x^2 \le N/D \iff x^2 \le \lfloor N/D \rfloor,$$
+
+$$
+x^2 \le N/D \iff x^2 \le \lfloor N/D \rfloor,
+$$
+
 and hence $\lfloor \sqrt{N/D} \rfloor = \lfloor \sqrt{\lfloor N/D \rfloor} \rfloor$. Where would a
 naive floating-point `sqrt` break this?
 
@@ -102,7 +110,11 @@ literally $P(a)$; so $u \in L^*$ iff $P(a) \equiv 0 \pmod m$. *(b)* $a - 3 = 2^{
 so $(a - 3)^2 = 2^{32} = 2 \cdot 2^{31} \equiv 0 \pmod{m}$. If $P(x) = (x - 3)^2 Q(x)$ then
 $P(a) = (a-3)^2 Q(a) \equiv 0$, so **every** multiple of $(x-3)^2$ is dual. *(c)*
 $(x-3)^2 = x^2 - 6x + 9$, and
-$$(x-3)^2(x+1) = x^3 - 5x^2 + 3x + 9,$$
+
+$$
+(x-3)^2(x+1) = x^3 - 5x^2 + 3x + 9,
+$$
+
 whose coefficient vector (constant term first) is $u = (9, 3, -5, 1)$; its
 norm$^2$ is $81 + 9 + 25 + 1 = 116$, just under the $t = 3$ witness
 $(9, -6, 1)$'s $81 + 36 + 1 = 118$. (Both verified dual by direct evaluation
@@ -163,19 +175,31 @@ condition but $v_1 + v_2 + v_3$ is shorter than all three rows.
 **Answer sketch.** *(a)* Let $v_1, v_2$ be reduced with $|v_1| \le |v_2|$, so
 $2|v_1 \cdot v_2| \le |v_1|^2$. Any nonzero lattice vector is $w = \alpha v_1 + \beta v_2$
 with integers $\alpha, \beta$ not both zero. Then
-$$|w|^2 = \alpha^2 |v_1|^2 + 2\alpha\beta (v_1\cdot v_2) + \beta^2 |v_2|^2
+
+$$
+|w|^2 = \alpha^2 |v_1|^2 + 2\alpha\beta (v_1\cdot v_2) + \beta^2 |v_2|^2
 \ge \alpha^2 |v_1|^2 - |\alpha\beta|\,|v_1|^2 + \beta^2 |v_1|^2
-= (\alpha^2 - |\alpha\beta| + \beta^2)\,|v_1|^2,$$
+= (\alpha^2 - |\alpha\beta| + \beta^2)\,|v_1|^2,
+$$
+
 using $2|v_1\cdot v_2| \le |v_1|^2 \le |v_2|^2$. The integer form
 $\alpha^2 - |\alpha\beta| + \beta^2 \ge 1$ for $(\alpha,\beta) \ne (0,0)$ (module 12's
 rank-2 miracle) gives $|w|^2 \ge |v_1|^2$. So the shorter row $v_1$ *is* a
 shortest lattice vector — the Gauss–Lagrange optimality §3 inherits. *(b)*
 A pairwise-reduced $t = 3$ basis that fails to contain a shortest vector:
-$$v_1 = (-1, -3, -1),\quad v_2 = (2, 1, -2),\quad v_3 = (1, 0, 3),$$
+
+$$
+v_1 = (-1, -3, -1),\quad v_2 = (2, 1, -2),\quad v_3 = (1, 0, 3),
+$$
+
 with row norms$^2$ $11, 9, 10$. Every ordered pair satisfies
 $2|v_i\cdot v_j| \le |v_j|^2$ ($|v_1\cdot v_2| = 3, |v_1\cdot v_3| = 4, |v_2\cdot v_3| = 4$,
 and $2\cdot4 = 8 \le 9$), so the basis is a size-reduction fixpoint. Yet
-$$v_1 + v_2 + v_3 = (2, -2, 0),\qquad |{\cdot}|^2 = 8 < 9 = \min_i |v_i|^2.$$
+
+$$
+v_1 + v_2 + v_3 = (2, -2, 0),\qquad |{\cdot}|^2 = 8 < 9 = \min_i |v_i|^2.
+$$
+
 The shortest vector needs **all three** rows added — no local pairwise rule
 sees it. This is exactly §3's warning that at rank $\ge 3$ the fixpoint buys
 *small numbers*, not global optimality, and why Algorithm E's enumeration is
@@ -198,8 +222,12 @@ comfortably below $2^{62}$ for $m \le 2^{31}$, but the *unreduced* $\det$ and
 cofactors of an $8\times8$ matrix with an $m$-sized entry need the full i128.
 
 **Answer sketch.** The two new $\Gamma$ values are exact:
-$$\Gamma\!\left(\tfrac{9}{2}\right) = \tfrac{7}{2}\cdot\tfrac{5}{2}\cdot\tfrac{3}{2}\cdot\tfrac{1}{2}\sqrt{\pi} = \frac{105\sqrt{\pi}}{16},\qquad
-\Gamma(5) = 4! = 24,$$
+
+$$
+\Gamma\!\left(\tfrac{9}{2}\right) = \tfrac{7}{2}\cdot\tfrac{5}{2}\cdot\tfrac{3}{2}\cdot\tfrac{1}{2}\sqrt{\pi} = \frac{105\sqrt{\pi}}{16},\qquad
+\Gamma(5) = 4! = 24,
+$$
+
 (confirmed numerically: $\Gamma(9/2) = 11.6317\ldots = 105\sqrt{\pi}/16$,
 $\Gamma(5) = 24$), giving closed forms
 $\mu_7 = \tfrac{16\pi^3}{105}\nu^7/m$ and $\mu_8 = \tfrac{\pi^4}{24}\nu^8/m$. The
@@ -260,8 +288,12 @@ a constant depending only on $t$.
 
 **Answer sketch.** Since $\nu_t^t = (\nu_t^2)^{t/2} \le (\gamma_t m^{2/t})^{t/2}
 = \gamma_t^{t/2}\, m$, the $m$ cancels:
-$$\mu_t \le \frac{\pi^{t/2}\,\gamma_t^{t/2}\,m}{\Gamma(t/2+1)\,m}
-= \frac{(\pi\,\gamma_t)^{t/2}}{\Gamma(t/2 + 1)} \quad(\text{independent of } m).$$
+
+$$
+\mu_t \le \frac{\pi^{t/2}\,\gamma_t^{t/2}\,m}{\Gamma(t/2+1)\,m}
+= \frac{(\pi\,\gamma_t)^{t/2}}{\Gamma(t/2 + 1)} \quad(\text{independent of } m).
+$$
+
 Evaluating:
 - $t = 4$: $(\pi\sqrt{2})^2/\Gamma(3) = 2\pi^2/2 = \pi^2 \approx 9.87$;
 - $t = 5$: $(\pi\cdot 8^{1/5})^{5/2}/\Gamma(7/2) \approx 14.89$;

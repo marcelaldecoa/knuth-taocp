@@ -43,7 +43,11 @@ low bits set, so $\lfloor k/2 \rfloor$ has bits $0$ through $n-2$ set. XOR them.
 **Answer sketch.** $g(0) = 0 \oplus 0 = 0$, the all-zeros word. For
 $k = 2^n - 1$ (bits $0..n-1$ all $1$), $\lfloor k/2 \rfloor = 2^{n-1} - 1$
 (bits $0..n-2$ all $1$). Then
-$$g(2^n-1) = (2^n - 1) \oplus (2^{n-1} - 1),$$
+
+$$
+g(2^n-1) = (2^n - 1) \oplus (2^{n-1} - 1),
+$$
+
 and the low $n-1$ bits cancel, leaving only bit $n-1$: the word
 $2^{n-1} = 100\ldots0$. It differs from $g(0) = 0$ in exactly one bit (the top
 bit). Hence appending the first word after the last keeps the one-bit-change
@@ -55,7 +59,11 @@ flip is bit $2$, matching the README's $\rho(8) = 3$ seam observation.)
 
 **Problem.** The Gray map is $g(k) = k \oplus \lfloor k/2 \rfloor$. Given a
 codeword $w = g(k)$, the lab's `gray_rank` recovers $k$ by the shift-and-XOR
-$$k = w \oplus (w \gg 1) \oplus (w \gg 2) \oplus (w \gg 3) \oplus \cdots$$
+
+$$
+k = w \oplus (w \gg 1) \oplus (w \gg 2) \oplus (w \gg 3) \oplus \cdots
+$$
+
 (shifting until zero). Prove this formula really is $g^{-1}$.
 
 **Hint.** Work bit by bit from the top. Bit $n-1$ of $g(k)$ equals bit $n-1$ of
@@ -67,8 +75,12 @@ $k_{i+1}$.
 bit $i$ of the word is $w_i = k_i \oplus k_{i+1}$ (with $k_n = 0$). Solving
 downward from the top: $k_{n-1} = w_{n-1}$, and $k_i = w_i \oplus k_{i+1}$ for
 each lower $i$. Unrolling this recurrence,
-$$k_i = w_i \oplus w_{i+1} \oplus w_{i+2} \oplus \cdots \oplus w_{n-1}
-= \bigoplus_{j \ge i} w_j.$$
+
+$$
+k_i = w_i \oplus w_{i+1} \oplus w_{i+2} \oplus \cdots \oplus w_{n-1}
+= \bigoplus_{j \ge i} w_j.
+$$
+
 That is precisely bit $i$ of $w \oplus (w \gg 1) \oplus (w \gg 2) \oplus \cdots$:
 the term $w \gg t$ contributes $w_{i+t}$ to bit $i$, so summing over all shifts
 $t \ge 0$ gives $\bigoplus_{j \ge i} w_j$. Since this holds for every bit, the
@@ -90,7 +102,11 @@ the multinomial $4! / 2!$ because the two $2$s are indistinguishable.
 
 **Answer sketch.** The distinct arrangements, in increasing lexicographic order,
 are the $4!/2! = 12$ strings
-$$1223,\ 1232,\ 1322,\ 2123,\ 2132,\ 2213,\ 2231,\ 2312,\ 2321,\ 3122,\ 3212,\ 3221.$$
+
+$$
+1223,\ 1232,\ 1322,\ 2123,\ 2132,\ 2213,\ 2231,\ 2312,\ 2321,\ 3122,\ 3212,\ 3221.
+$$
+
 Algorithm L produces exactly this sequence: e.g. from `1223`, L2 stops at
 $j = 3$ (value $2$, since $a_3 = 2 < a_4 = 3$ is ascending), L3 swaps the $2$
 and $3$ giving `1232`, and L4 reverses the length-1 tail (no change). It
@@ -179,8 +195,12 @@ with $\{0,1,2\}$ and enumerate all sets with max $= 2$, then max $= 3$, then
 max $= 4$.
 
 **Answer sketch.** In colex order the ten combinations are
-$$\{0,1,2\},\ \{0,1,3\},\ \{0,2,3\},\ \{1,2,3\},\ \{0,1,4\},\ \{0,2,4\},\
-\{1,2,4\},\ \{0,3,4\},\ \{1,3,4\},\ \{2,3,4\}.$$
+
+$$
+\{0,1,2\},\ \{0,1,3\},\ \{0,2,3\},\ \{1,2,3\},\ \{0,1,4\},\ \{0,2,4\},\
+\{1,2,4\},\ \{0,3,4\},\ \{1,3,4\},\ \{2,3,4\}.
+$$
+
 The maxima run $2,3,3,3,4,4,4,4,4,4$ — non-decreasing, as colex requires; within
 each max-group the sets are in colex order of the remaining elements.
 $\binom{5}{3} = 10$ matches the list length. (This is exactly the Stage 4 colex
@@ -191,8 +211,12 @@ output, and note the first four entries — those using only $\{0,1,2,3\}$ — a
 
 **Problem.** Prove that in colex order the rank (0-based position) of the
 combination $\{c_1 < c_2 < \cdots < c_k\}$ of $\{0,\dots,n-1\}$ is
-$$\operatorname{rank}(\{c_1,\dots,c_k\}) = \binom{c_1}{1} + \binom{c_2}{2}
-+ \cdots + \binom{c_k}{k}.$$
+
+$$
+\operatorname{rank}(\{c_1,\dots,c_k\}) = \binom{c_1}{1} + \binom{c_2}{2}
++ \cdots + \binom{c_k}{k}.
+$$
+
 Verify it on two entries of the $(5,3)$ list from Problem 6.
 
 **Hint.** Count how many $k$-combinations come *before* a given one in colex
@@ -232,8 +256,12 @@ part greater than $1$ and redistribute. Reverse-lex means `6` first,
 `1+1+1+1+1+1` last.
 
 **Answer sketch.** In the order Algorithm P produces (reverse-lex):
-$$6,\ 5{+}1,\ 4{+}2,\ 4{+}1{+}1,\ 3{+}3,\ 3{+}2{+}1,\ 3{+}1{+}1{+}1,\
-2{+}2{+}2,\ 2{+}2{+}1{+}1,\ 2{+}1{+}1{+}1{+}1,\ 1{+}1{+}1{+}1{+}1{+}1.$$
+
+$$
+6,\ 5{+}1,\ 4{+}2,\ 4{+}1{+}1,\ 3{+}3,\ 3{+}2{+}1,\ 3{+}1{+}1{+}1,\
+2{+}2{+}2,\ 2{+}2{+}1{+}1,\ 2{+}1{+}1{+}1{+}1,\ 1{+}1{+}1{+}1{+}1{+}1.
+$$
+
 That is $11 = p(6)$ partitions, each lexicographically less than its
 predecessor. (This matches `partitions(6)` in Stage 5.)
 
@@ -244,8 +272,12 @@ $\sum_{n \ge 0} p(n) x^n = \prod_{k \ge 1} (1 - x^k)^{-1}$ and the pentagonal
 number theorem
 $\prod_{k \ge 1}(1 - x^k) = \sum_{j=-\infty}^{\infty} (-1)^j x^{j(3j-1)/2}$,
 derive the recurrence
-$$p(n) = \sum_{k \ge 1} (-1)^{k+1}\left[p\!\left(n - \tfrac{k(3k-1)}{2}\right)
-+ p\!\left(n - \tfrac{k(3k+1)}{2}\right)\right],$$
+
+$$
+p(n) = \sum_{k \ge 1} (-1)^{k+1}\left[p\!\left(n - \tfrac{k(3k-1)}{2}\right)
++ p\!\left(n - \tfrac{k(3k+1)}{2}\right)\right],
+$$
+
 with $p(0)=1$ and $p(m)=0$ for $m<0$. Then use it to verify $p(50) = 204226$.
 
 **Hint.** The two products are reciprocals, so their product is $1$. Multiply
@@ -255,18 +287,30 @@ $j \ge 1$ (exponent $\frac{k(3k-1)}{2}$) and $j \le -1$ (exponent
 $\frac{k(3k+1)}{2}$, with $k = -j$).
 
 **Answer sketch.** Because $\prod(1-x^k)^{-1}$ and $\prod(1-x^k)$ are reciprocal,
-$$\Big(\sum_{n \ge 0} p(n) x^n\Big)\Big(\sum_{j=-\infty}^{\infty}(-1)^j
-x^{g_j}\Big) = 1, \qquad g_j = \frac{j(3j-1)}{2}.$$
+
+$$
+\Big(\sum_{n \ge 0} p(n) x^n\Big)\Big(\sum_{j=-\infty}^{\infty}(-1)^j
+x^{g_j}\Big) = 1, \qquad g_j = \frac{j(3j-1)}{2}.
+$$
+
 The coefficient of $x^0$ on the left is $p(0)\cdot 1 = 1$ (matching the RHS), and
 for every $n \ge 1$ the coefficient of $x^n$ must vanish:
-$$\sum_{j=-\infty}^{\infty} (-1)^j\, p(n - g_j) = 0.$$
+
+$$
+\sum_{j=-\infty}^{\infty} (-1)^j\, p(n - g_j) = 0.
+$$
+
 Peel off the $j=0$ term ($g_0 = 0$, sign $+1$), giving $p(n)$, and move the rest
 to the other side. Writing the positive index as $k = j \ge 1$ (exponent
 $g_k = \frac{k(3k-1)}{2}$) and the negative index as $k = -j \ge 1$ (exponent
 $g_{-k} = \frac{k(3k+1)}{2}$), and noting $(-1)^j = (-1)^k$ so
 $-(-1)^k = (-1)^{k+1}$:
-$$p(n) = \sum_{k \ge 1} (-1)^{k+1}\left[p\!\left(n - \tfrac{k(3k-1)}{2}\right)
-+ p\!\left(n - \tfrac{k(3k+1)}{2}\right)\right].$$
+
+$$
+p(n) = \sum_{k \ge 1} (-1)^{k+1}\left[p\!\left(n - \tfrac{k(3k-1)}{2}\right)
++ p\!\left(n - \tfrac{k(3k+1)}{2}\right)\right].
+$$
+
 The generalized pentagonal exponents are $1, 2, 5, 7, 12, 15, \dots$, and only
 $O(\sqrt{n})$ of them are $\le n$, so each $p(n)$ costs $O(\sqrt{n})$.
 

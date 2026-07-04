@@ -94,8 +94,12 @@ This is exactly what `chi_square_uniform(&[16,8,9,6,12,9])` returns; reject if
 $V$ exceeds the tabulated critical value.
 
 **Answer sketch.** With every expected count $10$,
-$$V = \frac{(6)^2 + (-2)^2 + (-1)^2 + (-4)^2 + (2)^2 + (-1)^2}{10}
-= \frac{36 + 4 + 1 + 16 + 4 + 1}{10} = \frac{62}{10} = 6.2.$$
+
+$$
+V = \frac{(6)^2 + (-2)^2 + (-1)^2 + (-4)^2 + (2)^2 + (-1)^2}{10}
+= \frac{36 + 4 + 1 + 16 + 4 + 1}{10} = \frac{62}{10} = 6.2.
+$$
+
 There are $k - 1 = 5$ degrees of freedom. Since $6.2 < 11.07$, $V$ is **not** in
 the upper $5\%$ tail, so we do **not** reject the fair-die hypothesis — the
 counts are consistent with a fair die. (A $V$ near $0$ would be *too* good, and a
@@ -135,7 +139,11 @@ independence needed.
 **Answer sketch.** The stored sample is overwritten at step $i$ (for
 $i = 2, \dots, n$) with probability $1/i$, independently of the value stored.
 By linearity,
-$$\mathbb{E}[\text{replacements}] = \sum_{i=2}^{n} \frac{1}{i} = H_n - 1,$$
+
+$$
+\mathbb{E}[\text{replacements}] = \sum_{i=2}^{n} \frac{1}{i} = H_n - 1,
+$$
+
 where $H_n = \sum_{i=1}^{n} 1/i$ is the $n$-th harmonic number. So the count
 grows like $\ln n$: about $1.93$ replacements for $n = 10$, and $\approx \ln n +
 \gamma - 1$ for large $n$ — strikingly few, which is why reservoir sampling is

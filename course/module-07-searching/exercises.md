@@ -31,7 +31,11 @@ readers who own Volume 3.
 ### 1. Hand-trace Algorithm B and count comparisons (rating 10 · cf. 6.2.1-1)
 
 **Problem.** The sixteen keys, sorted, are
-$$61\ 87\ 154\ 170\ 275\ 426\ 503\ 509\ 512\ 612\ 653\ 677\ 703\ 765\ 897\ 908.$$
+
+$$
+61\ 87\ 154\ 170\ 275\ 426\ 503\ 509\ 512\ 612\ 653\ 677\ 703\ 765\ 897\ 908.
+$$
+
 Trace Algorithm B (binary search: $l = 1$, $u = N$; repeatedly compare against
 $K_i$ with $i = \lfloor (l+u)/2 \rfloor$, narrowing to the correct half) searching
 for $K = 503$. List the successive $(l, u, i, K_i)$ and count the comparisons.
@@ -101,7 +105,11 @@ key list after arbitrary insertion orders.)
 **Problem.** Build a BST by inserting $n$ distinct keys in a uniformly random
 order (all $n!$ orders equally likely). Show that the average number of
 comparisons in a *successful* search is
-$$C_n = 2\!\left(1 + \tfrac1n\right) H_n - 3 \approx 1.386 \lg n,$$
+
+$$
+C_n = 2\!\left(1 + \tfrac1n\right) H_n - 3 \approx 1.386 \lg n,
+$$
+
 and explain why the same constant $1.386$ governs quicksort.
 
 **Hint.** Let $S_n$ be the expected *internal path length* (sum of node depths).
@@ -112,8 +120,12 @@ it is *identical* to quicksort's comparison recurrence.
 
 **Answer sketch.** With the root splitting the remaining keys, and $n-1$ nodes
 each one level deeper,
-$$S_n = (n-1) + \frac1n \sum_{k=0}^{n-1}\big(S_k + S_{n-1-k}\big)
-= (n-1) + \frac2n \sum_{k=0}^{n-1} S_k.$$
+
+$$
+S_n = (n-1) + \frac1n \sum_{k=0}^{n-1}\big(S_k + S_{n-1-k}\big)
+= (n-1) + \frac2n \sum_{k=0}^{n-1} S_k.
+$$
+
 This is *exactly* quicksort's recurrence (Module 06), because building a random
 BST performs the same comparisons quicksort does, the root playing the pivot.
 Solving (multiply by $n$, subtract the $n-1$ instance, telescope) gives
@@ -121,7 +133,11 @@ $S_n = 2(n+1)H_n - 4n$, and since the average search visits path length plus one
 node, $C_n = S_n/n + 1 = 2(1 + 1/n)H_n - 3$. (Verified against the closed form:
 $n = 10 \to 3.4437$, $n = 100 \to 7.4785$, with $C_n$ and $S_n/n + 1$ agreeing
 exactly.) As $H_n \approx \ln n$ and $\ln n = \lg n \cdot \ln 2$,
-$$C_n \approx 2\ln 2 \cdot \lg n \approx 1.386 \lg n$$
+
+$$
+C_n \approx 2\ln 2 \cdot \lg n \approx 1.386 \lg n
+$$
+
 — only about 39% above the perfectly balanced $\lg n$, with no balancing logic.
 The shared $1.386 = 2\ln 2$ is the quicksort ↔ BST correspondence.
 
@@ -171,7 +187,11 @@ Fibonacci recurrence.
 
 **Answer sketch.** The sparsest height-$h$ AVL tree has a root whose subtrees are
 sparsest AVL trees of heights $h-1$ and $h-2$, so
-$$A_0 = 1,\quad A_1 = 2,\quad A_h = A_{h-1} + A_{h-2} + 1.$$
+
+$$
+A_0 = 1,\quad A_1 = 2,\quad A_h = A_{h-1} + A_{h-2} + 1.
+$$
+
 Adding $1$: $A_h + 1 = (A_{h-1}+1) + (A_{h-2}+1)$, so $A_h + 1$ satisfies the
 Fibonacci recurrence, giving $A_h = F_{h+3} - 1$ (with $F_1 = F_2 = 1$). (Verified:
 $A_0,\dots,A_4 = 1, 2, 4, 7, 12 = F_3{-}1,\dots,F_7{-}1$.) The extremal trees are
@@ -189,7 +209,11 @@ perfect tree, *guaranteed*.
 **Problem.** In an open-addressing hash table with linear probing (on collision,
 step to the adjacent slot), let $\alpha = N/M$ be the load factor. Knuth's 1962
 result gives the average number of probes for a **successful** search as
-$$C \approx \tfrac12\!\left(1 + \frac{1}{1 - \alpha}\right).$$
+
+$$
+C \approx \tfrac12\!\left(1 + \frac{1}{1 - \alpha}\right).
+$$
+
 Explain the mechanism (primary clustering) that drives this formula, evaluate it
 and the unsuccessful-search formula
 $C' \approx \tfrac12\big(1 + 1/(1-\alpha)^2\big)$ at $\alpha = 0.5$ and
@@ -206,8 +230,12 @@ its $\ell$ slots, so runs grow super-linearly and a search's cost is dominated b
 how long a run it lands in. Averaging insertion costs over the fill history yields
 Knuth's $C \approx \tfrac12(1 + 1/(1-\alpha))$ for a hit and $C' \approx \tfrac12(1
 + 1/(1-\alpha)^2)$ for a miss. Evaluating (verified):
-$$\alpha = 0.5:\ C \approx 1.5,\ C' \approx 2.5; \qquad
-\alpha = 0.9:\ C \approx 5.5,\ C' \approx 50.5.$$
+
+$$
+\alpha = 0.5:\ C \approx 1.5,\ C' \approx 2.5; \qquad
+\alpha = 0.9:\ C \approx 5.5,\ C' \approx 50.5.
+$$
+
 The reveal: the **unsuccessful** cost blows up *quadratically* in $1/(1-\alpha)$
 — from $2.5$ to $50.5$ as the table fills from half to 90% — while the successful
 cost only grows linearly. That runaway miss cost is the fingerprint of clustering
@@ -240,8 +268,12 @@ keys that collide in *both* $h_1$ and $h_2$ (or, in weaker schemes like quadrati
 probing, keys sharing only $h_1$) follow the *same* probe sequence and thus still
 pile up — a milder, second-order clustering. Numerically at $\alpha = 0.9$
 (verified against the uniform-hashing formulas):
-$$\text{successful } \tfrac1\alpha\ln\tfrac1{1-\alpha} \approx 2.56 \text{ probes},
-\qquad \text{unsuccessful } \tfrac1{1-\alpha} = 10,$$
+
+$$
+\text{successful } \tfrac1\alpha\ln\tfrac1{1-\alpha} \approx 2.56 \text{ probes},
+\qquad \text{unsuccessful } \tfrac1{1-\alpha} = 10,
+$$
+
 versus linear probing's $5.5$ and $50.5$ (Problem 7) — a decisive win, especially
 on the unsuccessful search where clustering hurt most. (The lab inserts the same
 key set into both tables at $\alpha = 0.9$ and confirms double hashing wins.)

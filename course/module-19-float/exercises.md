@@ -158,8 +158,12 @@ $O(nu^2)$ residue on top of a single $O(u)$ term.
 \delta_k)$, $|\delta_k| \le u/2$. Unrolling, the computed total is $\hat{S}_n =
 \sum_k x_k \prod_{j \ge k}(1 + \delta_j)$, and since $\prod(1 + \delta_j) = 1 +
 \theta$ with $|\theta| \le (n-1)(u/2) + O(u^2)$,
-$$\bigl|\hat{S}_n - \textstyle\sum x_k\bigr| \;\le\; (n-1)\,\tfrac{u}{2}
-\sum_{k=1}^{n} |x_k| \;+\; O(u^2).$$
+
+$$
+\bigl|\hat{S}_n - \textstyle\sum x_k\bigr| \;\le\; (n-1)\,\tfrac{u}{2}
+\sum_{k=1}^{n} |x_k| \;+\; O(u^2).
+$$
+
 The naive error grows **linearly in $n$** (worst case), which is why summing
 $0.1$ a hundred thousand times drifts to `10000.000000018848` instead of
 `10000`. For Kahan, the invariant is that $c$ holds, to first order, exactly the
@@ -167,9 +171,13 @@ rounding error dropped by the previous $t = \mathrm{fl}(s + y)$ (proved by
 Sterbenz's lemma, Exercise 4: when $|s| \ge |y|$, $t - s$ is exact, so $c = (t -
 s) - y$ is the true lost part). Feeding $-c$ back cancels each step's leading
 error, leaving
-$$\bigl|\hat{S}^{\text{Kahan}}_n - \textstyle\sum x_k\bigr| \;\le\; \bigl(2\cdot
+
+$$
+\bigl|\hat{S}^{\text{Kahan}}_n - \textstyle\sum x_k\bigr| \;\le\; \bigl(2\cdot
 \tfrac{u}{2} + O(nu^2)\bigr)\sum_{k=1}^{n}|x_k| \;=\; \bigl(u + O(nu^2)\bigr)
-\sum_{k=1}^{n}|x_k|,$$
+\sum_{k=1}^{n}|x_k|,
+$$
+
 an $O(u)$ bound whose $n$-dependence is pushed to *second* order — effectively
 constant. Empirically Kahan lands on `10000.0` to the bit, and on the adversarial
 $[10^{16}, 1, \ldots, 1, -10^{16}]$ (ten thousand ones) it recovers `10000` while
@@ -194,8 +202,12 @@ preserves. Use $1$, $2^{-53}$, $2^{-53}$ and trace both.
 first add $1 + h$ is an exact tie, rounds to even $= 1$; then $1 + h$ ties again
 $= 1$. But $1 + (h + h)$: $h + h = 2^{-52} = \operatorname{ulp}(1)$ *exactly*
 (no rounding), and $1 + 2^{-52} = $ `1.0000000000000002` exactly. So
-$$(1 + h) + h = 1, \qquad 1 + (h + h) = 1 + 2^{-52}, \qquad
-\text{difference} = 2^{-52},$$
+
+$$
+(1 + h) + h = 1, \qquad 1 + (h + h) = 1 + 2^{-52}, \qquad
+\text{difference} = 2^{-52},
+$$
+
 verified on hardware `f64`. **When do they differ?** Using TwoSum, each addition
 $\mathrm{fl}(p + q) = (p + q) - \varepsilon$ with $\varepsilon$ the exact
 rounding error; $(a+b)+c$ carries the errors of forming $a+b$ then adding $c$,
@@ -204,9 +216,13 @@ agree iff those accumulated errors coincide; they differ precisely when at least
 one grouping performs an inexact rounding the other avoids (as above: $1 + h$ is
 inexact and destructive, $h + h$ is exact). **How much?** Each grouping equals
 $(a + b + c)(1 + \theta)$ with $|\theta| \le 2(u/2) + O(u^2) = u + O(u^2)$, so
-$$\bigl|((a{+}b){+}c) - (a{+}(b{+}c))\bigr| \;\le\; \bigl(u + O(u^2)\bigr)\,
+
+$$
+\bigl|((a{+}b){+}c) - (a{+}(b{+}c))\bigr| \;\le\; \bigl(u + O(u^2)\bigr)\,
 |a + b + c| \;+\; \text{(cancellation terms)} \;\lesssim\; 2\cdot\tfrac{u}{2}
-\bigl(|a| + |b| + |c|\bigr),$$
+\bigl(|a| + |b| + |c|\bigr),
+$$
+
 i.e. a couple of ulps of the operands — small in *absolute* terms, but (as when
 $a + b + c$ nearly cancels) potentially unbounded in *relative* terms. The
 practical moral of §6/§8: you may not freely reorder floating-point sums, and

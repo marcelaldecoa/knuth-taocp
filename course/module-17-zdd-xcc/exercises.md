@@ -47,7 +47,11 @@ rule mean "$x_5$ is don't-care" or "$x_5$ is absent"?
 **Answer sketch.** The ZDD splits $F$ on $x_1$: members without $1$ are
 $\{\{2\},\{3\}\}$, members with $1$ (with $1$ removed) are $\{\varnothing\}$.
 Recursing gives the chain
-$$(x_1,\ (x_2,\ (x_3,\bot,\top),\ \top),\ \top),$$
+
+$$
+(x_1,\ (x_2,\ (x_3,\bot,\top),\ \top),\ \top),
+$$
+
 three branch nodes plus the two sinks — $Z(F) = 5$. Variables $x_4, x_5, x_6$
 never appear: they are absent from every member, and under zero-suppression a
 *skipped* variable defaults to "absent," so they cost literally nothing. The

@@ -87,10 +87,18 @@ cars are output before... the standard decomposition splits the output into the
 block produced "under" a given car and the block produced after it, and the two
 blocks are independently realizable of sizes $k$ and $n-1-k$. Summing over the
 split point,
-$$b_n = \sum_{k=0}^{n-1} b_k\,b_{n-1-k},$$
+
+$$
+b_n = \sum_{k=0}^{n-1} b_k\,b_{n-1-k},
+$$
+
 the **Catalan recurrence** — the very recurrence the lesson derives for the
 number of binary trees on $n$ nodes. Its solution is the Catalan number
-$$b_n = C_n = \frac{1}{n+1}\binom{2n}{n}, \qquad C_0, C_1, \dots = 1, 1, 2, 5, 14, 42, 132, \dots$$
+
+$$
+b_n = C_n = \frac{1}{n+1}\binom{2n}{n}, \qquad C_0, C_1, \dots = 1, 1, 2, 5, 14, 42, 132, \dots
+$$
+
 So $C_3 = 5$ (all orders of $3$ except $312$) and $C_4 = 14$ of the $24$ orders.
 Exhaustive enumeration confirms $1, 2, 5, 14, 42, 132$ for $n = 1, \dots, 6$. $\blacksquare$
 

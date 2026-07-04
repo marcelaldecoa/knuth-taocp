@@ -39,7 +39,11 @@ $j$.
 
 **Answer sketch.** Induct on $j$. Initially $k = 0 \le 1$. Suppose the incoming
 carry satisfies $k \le 1$. Then
-$$t = u_j + v_j + k \le (b-1) + (b-1) + 1 = 2b - 1 < 2b,$$
+
+$$
+t = u_j + v_j + k \le (b-1) + (b-1) + 1 = 2b - 1 < 2b,
+$$
+
 so the outgoing carry $\lfloor t/b \rfloor \le \lfloor (2b-1)/b \rfloor = 1$. The
 bound is preserved, so $k \in \{0, 1\}$ at every step. (Check: base $10$ gives
 $t \le 19 < 20$; base $2^{32}$ gives $t \le 2^{33} - 1 < 2^{33}$, both with carry
@@ -63,7 +67,11 @@ particular inputs?
 **Answer sketch.** The outer loop runs over $i = 0, \dots, n-1$ ($n$ passes) and
 for each, the inner loop runs over $j = 0, \dots, m-1$ ($m$ digit products), with
 no early exits. So Algorithm M always performs exactly
-$$m \cdot n \text{ single-digit multiplications,}$$
+
+$$
+m \cdot n \text{ single-digit multiplications,}
+$$
+
 regardless of the operands' values — every digit of $u$ meets every digit of $v$
 exactly once. (The additions/carries add only $O(mn)$ lower-cost operations.)
 Hence "schoolbook" multiplication is $\Theta(mn)$, i.e. $\Theta(n^2)$ for
@@ -91,8 +99,12 @@ $n^{\log_2 3}$ finally undercut $n^2$ once constants are included?
 the number of subproblems, so there are $3^k = 3^{\log_2 n} = n^{\log_2 3}$
 leaves. By the recursion-tree (master) argument the leaves dominate the $O(n)$
 merge work, giving
-$$T(n) = \Theta\!\left(n^{\log_2 3}\right) = \Theta\!\left(n^{1.585}\right),
-\qquad \log_2 3 = 1.58496\ldots$$
+
+$$
+T(n) = \Theta\!\left(n^{\log_2 3}\right) = \Theta\!\left(n^{1.585}\right),
+\qquad \log_2 3 = 1.58496\ldots
+$$
+
 (Verified leaf counts for $n = 2^k$: $n{=}4 \to 9$, $n{=}8 \to 27$, $n{=}1024 \to
 59049$, versus classical $n^2 = 16, 64, 1048576$ — the classical/Karatsuba ratio
 grows from $1.78$ to $17.8$.) (b) Karatsuba's smaller exponent hides a *larger*
@@ -159,7 +171,11 @@ $n \nmid (x_i - x_{2i})$, so $\gcd(|x_i - x_{2i}|, n)$ is a proper factor. Since
 $p \le \sqrt n$, the expected cost is $O(n^{1/4})$ gcd/step operations — for a
 60-bit $n$ that is on the order of $n^{1/4} \approx 3.2 \times 10^4$ iterations.
 (b) With $f(x) = x^2 + 1$ and $x_0 = 2$, Floyd's method exposes a factor of
-$$n = 1073741834516192789 = 1000000007 \times 1073741827$$
+
+$$
+n = 1073741834516192789 = 1000000007 \times 1073741827
+$$
+
 in about $27{,}000$ iterations (both factors are prime, verifiable with
 `is_prime_u64`) — consistent with the $O(n^{1/4})$ estimate. This is the same
 $\sqrt{1}$/random-map machinery as Miller–Rabin, turned from a *detector* of

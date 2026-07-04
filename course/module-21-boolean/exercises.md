@@ -41,7 +41,11 @@ into exactly $2^n / 2 = 2^{n-1}$ complementary pairs. Self-duality forces
 $f(\lnot x) = \lnot f(x)$, so **fixing $f$ on one member of a pair fixes it on
 the other**. You may choose $f$ freely (0 or 1) on one representative of each of
 the $2^{n-1}$ pairs, and nothing else. Hence there are
-$$\boxed{2^{2^{n-1}}}$$
+
+$$
+\boxed{2^{2^{n-1}}}
+$$
+
 self-dual functions. Check: $n = 1 \Rightarrow 2^{1} = 2$ (the two projections
 $x_1, \lnot x_1$); $n = 2 \Rightarrow 2^{2} = 4$; $n = 3 \Rightarrow 2^{4} = 16$
 — all confirmed by brute-force enumeration. Compare the grand total $2^{2^n}$ of
@@ -67,7 +71,11 @@ on group $j$ — exactly the $n+1$ bits $w_0, \dots, w_n$, giving
 $f(x) = w_{\operatorname{popcount}(x)}$ (the module's `symmetric_function`).
 Conversely any choice of the $w_j$ yields a symmetric function. So the symmetric
 functions are in bijection with $(n+1)$-bit strings, and there are exactly
-$$2^{\,n+1}$$
+
+$$
+2^{\,n+1}
+$$
+
 of them. Check: $n = 2 \Rightarrow 2^3 = 8$, $n = 3 \Rightarrow 2^4 = 16$ —
 confirmed by enumeration. This is a spectacular compression: $n+1$ bits instead
 of $2^n$, and it is why majority, threshold, and parity — all symmetric — are
@@ -113,12 +121,14 @@ lower bound, recall why the "reachable functions" shortcut that reports 3 is
 what a real chain provides.
 
 **Answer sketch.** **Upper bound (witness).** The chain
+
 $$
 \begin{aligned}
 v_3 &= x_1 \land x_2, & v_4 &= x_1 \lor x_2,\\
 v_5 &= x_3 \land v_4, & v_6 &= v_3 \lor v_5 \;(\text{output}),
 \end{aligned}
 $$
+
 computes $\text{majority}(x_1,x_2,x_3) = (x_1 \land x_2) \lor (x_3 \land (x_1 \lor
 x_2))$ in 4 gates. Check the cases: if $x_1 = x_2 = 1$, $v_3 = 1$; if exactly one
 of $x_1, x_2$ is 1 then $v_4 = 1$ and $v_5 = x_3$, so the output is 1 iff $x_3$
@@ -148,12 +158,14 @@ where they agree.
 so both fit in **5 gates**, not 6. When $x_1 \land x_2 = 0$ (the region that
 matters for the second disjunct) $x_1 \lor x_2$ equals $x_1 \oplus x_2$, giving
 the identity $c = (x_1 \land x_2) \lor (x_3 \land (x_1 \oplus x_2))$. Now:
+
 $$
 \begin{aligned}
 g_1 &= x_1 \oplus x_2, & g_2 &= g_1 \oplus x_3 \;(=\text{sum } s),\\
 g_3 &= x_1 \land x_2, & g_4 &= x_3 \land g_1, & g_5 &= g_3 \lor g_4 \;(=\text{carry } c).
 \end{aligned}
 $$
+
 Gate $g_1$ feeds *both* the sum (via $g_2$) and the carry (via $g_4$) — that is
 the sharing. Evaluating all $2^3 = 8$ inputs confirms $g_2 = x_1 \oplus x_2
 \oplus x_3$ and $g_5 = \text{majority}(x_1, x_2, x_3)$ on every row. So the joint
@@ -175,7 +187,11 @@ too few small chains, most functions cannot have one.
 **Answer sketch.** **Lower bound (counting chains).** A chain of $r$ gates over
 the 16-operation basis is specified by choosing, per gate, an operation (16 ways)
 and two earlier operands (at most $(n + r)^2$ ways). So at most
-$$\big(16\,(n+r)^2\big)^r = 2^{O(r \log r)}$$
+
+$$
+\big(16\,(n+r)^2\big)^r = 2^{O(r \log r)}
+$$
+
 distinct functions have an $r$-gate chain. To realize even a constant fraction of
 all $2^{2^n}$ functions we need $2^{O(r \log r)} \ge \text{const} \cdot 2^{2^n}$,
 i.e. $O(r \log r) \ge 2^n - O(1)$, which forces $r = \Omega(2^n / n)$. Because
@@ -203,7 +219,11 @@ astronomically worse.
 
 **Answer sketch.** By definition (README §4) $M(0..4) = 2, 3, 6, 20, 168$, and
 the next value is
-$$M(5) = 7581.$$
+
+$$
+M(5) = 7581.
+$$
+
 A brute-force enumeration of all $2^{2^5} = 2^{32} \approx 4.3 \times 10^9$
 functions, testing each for monotonicity via single-bit raises, reproduces
 $7581$ — feasible but no longer instant, which is why the lab caps its live
