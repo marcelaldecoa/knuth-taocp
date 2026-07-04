@@ -21,7 +21,7 @@ everyone honest.
 
 ---
 
-## 1. Why external ≠ internal: the memory hierarchy is the algorithm
+## 1. Why external $\ne$ internal: the memory hierarchy is the algorithm
 
 Internal sorting counts comparisons because comparisons are what you pay
 for. External sorting counts **record transfers**, because moving a record
@@ -36,7 +36,7 @@ object store. The constants have shrunk by nine orders of magnitude, but the
   SSD serves large sequential reads at full bus bandwidth; S3 serves ranged
   GETs best in big contiguous chunks.
 - **Random access is expensive.** A tape must physically rewind (seconds!);
-  an SSD random 4K read costs ~100× the per-byte price of a sequential
+  an SSD random 4K read costs ~$100\times$ the per-byte price of a sequential
   scan; a disk seek costs ~10 ms while the CPU executes tens of millions of
   instructions.
 

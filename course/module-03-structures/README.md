@@ -55,7 +55,7 @@ is an address. The faithful — and idiomatic — Rust translation is an
 - a link is a plain `usize`, an index into that `Vec`;
 - the **null link $\Lambda$** (Knuth's "points nowhere") is a reserved value. We use
   `LAMBDA = usize::MAX`, which is never a valid index, so index 0 stays an
-  ordinary usable cell. (MIX used 0 = Λ and thereby wasted location 0.)
+  ordinary usable cell. (MIX used $0 = \Lambda$ and thereby wasted location 0.)
 
 No `Rc`, no `RefCell`, no `unsafe`. A link is a number, exactly as in the book,
 and the borrow checker never fights you because there is only one owner — the
@@ -119,7 +119,7 @@ pointers; then all `M` cells are usable and full/empty are distinguished by
 
 ### Railway shunting and stack-permutable permutations (§2.2.1)
 
-Knuth opens the chapter with a picture: railway cars 1, 2, …, n arrive in that
+Knuth opens the chapter with a picture: railway cars $1, 2, \ldots, n$ arrive in that
 order, and a single **siding** (a stack) can hold cars temporarily before they
 leave onto the main line. Which output orders are achievable?
 
@@ -304,7 +304,7 @@ yields `None`.
 A **binary tree** is either empty, or a root node with a *left subtree* and a
 *right subtree*, each itself a binary tree. The order matters and the two
 subtrees are distinguished — this is *not* the same as an ordinary tree.
-Represent it with three fields per node: `INFO`, `LLINK`, `RLINK`, using Λ for
+Represent it with three fields per node: `INFO`, `LLINK`, `RLINK`, using $\Lambda$ for
 an empty subtree. In our arena, nodes are appended with `add_node(info, l, r)`
 and the root is set explicitly.
 
@@ -458,7 +458,7 @@ greedy siding simulation of §2; the tests confirm it splits the permutations of
 ### Stage 2 — `LinkedArena` (§2.2.3)
 
 The INFO/LINK arena with an AVAIL free stack. Implement `allocate` (`P <=
-AVAIL`, growing the pool only when AVAIL = Λ), `free` (`AVAIL <= P`),
+AVAIL`, growing the pool only when AVAIL = $\Lambda$), `free` (`AVAIL <= P`),
 `push_front`, `delete_after`, and `to_vec`. The decisive test: under a long
 churn of delete+insert, `cells_in_memory()` must stay pinned at the peak live
 count — freed cells *must* be reused before fresh memory is drawn, and AVAIL is
@@ -469,7 +469,7 @@ LIFO.
 Implement Algorithm T with a FIFO queue. Match the queue discipline exactly
 (initial zeros in increasing index order, successors in input order) so the
 output is deterministic; the lab pins Knuth's 9-object worked example to
-`1 9 3 2 7 5 4 8 6`. Return `None` on any cycle (including j ≺ j); panic only if
+`1 9 3 2 7 5 4 8 6`. Return `None` on any cycle (including $j \prec j$); panic only if
 a relation names an object outside 1..=n. The property test feeds random
 *acyclic* relation sets and checks the output is a genuine linear extension.
 
@@ -486,7 +486,7 @@ trees (whose inorder must be sorted) and round-trip them through
 The fully threaded tree with a list head. Implement `insert_left`,
 `insert_right`, the stackless `successor` (Algorithm S), and the two inorder
 walkers. `inorder_via_threads` must equal an ordinary inorder walk, and
-`inorder_via_threads_counting` must report ≤ 2n + 2 link-follows — the proof
+`inorder_via_threads_counting` must report $\le 2n + 2$ link-follows — the proof
 the walk is O(n).
 
 ---
@@ -495,16 +495,16 @@ the walk is O(n).
 
 1. Why must a two-pointer circular queue waste one cell, and how does an
    explicit length fix it? (Empty and full both show `R = F`.)
-2. After 10⁶ interleaved `push_front`/`delete_after` calls on a list that never
+2. After $10^6$ interleaved `push_front`/`delete_after` calls on a list that never
    exceeds 5 live nodes, how large is `cells_in_memory()`? Why? (5 — AVAIL
    reuse.)
-3. In Algorithm T, what does it *mean* if the queue empties before all n
+3. In Algorithm T, what does it *mean* if the queue empties before all $n$
    objects are output? (A cycle: every survivor still has a predecessor.)
 4. State the stack invariant of Algorithm 2.3.1T at step T2 in one sentence.
-5. An n-node binary tree has how many null links, and what does threading do
-   with them? (n + 1; turns each into a thread to an inorder neighbour.)
-6. Why is iterating Algorithm S over the whole tree O(n) even though one call
-   can be O(height)? (Amortization: each real left link is descended once.)
+5. An $n$-node binary tree has how many null links, and what does threading do
+   with them? ($n + 1$; turns each into a thread to an inorder neighbour.)
+6. Why is iterating Algorithm S over the whole tree $O(n)$ even though one call
+   can be $O(\text{height})$? (Amortization: each real left link is descended once.)
 
 ## 9. Exercises from the text
 
@@ -518,7 +518,7 @@ especially instructive ones. Log attempts in
 | ▶2.2.1-2 | 20 | Show a permutation is obtainable through a stack iff it avoids the pattern 3-1-2. |
 | 2.2.1-3 | 22 | How many permutations of n elements are obtainable through one stack? (Catalan C_n.) |
 | 2.2.1-5 | 22 | Same question for a single queue; for a single deque. |
-| 2.2.2-1 | 10 | Why can a circular queue with only two pointers hold at most M − 1 items? |
+| 2.2.2-1 | 10 | Why can a circular queue with only two pointers hold at most $M - 1$ items? |
 | ▶2.2.3-6 | 22 | Give the details of the QLINK trick that threads Algorithm T's queue through the COUNT array. |
 | 2.2.3-7 | 25 | Prove Algorithm T outputs a valid topological order and detects every cycle. |
 | ▶2.3.1-12 | 20 | Modify Algorithm T to produce preorder; then postorder. |
@@ -529,7 +529,7 @@ especially instructive ones. Log attempts in
 ## Why it's done this way
 
 Knuth's MIX-era memory model — INFO and LINK fields in flat storage, an
-AVAIL list of free cells, Λ for "no link" — looks dated until you write a
+AVAIL list of free cells, $\Lambda$ for "no link" — looks dated until you write a
 linked structure in Rust. Then it turns out to be the *idiomatic* answer:
 a `Vec<Node>` arena with `usize` links sidesteps the borrow checker's
 hostility to pointer cycles, keeps nodes cache-adjacent, and makes every

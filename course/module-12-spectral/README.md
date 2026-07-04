@@ -258,92 +258,93 @@ C3. [Certified?]  If B² >= best, terminate: ν_3² = best.
 C4. [Grow.]       B <- 2B; return to C2.
 ```
 
-**Why termination at C3 is a proof, not a hope.** Suppose B² ≥ best and
-some dual vector u is shorter than best. Where is it? If |u_2| > B or
-|u_3| > B, then ‖u‖² ≥ u_2² + u_3² > B² ≥ best — contradiction. So
-(u_2, u_3) lies in the scanned square; but there we already took the best
-possible u_1 for its class (the centered-residue lemma), so u cannot beat
-best either. Hence best = ν_3² exactly. The search bound is justified *by
+**Why termination at C3 is a proof, not a hope.** Suppose $B^2 \ge$ best and
+some dual vector $u$ is shorter than best. Where is it? If $|u_2| > B$ or
+$|u_3| > B$, then $\|u\|^2 \ge u_2^2 + u_3^2 > B^2 \ge$ best — contradiction. So
+$(u_2, u_3)$ lies in the scanned square; but there we already took the best
+possible $u_1$ for its class (the centered-residue lemma), so $u$ cannot beat
+best either. Hence best $= \nu_3^2$ exactly. The search bound is justified *by
 the answer it found* — the same trick as branch-and-bound, in its simplest
 possible clothing.
 
 **Why C4 terminates.** Hermite's theorem (next section) gives
-ν_3² ≤ 2^{1/3}·m^{2/3} < 2.2×10^6 for m ≤ 2^31, so once B = 4096 we have
-B² > ν_3² ≥ best-after-scan and C3 fires. Total work: the doubling scans
-sum to at most (4/3)·(2·4096+1)² ≈ 9×10^7 cheap iterations — the geometric
+$\nu_3^2 \le 2^{1/3}\cdot m^{2/3} < 2.2\times 10^6$ for $m \le 2^{31}$, so once $B = 4096$ we have
+$B^2 > \nu_3^2 \ge$ best-after-scan and C3 fires. Total work: the doubling scans
+sum to at most $(4/3)\cdot(2\cdot 4096+1)^2 \approx 9\times 10^7$ cheap iterations — the geometric
 series is dominated by its last term, a bound you proved for table doubling
-in earlier modules. (In practice RANDU certifies at B = 16 and the minimal
-standard at B = 1024.)
+in earlier modules. (In practice RANDU certifies at $B = 16$ and the minimal
+standard at $B = 1024$.)
 
 Why not extend Gauss reduction instead? Rank-3 reduction (or LLL) gives a
 *nearly* shortest vector with more delicate proofs; Knuth's Algorithm S
 does exact enumeration with Cholesky-style pruning. Algorithm C is the
 honest kernel of the latter: exact, certified, and slow only in ways we can
-afford at t = 3.
+afford at $t = 3$.
 
 ---
 
 ## 6. Figures of merit: how good could ν_t possibly be?
 
-Raw ν_t values are incomparable across moduli — ν_3 = 639 is meaningless
-until you know how large ν_3 *could* be for that m. Two normalizations:
+Raw $\nu_t$ values are incomparable across moduli — $\nu_3 = 639$ is meaningless
+until you know how large $\nu_3$ *could* be for that $m$. Two normalizations:
 
-**Hermite's constants.** For any rank-t lattice of determinant d, the
-shortest nonzero vector satisfies λ_1² ≤ γ_t·d^{2/t}, where
+**Hermite's constants.** For any rank-$t$ lattice of determinant $d$, the
+shortest nonzero vector satisfies $\lambda_1^2 \le \gamma_t\cdot d^{2/t}$, where
 
-    γ_2 = 2/√3 ≈ 1.1547   (hexagonal lattice, Lagrange/Gauss),
-    γ_3 = 2^{1/3} ≈ 1.2599 (face-centered cubic packing, Gauss).
+$$\begin{aligned}
+\gamma_2 &= 2/\sqrt{3} \approx 1.1547 \quad\text{(hexagonal lattice, Lagrange/Gauss),} \\
+\gamma_3 &= 2^{1/3} \approx 1.2599 \quad\text{(face-centered cubic packing, Gauss).}
+\end{aligned}$$
 
-Our dual lattice L* = {u : Σ u_i a^{i-1} ≡ 0 (mod m)} has index m in Z^t
-(one congruence mod m), hence determinant m. Therefore
+Our dual lattice $L^* = \{u : \sum u_i a^{i-1} \equiv 0 \pmod{m}\}$ has index $m$ in $\mathbb{Z}^t$
+(one congruence mod $m$), hence determinant $m$. Therefore
 
-    ν_2² ≤ (2/√3)·m        and        ν_3² ≤ 2^{1/3}·m^{2/3}.
+$$\nu_2^2 \le (2/\sqrt{3})\cdot m \qquad\text{and}\qquad \nu_3^2 \le 2^{1/3}\cdot m^{2/3}.$$
 
 These bounds are load-bearing twice in the lab: they justify the
-brute-force cutoff in stage 2 (|u_2| ≤ √(γ_2·m) suffices) and the
+brute-force cutoff in stage 2 ($|u_2| \le \sqrt{\gamma_2\cdot m}$ suffices) and the
 termination of Algorithm C in stage 3.
 
-**Knuth's μ_t** (§3.3.4, Eq. (37)) compares ν_t to the ideal by volume:
+**Knuth's $\mu_t$** (§3.3.4, Eq. (37)) compares $\nu_t$ to the ideal by volume:
 
-    μ_t = (volume of the t-ball of radius ν_t) / m
-        = π^{t/2}·ν_t^t / ((t/2)!·m),
+$$\mu_t = \frac{\text{volume of the } t\text{-ball of radius } \nu_t}{m} = \frac{\pi^{t/2}\cdot \nu_t^t}{(t/2)!\cdot m},$$
 
 so
 
-    μ_2 = π·ν_2²/m          and          μ_3 = (4/3)·π·ν_3³/m
+$$\mu_2 = \pi\cdot\nu_2^2/m \qquad\text{and}\qquad \mu_3 = (4/3)\cdot\pi\cdot\nu_3^3/m$$
 
-(the half-integer factorial: (3/2)! = (3/4)√π). Interpretation: the dual
-lattice has one point per volume m, so μ_t is the expected number of
+(the half-integer factorial: $(3/2)! = (3/4)\sqrt{\pi}$). Interpretation: the dual
+lattice has one point per volume $m$, so $\mu_t$ is the expected number of
 lattice points in a ball whose radius is the *actual* shortest vector — if
-μ_t is tiny, that vector is anomalously short and the generator is bad in
-t dimensions. Hermite caps the scale: μ_2 ≤ 2π/√3 ≈ 3.63 and
-μ_3 ≤ (4/3)π√2 ≈ 5.92. **Knuth's rule of thumb: μ_t ≥ 0.1 passes, μ_t ≥ 1
+$\mu_t$ is tiny, that vector is anomalously short and the generator is bad in
+$t$ dimensions. Hermite caps the scale: $\mu_2 \le 2\pi/\sqrt{3} \approx 3.63$ and
+$\mu_3 \le (4/3)\pi\sqrt{2} \approx 5.92$. **Knuth's rule of thumb: $\mu_t \ge 0.1$ passes, $\mu_t \ge 1$
 is excellent.**
 
 The verdicts you will compute in the lab (compare Knuth's Table 1):
 
-| generator | m | ν_2² | ν_3² | μ_2 | μ_3 | verdict |
+| generator | $m$ | $\nu_2^2$ | $\nu_3^2$ | $\mu_2$ | $\mu_3$ | verdict |
 |---|---|---|---|---|---|---|
-| toy, a = 137 | 256 | 274 | 30 | 3.36 | 2.69 | great *for its size* |
-| RANDU, a = 65539 | 2^31 | 2 147 221 514 | **118** | 3.14 | **2.5×10⁻⁶** | catastrophic in 3-D |
-| minimal standard, a = 16807 | 2^31−1 | 16807²+1 | 408 197 | 0.41 | 0.51 | passes; unspectacular |
-| a = 48271 (`std::minstd_rand`) | 2^31−1 | 1 990 735 345 | 1 433 881 | 2.91 | 3.35 | excellent for this m |
+| toy, $a = 137$ | 256 | 274 | 30 | 3.36 | 2.69 | great *for its size* |
+| RANDU, $a = 65539$ | $2^{31}$ | 2 147 221 514 | **118** | 3.14 | **$2.5\times10^{-6}$** | catastrophic in 3-D |
+| minimal standard, $a = 16807$ | $2^{31}-1$ | $16807^2+1$ | 408 197 | 0.41 | 0.51 | passes; unspectacular |
+| $a = 48271$ (`std::minstd_rand`) | $2^{31}-1$ | 1 990 735 345 | 1 433 881 | 2.91 | 3.35 | excellent for this $m$ |
 
 Two morals. First, the test is *per dimension*: RANDU's pairs are nearly
-perfect (μ_2 ≈ π, close to the Hermite ceiling!) while its triples are
-ruinous — you must test every t your application consumes. Second,
+perfect ($\mu_2 \approx \pi$, close to the Hermite ceiling!) while its triples are
+ruinous — you must test every $t$ your application consumes. Second,
 multipliers are not commodities: 16807
 and 48271 cost the same to evaluate, and one is an order of magnitude
 better. That is why the revision happened.
 
-### Scope note (honesty about t ≤ 3)
+### Scope note (honesty about $t \le 3$)
 
-Knuth's Algorithm S carries this program to t = 4, 5, ..., 8: it maintains
+Knuth's Algorithm S carries this program to $t = 4, 5, \ldots, 8$: it maintains
 dual and primal bases simultaneously, transforms them as t grows, and
 enumerates candidates inside an ellipsoid with Cholesky-factorization
 bounds instead of our square. Every idea you implement here — dual lattice,
 exact integer arithmetic, a search bound certified by the best value found
-— reappears there, industrial-strength. We stop at t = 3 because rank-2
+— reappears there, industrial-strength. We stop at $t = 3$ because rank-2
 reduction and one certified 2-parameter search teach the entire method
 without the bookkeeping; if you want the rest, exercise W6 and §3.3.4 are
 waiting.
@@ -352,15 +353,15 @@ waiting.
 
 ## 7. Why it's done this way
 
-- **Exact integer arithmetic, `i128`.** ν_t² is a *minimum over a lattice*;
+- **Exact integer arithmetic, `i128`.** $\nu_t^2$ is a *minimum over a lattice*;
   a single rounding error can report a vector that does not exist or miss
   one that does, and a "certification" computed in floating point certifies
-  nothing. Norms reach m² ≈ 2^62; `i128` holds them with room to spare.
-  Floating point enters exactly once, in μ_t, *after* the integer minimum
+  nothing. Norms reach $m^2 \approx 2^{62}$; `i128` holds them with room to spare.
+  Floating point enters exactly once, in $\mu_t$, *after* the integer minimum
   is frozen.
 - **The dual lattice, not the primal.** The failure mode users care about
   is planes-and-slabs, and plane families correspond one-to-one to dual
-  vectors, with gap m/‖u‖. Minimizing over the dual *is* maximizing the
+  vectors, with gap $m/\|u\|$. Minimizing over the dual *is* maximizing the
   worst slab — and the dual basis is available by inspection, no inversion
   needed.
 - **Reduction in 2-D, enumeration in 3-D.** Rank 2 is the one case where a
@@ -375,7 +376,7 @@ waiting.
   reason.
 - **Overlapping tuples.** Non-overlapping tuples of a full-period LCG form
   essentially the same lattice (a sub-sequence of an LCG is an LCG with
-  multiplier a^t), but overlapping tuples are what serial correlation
+  multiplier $a^t$), but overlapping tuples are what serial correlation
   actually sees, and they make the lattice theorem a one-liner.
 
 ## 8. Stage-by-stage lab guide
@@ -385,39 +386,39 @@ order and stop at the first failure.
 
 ### Stage 1 — `tuples` and `is_dual_vector`
 
-Mechanics first. `tuples(a, m, t, x0, count)` generates count + t − 1 terms
-of x_{n+1} = a·x_n mod m and windows them; multiply in `i128` before
-reducing. `is_dual_vector(u, a, m)` checks Σ u_i·a^{i-1} ≡ 0 (mod m) with
-incrementally computed powers (never form a^{t-1} unreduced!) and rejects
-u = 0. Coordinates may be negative: `rem_euclid` gives the non-negative
+Mechanics first. `tuples(a, m, t, x0, count)` generates $\text{count} + t - 1$ terms
+of $x_{n+1} = a\cdot x_n \bmod m$ and windows them; multiply in `i128` before
+reducing. `is_dual_vector(u, a, m)` checks $\sum u_i\cdot a^{i-1} \equiv 0 \pmod{m}$ with
+incrementally computed powers (never form $a^{t-1}$ unreduced!) and rejects
+$u = 0$. Coordinates may be negative: `rem_euclid` gives the non-negative
 residue Rust's `%` does not. The tests make you verify RANDU's
-(9, −6, 1) — and that *every* generated triple obeys the planes equation,
+$(9, -6, 1)$ — and that *every* generated triple obeys the planes equation,
 which is the lattice theorem made executable.
 
 ### Stage 2 — `nu2_squared`
 
-Algorithm G on the basis (m, 0), (−a, 1), all in `i128`. The one subtlety
-is q = *nearest* integer to d/n with n > 0: `(2*d + n).div_euclid(2*n)`
-does it (check it against the hand trace: d = −35072, n = 18770 must give
-q = −2). The tests cross-check against a brute force whose cutoff is the
+Algorithm G on the basis $(m, 0)$, $(-a, 1)$, all in `i128`. The one subtlety
+is $q =$ *nearest* integer to $d/n$ with $n > 0$: `(2*d + n).div_euclid(2*n)`
+does it (check it against the hand trace: $d = -35072$, $n = 18770$ must give
+$q = -2$). The tests cross-check against a brute force whose cutoff is the
 Hermite bound — read that helper; its comment is the argument you should be
-able to reproduce cold — and pin the hand-traced ν_2²(137, 256) = 274.
+able to reproduce cold — and pin the hand-traced $\nu_2^2(137, 256) = 274$.
 
 ### Stage 3 — `nu3_squared_certified`
 
-Algorithm C verbatim. Keep the running residue r = (a·u_2 + a²·u_3) mod m
+Algorithm C verbatim. Keep the running residue $r = (a\cdot u_2 + a^2\cdot u_3) \bmod m$
 incremental if you like speed, but correctness only needs the centered
-residue chosen right: r vs m − r, smaller absolute value wins. Do not
-forget to skip (u_2, u_3) = (0, 0) *inside* the scan while still seeding
-best = m². The tests demand RANDU's 118 on the nose, the frozen 408 197 for
+residue chosen right: $r$ vs $m - r$, smaller absolute value wins. Do not
+forget to skip $(u_2, u_3) = (0, 0)$ *inside* the scan while still seeding
+best $= m^2$. The tests demand RANDU's 118 on the nose, the frozen 408 197 for
 the minimal standard, agreement with a full brute force on tiny moduli, and
 a witness dual vector achieving your minimum.
 
 ### Stage 4 — `mu2` and `mu3`
 
-Ten lines: μ_2 = π·ν_2²/m, μ_3 = (4/3)π·ν_3³/m with ν_3 = √(ν_3²) in f64.
+Ten lines: $\mu_2 = \pi\cdot\nu_2^2/m$, $\mu_3 = (4/3)\pi\cdot\nu_3^3/m$ with $\nu_3 = \sqrt{\nu_3^2}$ in f64.
 The tests hold you to the reference values to 1e-9 and — the point of the
-whole module — to the ordering: 48271 ≻ 16807 ≻ RANDU on μ_3, with five
+whole module — to the ordering: $48271 \succ 16807 \succ \text{RANDU}$ on $\mu_3$, with five
 orders of magnitude between the ends.
 
 ## 9. In the real world
@@ -431,13 +432,13 @@ orders of magnitude between the ends.
   is that its very name deserves contempt, and textbooks still cite it as
   the canonical warning that a generator can pass 1-D tests perfectly while
   being unusable. The deeper lesson: the flaw was *provable in advance* —
-  (a−3)² = 2^32 is one line of algebra — but nobody ran the test before
+  $(a-3)^2 = 2^{32}$ is one line of algebra — but nobody ran the test before
   shipping.
 - **Why PCG and xoshiro replaced plain LCGs.** The lattice structure you
   computed is not a bug of bad multipliers; it is a theorem about *all*
-  LCGs. Even the best multiplier leaves ν_t ≈ m^{1/t}·(γ_t)^{1/2}, so a
+  LCGs. Even the best multiplier leaves $\nu_t \approx m^{1/t}\cdot(\gamma_t)^{1/2}$, so a
   32-bit LCG is structurally weak in high dimensions, and power-of-two
-  moduli additionally make the low k bits cycle with period 2^k. Modern
+  moduli additionally make the low $k$ bits cycle with period $2^k$. Modern
   designs keep a linear engine but *destroy the lattice at the output*:
   PCG (O'Neill, 2014) advances a 64/128-bit LCG state — with multipliers
   chosen via exactly this spectral theory, and its default multiplier
@@ -457,7 +458,7 @@ orders of magnitude between the ends.
   SSJ, cuRAND); and anywhere reproducible, cheap, *statistically
   undemanding* streams are needed: test-data generation (this repo!),
   procedural jitter in graphics, load-balancing salts. The rule: fine when
-  nobody consumes k-tuples as geometry, or when an output scrambler stands
+  nobody consumes $k$-tuples as geometry, or when an output scrambler stands
   between the lattice and the user. And when someone proposes a new
   multiplier, the spectral test — Fishman–Moore/L'Ecuyer-style exhaustive
   searches, Knuth's Algorithm S — is still exactly how it is vetted.
@@ -466,29 +467,29 @@ orders of magnitude between the ends.
 
 Answer before moving on (hints inverted at the end of each item):
 
-1. Adding an increment c changes every x_n — why does it change no ν_t?
-   *Hint: write the c-tuple as (c = 0 tuple) + w for a fixed w; what do
+1. Adding an increment $c$ changes every $x_n$ — why does it change no $\nu_t$?
+   *Hint: write the $c$-tuple as ($c = 0$ tuple) $+ w$ for a fixed $w$; what do
    translations do to plane families?*
-2. Show 9 − 6a + a² ≡ 0 (mod 2^31) for a = 2^16 + 3 without multiplying
-   out a². *Hint: it is (a − 3)².*
-3. RANDU's planes: derive the count 15 from u = (9, −6, 1). *Hint:
-   bound 9x₁ − 6x₂ + x₃ over [0, m)³ and count multiples of m strictly
-   inside; N + P − 1 with N = 6, P = 10.*
-4. In Algorithm C, why may the scan fix u_1 to the centered residue and
-   ignore every other member of the class — could a longer u_1 ever pair
-   with the same (u_2, u_3) to give a shorter vector? *Hint: the other
-   coordinates don't change, and |u_1| only grows.*
-5. The optimality proof of Algorithm G needs α² − |αβ| + β² ≥ 1. Where does
-   it fail if α, β range over reals, and what does that tell you about why
+2. Show $9 - 6a + a^2 \equiv 0 \pmod{2^{31}}$ for $a = 2^{16} + 3$ without multiplying
+   out $a^2$. *Hint: it is $(a - 3)^2$.*
+3. RANDU's planes: derive the count 15 from $u = (9, -6, 1)$. *Hint:
+   bound $9x_1 - 6x_2 + x_3$ over $[0, m)^3$ and count multiples of $m$ strictly
+   inside; $N + P - 1$ with $N = 6$, $P = 10$.*
+4. In Algorithm C, why may the scan fix $u_1$ to the centered residue and
+   ignore every other member of the class — could a longer $u_1$ ever pair
+   with the same $(u_2, u_3)$ to give a shorter vector? *Hint: the other
+   coordinates don't change, and $|u_1|$ only grows.*
+5. The optimality proof of Algorithm G needs $\alpha^2 - |\alpha\beta| + \beta^2 \ge 1$. Where does
+   it fail if $\alpha, \beta$ range over reals, and what does that tell you about why
    *lattice* problems are hard while *linear algebra* is easy? *Hint: try
-   α = β = ½; shortest-vector is discrete optimization.*
+   $\alpha = \beta = \tfrac12$; shortest-vector is discrete optimization.*
 
 ## 11. Exercises
 
 Ratings use Knuth's scale: 00 immediate · 10 a minute · 20 fifteen minutes
 to an hour · 30 hours · 40 term project. M = mathematically oriented. Log
 attempts in `course/module-12-spectral/exercises.md`. (These are curated
-for our t ≤ 3 build; if you own Vol. 2, the exercises of §3.3.4 continue
+for our $t \le 3$ build; if you own Vol. 2, the exercises of §3.3.4 continue
 the story — several assume the full Algorithm S.)
 
 | Ex. | Rating | Statement |

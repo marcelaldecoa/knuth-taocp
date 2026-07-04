@@ -184,7 +184,7 @@ C1 = (¬x1 ∨ x3 ∨ x7)    C4 = (¬x4 ∨ x6)
 C2 = (¬x2 ∨ ¬x3 ∨ x4)   C5 = (¬x5 ∨ ¬x6)
 ```
 
-Decisions: ¬x7 at level 1, ¬x8 at level 2, x1 at level 3. Propagation at
+Decisions: $\lnot x_7$ at level 1, $\lnot x_8$ at level 2, $x_1$ at level 3. Propagation at
 level 3 then runs C0, C1, C2, C3, C4 in turn and crashes into C5:
 
 | t | literal | level | reason |
@@ -199,7 +199,7 @@ level 3 then runs C0, C1, C2, C3, C4 in turn and crashes into C5:
 | 7 | x6  | 3 | C4 |
 |   | Λ   |   | C5 all false — conflict |
 
-The implication graph (`@d` = assigned at level d; x1, ¬x7, ¬x8 are the
+The implication graph (`@d` = assigned at level $d$; $x_1$, $\lnot x_7$, $\lnot x_8$ are the
 decisions):
 
 ```text
@@ -211,9 +211,9 @@ decisions):
 ```
 
 Every path from the decision `x1@3` to $\Lambda$ passes through `x4@3` — and through
-nothing else at level 3 beyond it. So x4 is the **first UIP** (x1, the
+nothing else at level 3 beyond it. So $x_4$ is the **first UIP** ($x_1$, the
 decision, is the *last*). Now run A1–A3, resolving backwards along the trail
-(on x6, then x5):
+(on $x_6$, then $x_5$):
 
 ```text
 R = C5                        = (¬x5 ∨ ¬x6)      two level-3 literals
@@ -221,14 +221,14 @@ R = resolve(R, C4, on x6)     = (¬x4 ∨ ¬x5)      still two
 R = resolve(R, C3, on x5)     = (¬x4 ∨ x8)       one level-3 literal: stop
 ```
 
-Learned clause **C6 = (¬x4 ∨ x8)**; its other literal x8 lives at level 2,
+Learned clause **C6** $= (\lnot x_4 \lor x_8)$; its other literal $x_8$ lives at level 2,
 so the solver **backjumps to level 2** — the level-3 suffix `x1..x6`
 disappears wholesale, and level 2's trail grows by the forced literal:
-`¬x8@2 (decision), ¬x4@2 (reason C6)`. No re-guessing of x1 happened, and
-none was needed: with ¬x4 asserted, the old dead end is unreachable.
+`¬x8@2 (decision), ¬x4@2 (reason C6)`. No re-guessing of $x_1$ happened, and
+none was needed: with $\lnot x_4$ asserted, the old dead end is unreachable.
 
 Had we kept resolving to the *last* UIP (through C2, C1, C0) we would have
-learned `(¬x1 ∨ x7 ∨ x8)` — a longer clause asserting the same level. Trace
+learned $(\lnot x_1 \lor x_7 \lor x_8)$ — a longer clause asserting the same level. Trace
 it yourself; it is the check-your-understanding question 2.
 
 ## 5. Two watched literals: propagation that never looks back
@@ -557,7 +557,7 @@ Then pick a heuristic, document it, and enjoy the scale tests: `php(7,6)`
    level, forces immediately. Two or more → arrives with two unassigned
    literals, silent; the solver would have to rediscover the conflict.)
 2. In the §4 example, finish the resolution past the first UIP (through C2,
-   then C1, then C0) and confirm you get (¬x1 ∨ x7 ∨ x8). Why does its
+   then C1, then C0) and confirm you get $(\lnot x_1 \lor x_7 \lor x_8)$. Why does its
    backjump level equal the first-UIP clause's here, and why is it worse
    anyway? (Same second-highest level 2, but longer — and in general the
    level can only get worse, by §4's monotonicity argument.)

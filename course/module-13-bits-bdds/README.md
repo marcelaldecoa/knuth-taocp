@@ -534,7 +534,7 @@ performed — the lemma of §2.4 is literally an accounting identity.
 
 **Bit tricks are production infrastructure, not folklore.**
 - *Chess engines* live on 64-bit "bitboards" (one bit per square — the fit
-  is a happy accident of 8×8). Move generators in engines like Stockfish
+  is a happy accident of $8 \times 8$). Move generators in engines like Stockfish
   iterate attack sets with exactly stage 1's loop: `b = x & (−x)` to peel a
   square, de Bruijn-multiply bitscan to name it, `x &= x − 1` to drop it.
   Before hardware bit-scan was fast and universal, the de Bruijn trick (the

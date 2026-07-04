@@ -307,37 +307,37 @@ we currently stand — not on the order in which the visited ones were visited.
 
 ### The recurrence
 
-Let `d(i, j)` be the weight of edge `i–j`. Define
+Let $d(i, j)$ be the weight of edge `i–j`. Define
 
-> `C(S, j)` = the least weight of a path that starts somewhere, visits **exactly
-> the set of vertices `S`**, and **ends at `j ∈ S`**.
+> $C(S, j)$ = the least weight of a path that starts somewhere, visits **exactly
+> the set of vertices $S$**, and **ends at $j \in S$**.
 
-Then, peeling off the last vertex `j`:
+Then, peeling off the last vertex $j$:
 
-> **`C(S, j) = min over i ∈ S∖{j} of  C(S∖{j}, i) + d(i, j)`**
+> **$C(S, j) = \min_{i \in S \setminus \{j\}} \bigl[ C(S \setminus \{j\}, i) + d(i, j) \bigr]$**
 
-with base case `C({j}, j) = 0`. The shortest Hamiltonian **path** is
-`min_j C(V, j)` over the full set `V`. For the shortest **cycle**, anchor the
+with base case $C(\{j\}, j) = 0$. The shortest Hamiltonian **path** is
+$\min_j C(V, j)$ over the full set $V$. For the shortest **cycle**, anchor the
 start at vertex 0 and close the best path:
-`min_{j≠0} C(V, j) + d(j, 0)`.
+$\min_{j \ne 0} C(V, j) + d(j, 0)$.
 
-### Why the subset makes it `2^n` ↩ Module 13
+### Why the subset makes it $2^n$ ↩ Module 13
 
-The state is a pair `(S, j)`: a **subset** `S` of the `n` vertices and a last
-vertex `j`. There are `2^n` subsets and `n` choices of `j`, so `2^n · n` states,
-each computed by a `min` over ≤ `n` predecessors — total **O(2^n · n²)** time
-and **O(2^n · n)** space. We encode `S` as a bitmask in a machine word, exactly
-the bitmask-state technique of Module 13 ↩: "vertex `k` is in `S`" is bit `k`;
-`S ∖ {j}` is `S & !(1<<j)`; "adding `k`" is `S | (1<<k)`. Iterating subsets in
+The state is a pair $(S, j)$: a **subset** $S$ of the $n$ vertices and a last
+vertex $j$. There are $2^n$ subsets and $n$ choices of $j$, so $2^n n$ states,
+each computed by a $\min$ over $\le n$ predecessors — total **$O(2^n n^2)$** time
+and **$O(2^n n)$** space. We encode $S$ as a bitmask in a machine word, exactly
+the bitmask-state technique of Module 13 ↩: "vertex $k$ is in $S$" is bit $k$;
+$S \setminus \{j\}$ is `S & !(1<<j)`; "adding $k$" is `S | (1<<k)`. Iterating subsets in
 **increasing numeric order** is a valid evaluation order, because adding a
 vertex only *sets* a bit, so `S | (1<<k) > S` — every state is computed after
 all the states it depends on.
 
 ### A hand trace: the triangle
 
-`n = 3`, weights `d(0,1)=1, d(1,2)=2, d(0,2)=3`.
+$n = 3$, weights $d(0,1)=1, d(1,2)=2, d(0,2)=3$.
 
-| S | j | C(S,j) | from |
+| S | j | $C(S,j)$ | from |
 |---|---|---|---|
 | {0} | 0 | 0 | base |
 | {1} | 1 | 0 | base |
@@ -349,21 +349,21 @@ all the states it depends on.
 | {0,1,2} | 2 | 3 | C({0,1},1)+d(1,2) = 1+2 |
 | {0,1,2} | 0 | 4 | C({1,2},2)+d(2,0) = 2+... |
 
-Shortest **path** = `min_j C({0,1,2}, j) = 3` (the route 0–1–2, skipping the
-expensive edge 0–2). Shortest **cycle** = `C({0,1,2},2) + d(2,0) = 3 + 3 = 6`
+Shortest **path** = $\min_j C(\{0,1,2\}, j) = 3$ (the route 0–1–2, skipping the
+expensive edge 0–2). Shortest **cycle** = $C(\{0,1,2\},2) + d(2,0) = 3 + 3 = 6$
 (the only triangle). Your stage-4 tests check exactly these numbers, then
 cross-check the DP against brute-force permutation enumeration on random
-instances up to `n = 9`, and confirm `n = 13` runs in milliseconds.
+instances up to $n = 9$, and confirm $n = 13$ runs in milliseconds.
 
 ### The punchline: this is still the best we know
 
-Held–Karp turns `n!` into `2^n · n²` — the difference between "impossible at
-`n = 15`" and "instant at `n = 20`." And yet **`O(2^n · n²)` remains, sixty
+Held–Karp turns $n!$ into $2^n n^2$ — the difference between "impossible at
+$n = 15$" and "instant at $n = 20$." And yet **$O(2^n n^2)$ remains, sixty
 years later, essentially the best known worst-case bound for general TSP.** No
 polynomial algorithm has been found, and (Section 1's asymmetry again) finding
 one would collapse P and NP. Held–Karp is the honest state of the art:
 exponential, but *tamed* — a subset dimension instead of a factorial one. When
-even `2^n` is too much (routing thousands of stops), practice turns to
+even $2^n$ is too much (routing thousands of stops), practice turns to
 *approximation* and *heuristics* — the Warnsdorff spirit, scaled up — which is
 why Section 3 was not a detour but a preview.
 
@@ -373,7 +373,7 @@ why Section 3 was not a detour but a preview.
 
 Open `labs/module-22-hamilton/src/lab.rs`. Graphs are neighbor lists
 `&[Vec<usize>]`, assumed undirected and simple; `adjacency_matrix` transposes
-them to an `n×n` bool grid for O(1) adjacency checks.
+them to an $n \times n$ bool grid for $O(1)$ adjacency checks.
 
 ### Stage 1 — `hamiltonian_path`, `hamiltonian_cycle`, `count_hamiltonian_cycles`
 
@@ -383,37 +383,37 @@ the path, launch from every start; for the cycle, fix start 0 and require the
 last vertex adjacent to 0. For the count, tally directed closed walks from 0 and
 divide by 2. The tests *validate* every returned route (permutation +
 consecutive adjacency + closure) rather than comparing to a fixed answer, and
-they pin `Kₙ → (n−1)!/2`, `Cₙ → 1`, `Pₙ → path but no cycle`, and the Petersen
+they pin $K_n$ → $(n-1)!/2$, $C_n$ → 1, $P_n$ → path but no cycle, and the Petersen
 graph → no cycle but a path.
 
 ### Stage 2 — `knight_moves`, `warnsdorff_tour`, `is_valid_tour`
 
-`knight_moves(board, sq)` returns the on-board `(±1,±2)/(±2,±1)` destinations in
+`knight_moves(board, sq)` returns the on-board $(\pm 1, \pm 2)/(\pm 2, \pm 1)$ destinations in
 a fixed order — that fixed order is what makes your tie-breaking deterministic.
 `warnsdorff_tour` follows Algorithm W: at each step pick the unvisited neighbor
 minimizing `(onward-degree, square index)`, and return `None` if you get stuck.
 `is_valid_tour` checks that a sequence is a permutation of all squares with
 every consecutive pair a knight move. Expect success from corners on `5–8`
-boards and from every start on `6×6`; expect the documented **failures** from
-`5×5` square 2 and `8×8` square 24 — the heuristic's honest limits.
+boards and from every start on $6 \times 6$; expect the documented **failures** from
+$5 \times 5$ square 2 and $8 \times 8$ square 24 — the heuristic's honest limits.
 
 ### Stage 3 — `hypercube_neighbors`, `gray_code_cycle`, `is_hamiltonian_cycle_on_hypercube`
 
-`hypercube_neighbors` flips each of the `d` low bits. `gray_code_cycle` is a
-one-liner: `k ^ (k >> 1)` for `k` in `0..2^d`. The validator checks all `2^d`
+`hypercube_neighbors` flips each of the $d$ low bits. `gray_code_cycle` is a
+one-liner: `k ^ (k >> 1)` for $k$ in `0..2^d`. The validator checks all $2^d$
 vertices appear once and consecutive (cyclically!) vertices differ in one bit.
-The tests confirm the sequence *is* a Hamiltonian cycle on `Q_d`, matches the
+The tests confirm the sequence *is* a Hamiltonian cycle on $Q_d$, matches the
 Module-08 formula bit-for-bit, and that each successive XOR is a single power of
 two — a hypercube edge.
 
 ### Stage 4 — `shortest_hamiltonian_path`, `shortest_hamiltonian_cycle`
 
-Fill `dp[S][j] = C(S, j)` in increasing subset order using the Held–Karp
+Fill `dp[S][j]` $= C(S, j)$ in increasing subset order using the Held–Karp
 recurrence, with a large `INF` sentinel that leaves headroom against overflow.
 Answer the path query with `min_j dp[full][j]`; the cycle query anchors at 0 and
-closes with `+ d(j, 0)`. Handle the degenerate `n ≤ 1` (weight 0). The tests
-hand-check tiny instances, cross-check against brute force for `n ≤ 9`, accept
-arbitrary (triangle-inequality-free, even asymmetric) weights, and time `n = 13`.
+closes with $+\, d(j, 0)$. Handle the degenerate $n \le 1$ (weight 0). The tests
+hand-check tiny instances, cross-check against brute force for $n \le 9$, accept
+arbitrary (triangle-inequality-free, even asymmetric) weights, and time $n = 13$.
 
 Run the growth curve any time with
 `cargo run -p lab-22-hamilton --example bench --features solutions --release`.
@@ -426,9 +426,9 @@ Run the growth curve any time with
    *guaranteed*, and which are you *not*? (Eulerian circuit yes; Hamiltonian
    cycle — no guarantee at all.)
 2. Why may `count_hamiltonian_cycles` divide by exactly 2, never some other
-   number, for every graph with `n ≥ 3`? (Each undirected cycle is traversed in
+   number, for every graph with $n \ge 3$? (Each undirected cycle is traversed in
    precisely two directions from the fixed start.)
-3. On a `5×5` board, name a square from which *no* knight's tour exists for
+3. On a $5 \times 5$ board, name a square from which *no* knight's tour exists for
    *any* algorithm, and explain why. (Any minority-colour square — a tour must
    start and end on the majority colour.)
 4. In Held–Karp, why is iterating subsets in increasing integer order a valid
@@ -446,13 +446,13 @@ ones. Log attempts in `course/module-22-hamilton/exercises.md`.
 
 | Ex. | Rating | Statement (paraphrased) |
 |---|---|---|
-| 22-1 | 10 | Prove `Kₙ` has `(n−1)!/2` Hamiltonian cycles by the fixed-start / divide-by-two argument. |
+| 22-1 | 10 | Prove $K_n$ has $(n-1)!/2$ Hamiltonian cycles by the fixed-start / divide-by-two argument. |
 | 22-2 | 15 | Give the even/odd-degree Eulerian criterion and prove necessity. |
 | ▶22-3 | 25 | Add the "endpoint reachability" prune to Algorithm H and measure the search-tree shrinkage on random graphs. |
-| 22-4 | 20 | Prove the `5×5` colour-parity fact: a knight's tour must begin and end on the majority colour. |
-| ▶22-5 | 25 | Prove the reflected Gray code is a Hamiltonian cycle on `Q_d` by induction (fill in every seam of §4). |
+| 22-4 | 20 | Prove the $5 \times 5$ colour-parity fact: a knight's tour must begin and end on the majority colour. |
+| ▶22-5 | 25 | Prove the reflected Gray code is a Hamiltonian cycle on $Q_d$ by induction (fill in every seam of §4). |
 | 22-6 | 20 | Modify Held–Karp to also *return the optimal tour*, not just its cost (store parent pointers). |
-| ▶22-7 | 30 | Show the decision problem "does `G` have a Hamiltonian cycle?" is NP-complete via a reduction from 3-SAT (sketch Karp's gadget). |
+| ▶22-7 | 30 | Show the decision problem "does $G$ have a Hamiltonian cycle?" is NP-complete via a reduction from 3-SAT (sketch Karp's gadget). |
 | 22-8 | 30 | Implement the Held–Karp *space*-saving trick: process subsets by popcount so only two "layers" live in memory. |
 
 ## In the real world
@@ -494,8 +494,8 @@ ones. Log attempts in `course/module-22-hamilton/exercises.md`.
 - **The Gray-code bridge** shows that recognizing structure can replace search
   entirely: on the hypercube the answer is a closed-form formula, no
   backtracking needed.
-- **Held–Karp reshapes the state space** — a subset dimension (`2^n`) instead of
-  a sequence dimension (`n!`) — the single idea that turns a factorial into a
+- **Held–Karp reshapes the state space** — a subset dimension ($2^n$) instead of
+  a sequence dimension ($n!$) — the single idea that turns a factorial into a
   merely exponential cost, and the bitmask makes that subset a machine word.
 
 ## Proof techniques you practiced
@@ -504,16 +504,16 @@ ones. Log attempts in `course/module-22-hamilton/exercises.md`.
   a simple path," undone precisely on backtrack; the master pattern from Module
   01, now guarding a search tree.
 - **Induction with a construction** — the reflected Gray code is a Hamiltonian
-  cycle on `Q_d`, proved by *building* `G_d` from `G_{d−1}` and checking both
+  cycle on $Q_d$, proved by *building* $G_d$ from $G_{d-1}$ and checking both
   seams. Structural induction that mirrors the algorithm.
-- **Parity / colouring arguments** — the `5×5` knight's-tour impossibility from
+- **Parity / colouring arguments** — the $5 \times 5$ knight's-tour impossibility from
   a two-colouring; a local invariant (each move flips colour) forcing a global
   conclusion.
 - **Dynamic programming via optimal substructure** — Held–Karp's recurrence
   earns its correctness from "the future depends only on the visited set and the
   current vertex," and its efficiency from evaluating states in a valid order.
-- **Counting by symmetry (divide-out the over-count)** — `(n−1)!/2` cycles in
-  `Kₙ`: fix a representative (start at 0), then divide by the size of the orbit
+- **Counting by symmetry (divide-out the over-count)** — $(n-1)!/2$ cycles in
+  $K_n$: fix a representative (start at 0), then divide by the size of the orbit
   (two directions).
 - **Complexity as classification** — recognizing Hamiltonicity as NP-complete,
   and *using* that classification to choose an approach rather than to give up.

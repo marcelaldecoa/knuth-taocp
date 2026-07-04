@@ -179,8 +179,8 @@ constructions.
 
 **Stage 2** implements Algorithm M as `ford_johnson_sort` and
 `ford_johnson_comparisons`. The tests check correctness on all sizes `0..=50`
-and pin the worst case exhaustively for small `n` — you get to *watch* your code
-meet `F(n)` and never exceed it.
+and pin the worst case exhaustively for small $n$ — you get to *watch* your code
+meet $F(n)$ and never exceed it.
 
 ---
 
@@ -195,7 +195,7 @@ depend on the data. There is no "if `x < y` then compare these next"; the
 comparisons are wired in advance. This is what lets a network become silicon, or
 a straight-line SIMD routine with no data-dependent branches.
 
-We draw a network with `n` horizontal wires (time flows left to right) and each
+We draw a network with $n$ horizontal wires (time flows left to right) and each
 comparator as a vertical connector:
 
 ```text
@@ -278,7 +278,7 @@ execution order, this ASAP pass computes the critical-path length exactly.
 
 **Stage 3** builds `odd_even_merge_network`, `apply_network` (the
 compare-exchange), and `network_depth`. The tests pin the counts and depths and
-check the network sorts *every* permutation for `n ≤ 8`.
+check the network sorts *every* permutation for $n \le 8$.
 
 ---
 
@@ -378,7 +378,7 @@ Implement Algorithm M. The fiddly part is the **partner bookkeeping** across the
 recursion and the **Jacobsthal insertion order** of step M3. A robust design
 sorts *indices* by key (so partners survive the recursive sort) and folds the
 smaller elements in group order. The tests verify correctness for all sizes up
-to 50 and pin the exhaustive worst case `F(n)` for small `n`.
+to 50 and pin the exhaustive worst case $F(n)$ for small $n$.
 
 ### Stage 3 — `odd_even_merge_network`, `apply_network`, `network_depth`
 
@@ -388,7 +388,7 @@ depths are pinned to Batcher's formulas.
 
 ### Stage 4 — `sorts_all_zero_one`, `bitonic_sort_network`
 
-`sorts_all_zero_one` enumerates `2^n` binary inputs — the certificate from
+`sorts_all_zero_one` enumerates $2^n$ binary inputs — the certificate from
 Theorem Z. `bitonic_sort_network` is the bitonic recursion with direction-aware
 comparators. The tests certify both networks, cross-check against random
 integers, and confirm a broken network fails.
@@ -396,7 +396,7 @@ integers, and confirm a broken network fails.
 ### Bench
 
 `cargo run --release --example bench -p lab-20-networks --features solutions`
-times the oblivious network against a data-dependent sort at growing `n`,
+times the oblivious network against a data-dependent sort at growing $n$,
 printing `n | comps | net | sort | ratio` — the constant-factor / branch-free
 story made concrete.
 
@@ -404,14 +404,14 @@ story made concrete.
 
 ## 6. Check your understanding
 
-1. Why must a correct comparison-sort decision tree have at least `n!` leaves,
+1. Why must a correct comparison-sort decision tree have at least $n!$ leaves,
    and why "at least" rather than "exactly"?
-2. `⌈lg 12!⌉ = 29` but `S(12) = 30`. Does this contradict the lower-bound
+2. $\lceil \lg 12! \rceil = 29$ but $S(12) = 30$. Does this contradict the lower-bound
    theorem? (No — the theorem gives a lower bound; the truth can be higher.)
-3. In merge insertion, why is `b_1` placed at the front of the main chain with
+3. In merge insertion, why is $b_1$ placed at the front of the main chain with
    *no* comparison?
 4. State the zero-one principle. In its proof, what property of a single
-   comparator makes it commute with a monotone function `f`?
+   comparator makes it commute with a monotone function $f$?
 5. A network has depth 6 on 8 wires but 19 comparators. How can 19 comparators
    fit in 6 parallel steps? (Disjoint-wire comparators share a step; up to 4 can
    fire at once on 8 wires.)
@@ -424,14 +424,14 @@ attempts in `course/module-20-networks/exercises.md`.
 
 | Ex. | Rating | Statement (paraphrased) |
 |---|---|---|
-| 5.3.1-2 | 10 | Show `⌈lg n!⌉` equals `Σ_{k=1}^{n} ⌈lg k⌉` corrected — compute both sides for `n ≤ 8` and reconcile. |
-| ▶5.3.1-3 | 22 | Prove the worst-case count of merge insertion is `F(n) = Σ ⌈lg(3k/4)⌉`. |
-| 5.3.1-4 | 20 | Hand-trace merge insertion on `n = 11`; confirm it uses 26 comparisons. |
-| 5.3.1-8 | 24 | For which `n ≤ 20` is `F(n) = ⌈lg n!⌉`? Tabulate and explain the first failure. |
+| 5.3.1-2 | 10 | Show $\lceil \lg n! \rceil$ equals $\sum_{k=1}^{n} \lceil \lg k \rceil$ corrected — compute both sides for $n \le 8$ and reconcile. |
+| ▶5.3.1-3 | 22 | Prove the worst-case count of merge insertion is $F(n) = \sum \lceil \lg(3k/4) \rceil$. |
+| 5.3.1-4 | 20 | Hand-trace merge insertion on $n = 11$; confirm it uses 26 comparisons. |
+| 5.3.1-8 | 24 | For which $n \le 20$ is $F(n) = \lceil \lg n! \rceil$? Tabulate and explain the first failure. |
 | ▶5.3.4-1 | 20 | Prove the zero-one principle (Theorem Z) in full. |
 | 5.3.4-6 | 22 | Prove Batcher's odd-even merge is correct using the zero-one principle. |
-| ▶5.3.4-10 | 28 | Show any sorting network on `n` wires has depth `≥ ⌈lg n⌉` and at least `⌈lg n!⌉` comparators. |
-| 5.3.4-38 | 30 | Investigate the minimum-comparator networks for `n ≤ 10` (the "known optimum" table). |
+| ▶5.3.4-10 | 28 | Show any sorting network on $n$ wires has depth $\ge \lceil \lg n \rceil$ and at least $\lceil \lg n! \rceil$ comparators. |
+| 5.3.4-38 | 30 | Investigate the minimum-comparator networks for $n \le 10$ (the "known optimum" table). |
 
 ## In the real world
 
@@ -444,18 +444,18 @@ attempts in `course/module-20-networks/exercises.md`.
 - **GPU sorting.** Bitonic sort is the workhorse of GPU sort kernels (CUDA/OpenCL
   merge-path and bitonic builders): its comparator partners are pure index
   arithmetic, so every thread knows who to compare with no coordination. The
-  `O((lg n)²)` depth is `O((lg n)²)` parallel steps — excellent when you have
+  $O((\lg n)^2)$ depth is $O((\lg n)^2)$ parallel steps — excellent when you have
   thousands of cores.
 - **Hardware.** Switching fabrics and networking ASICs sort or route with fixed
   comparator arrays; obliviousness means fixed wiring and constant latency.
 - **Median filters.** Image and signal pipelines find medians of small windows
-  (3×3, 5×5) with tiny optimal networks — a 9-element median network is a
+  ($3\times3$, $5\times5$) with tiny optimal networks — a 9-element median network is a
   classic hand-optimized gadget.
 - **The AKS network.** Ajtai, Komlós, and Szemerédi (1983) built a sorting
-  network of *optimal* `O(n lg n)` comparators and `O(lg n)` depth — matching the
+  network of *optimal* $O(n \lg n)$ comparators and $O(\lg n)$ depth — matching the
   lower bound asymptotically. But its constant factor is astronomically large
-  (thousands), so it is never used in practice; Batcher's `O(n (lg n)²)` network
-  wins for every realistic `n`. It is the canonical example of an asymptotically
+  (thousands), so it is never used in practice; Batcher's $O(n (\lg n)^2)$ network
+  wins for every realistic $n$. It is the canonical example of an asymptotically
   optimal algorithm that is practically irrelevant.
 - **Secure computation.** Oblivious sorting is essential in MPC and ORAM, where
   the *access pattern* must leak nothing about the data — a data-oblivious
@@ -463,12 +463,12 @@ attempts in `course/module-20-networks/exercises.md`.
 
 ## Proof techniques you practiced
 
-- **Counting / information-theoretic lower bound** — `n!` leaves in a binary tree
-  force height `≥ ⌈lg n!⌉`, bounding *every* comparison sort at once (§1).
+- **Counting / information-theoretic lower bound** — $n!$ leaves in a binary tree
+  force height $\ge \lceil \lg n! \rceil$, bounding *every* comparison sort at once (§1).
 - **Optimality by construction with a matching bound** — merge insertion is shown
-  optimal for small `n` by exhibiting an algorithm that *meets* `⌈lg n!⌉` (§2).
+  optimal for small $n$ by exhibiting an algorithm that *meets* $\lceil \lg n! \rceil$ (§2).
 - **Amortized "budget" accounting** — the Jacobsthal insertion order keeps every
-  binary search inside a `2^k − 1` range so no comparison is wasted (§2).
+  binary search inside a $2^k - 1$ range so no comparison is wasted (§2).
 - **Reduction via a well-chosen map** — the zero-one principle turns a bad
   general input into a bad 0-1 input through a threshold function, using that
   comparators commute with monotone maps (§4).

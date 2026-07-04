@@ -272,9 +272,9 @@ Computing $C(f)$ exactly is a search problem. The lab's `optimal_cost` runs a
 breadth-first search — but *over which graph?* Getting this right is the subtle
 heart of the module.
 
-**The tempting shortcut that is wrong.** Grow a set `R_c` of "functions
-reachable with `c` gates" by `R_0 = {constants, projections}` and
-`R_c = R_{c−1} ∪ { g(a,b) : a, b ∈ R_{c−1} }`. This *undercounts*, because it
+**The tempting shortcut that is wrong.** Grow a set $R_c$ of "functions
+reachable with $c$ gates" by $R_0 = \{\text{constants}, \text{projections}\}$ and
+$R_c = R_{c-1} \cup \{\, g(a,b) : a, b \in R_{c-1} \,\}$. This *undercounts*, because it
 pretends the two operands `a` and `b` are simultaneously available for free. But
 each operand may itself cost gates, and their subcircuits do not always share.
 For **majority-of-three** the shortcut reports 3 — yet no 3-gate chain exists;
@@ -283,14 +283,12 @@ the true cost is 4. The shortcut computes a *lower bound*, not the answer.
 **The correct search — BFS over states.** A real chain keeps *every*
 intermediate value available, so sharing is automatic. Model a **state** as the
 *set of functions computed so far*. Start from the free set (the two constants
-and the `n` projections). One move appends a gate:
+and the $n$ projections). One move appends a gate:
 
-```text
-    state  →  state ∪ { g(a, b) }      for a, b ∈ state, g ∈ basis     (cost +1)
-```
+$$\text{state} \to \text{state} \cup \{\, g(a, b) \,\} \quad \text{for } a, b \in \text{state},\ g \in \text{basis} \quad (\text{cost } +1)$$
 
 BFS over states, deduplicating each state by its sorted contents. The first
-state that contains `f`'s truth table is reached at depth `C(f)`. Because the
+state that contains `f`'s truth table is reached at depth $C(f)$. Because the
 whole *set* is carried forward, a later gate may reuse any earlier value — that
 is exactly what "sharing" means, and it is why this search, unlike the shortcut,
 is correct.
@@ -305,20 +303,20 @@ value 5     : AND(2, 4) = x3 ∧ (x1 ∨ x2)
 value 6     : OR (3, 5) = (x1∧x2) ∨ (x3∧(x1∨x2))   ← majority, output
 ```
 
-Check the three cases: if `x₁ = x₂ = 1` value 3 fires; if exactly one of
-`x₁, x₂` is 1 then value 4 = 1 and value 5 = `x₃`, so the output is 1 iff `x₃`
-adds the second vote; if `x₁ = x₂ = 0` everything is 0. Four gates, and the
-state-BFS confirms no chain of three suffices. (For `n = 3` the search shows
-*every* function has `C ≤ 4` over the full basis.)
+Check the three cases: if $x_1 = x_2 = 1$ value 3 fires; if exactly one of
+$x_1, x_2$ is 1 then value 4 = 1 and value 5 = $x_3$, so the output is 1 iff $x_3$
+adds the second vote; if $x_1 = x_2 = 0$ everything is 0. Four gates, and the
+state-BFS confirms no chain of three suffices. (For $n = 3$ the search shows
+*every* function has $C \le 4$ over the full basis.)
 
 **Cost values you will pin.** Over the full 16-gate basis: constants and
 projections cost 0; every one of the 16 two-variable functions costs at most 1
-(each *is* a gate), with `C = 0` only for the 4 degenerate ones (two constants,
-two projections — note a *negated* input still costs one NOT gate); `C(XOR₂) =
-1`; `C(x₁ ⊕ x₂ ⊕ x₃) = 2`; `C(majority₃) = 4`.
+(each *is* a gate), with $C = 0$ only for the 4 degenerate ones (two constants,
+two projections — note a *negated* input still costs one NOT gate); $C(\text{XOR}_2) =
+1$; $C(x_1 \oplus x_2 \oplus x_3) = 2$; $C(\text{majority}_3) = 4$.
 
-**Staying fast.** Keep `n ≤ 3`: there are only 256 functions of 3 variables, and
-the state-BFS finishes each query in a fraction of a second. At `n = 4` the
+**Staying fast.** Keep $n \le 3$: there are only 256 functions of 3 variables, and
+the state-BFS finishes each query in a fraction of a second. At $n = 4$ the
 65536 functions blow the state space up — the same combinatorial explosion that
 pushes *exact* synthesis of real circuits onto SAT solvers.
 
@@ -336,8 +334,8 @@ Implement the struct methods. `from_closure` tabulates a rule into a `u64`;
 `eval` reads one bit; `to_dnf`/`to_cnf` walk the rows emitting signed-literal
 terms; `from_dnf`/`from_cnf` evaluate the formula on every input. The tests
 check eval-matches-table, that DNF size equals the minterm count, exhaustive
-DNF/CNF round-trips for all functions of `n ≤ 4`, the constant/tautology edge
-cases, and De Morgan via `complement`. Watch the masking so `n = 6` (all 64
+DNF/CNF round-trips for all functions of $n \le 4$, the constant/tautology edge
+cases, and De Morgan via `complement`. Watch the masking so $n = 6$ (all 64
 bits) does not overflow.
 
 ### Stage 2 — Boolean chains
@@ -345,23 +343,23 @@ bits) does not overflow.
 Implement `apply_gate` (index bit `2a+b` of the op), the `Chain` builder
 (`new`, `gate`, `set_output`), `eval_chain`, `chain_cost`, and `chain_computes`.
 Build XOR from AND/OR/NOT (cost 4) and majority-of-three by hand (cost 4), and
-verify the sum (`x₁⊕x₂⊕x₃`) and carry (`majority`) of a full adder. The key test
-evaluates a chain over all `2ⁿ` inputs and matches its target's table.
+verify the sum ($x_1 \oplus x_2 \oplus x_3$) and carry (`majority`) of a full adder. The key test
+evaluates a chain over all $2^n$ inputs and matches its target's table.
 
 ### Stage 3 — median, threshold, symmetric, monotone, self-dual
 
 Implement the five functions. `majority` is `2·popcount > len`; `threshold` is
 `popcount ≥ k`; `symmetric_function` reads `weights[popcount(x)]`. `is_monotone`
-checks single-bit raises; `is_self_dual` checks `f(x) ≠ f(¬x)`. The capstone
+checks single-bit raises; `is_self_dual` checks $f(x) \ne f(\lnot x)$. The capstone
 test reproduces the Dedekind numbers `2, 3, 6, 20, 168` by enumerating all
-`2^(2ⁿ)` functions for `n ≤ 4`.
+$2^{2^n}$ functions for $n \le 4$.
 
 ### Stage 4 — optimum chains
 
 Implement `full_basis` (`0..16`), `standard_basis` (`{AND, OR, NOTL}`), and the
-state-BFS `optimal_cost`. Tests pin `C = 0` for projections/constants,
-`C(XOR₂) = 1`, `C ≤ 1` for all 2-variable functions, `C(XOR₃) = 2`, and
-`C(majority₃) = 4` — each matched against a hand-built chain of the same cost.
+state-BFS `optimal_cost`. Tests pin $C = 0$ for projections/constants,
+$C(\text{XOR}_2) = 1$, $C \le 1$ for all 2-variable functions, $C(\text{XOR}_3) = 2$, and
+$C(\text{majority}_3) = 4$ — each matched against a hand-built chain of the same cost.
 
 ---
 
@@ -369,14 +367,14 @@ state-BFS `optimal_cost`. Tests pin `C = 0` for projections/constants,
 
 1. Why does `to_dnf(f).len()` always equal `popcount(f.table)`, and what is the
    analogous formula for `to_cnf`?
-2. The function `x₁ ∨ x₂` has a 3-term DNF but a 1-clause CNF. Give a function
+2. The function $x_1 \lor x_2$ has a 3-term DNF but a 1-clause CNF. Give a function
    whose CNF is much larger than its DNF. (Hint: complement the situation.)
 3. Encode NAND as a nibble in the `2a+b` convention, and check that
-   `NOTL(a, a)` computes `¬a`.
+   `NOTL(a, a)` computes $\lnot a$.
 4. Why is majority-of-three self-dual but AND not? Argue from the definition
-   `f(¬x) = ¬f(x)`.
+   $f(\lnot x) = \lnot f(x)$.
 5. Explain in one sentence why the "reachable functions" shortcut undercounts
-   `C(majority₃)`, and what the state-BFS fixes.
+   $C(\text{majority}_3)$, and what the state-BFS fixes.
 
 ## 9. Exercises from the text
 
@@ -386,13 +384,13 @@ Log attempts in `exercises.md`.
 
 | Ex. (§7.1.1–7.1.2) | Rating | Statement (paraphrased) |
 |---|---|---|
-| 7.1.1–2 | 10 | How many Boolean functions of `n` variables are self-dual? Count them. |
-| ▶7.1.1–5 | 20 | Show every symmetric function of `n` variables is determined by `n+1` bits; how many symmetric functions are there? |
+| 7.1.1–2 | 10 | How many Boolean functions of $n$ variables are self-dual? Count them. |
+| ▶7.1.1–5 | 20 | Show every symmetric function of $n$ variables is determined by $n+1$ bits; how many symmetric functions are there? |
 | 7.1.1–16 | 22 | Prove `f` is monotone iff it has a DNF using only *positive* literals. |
 | ▶7.1.2–1 | 15 | Exhibit an optimum (4-gate) chain for the median of three, and prove no 3-gate chain works. |
-| 7.1.2–2 | 20 | Find `C(f)` for the full adder's two outputs; can they share gates? |
-| ▶7.1.2–23 | 30 | Discuss why `C(f)` for a random `f` is `≈ 2ⁿ/n` (Shannon/Lupanov). |
-| 7.1.1–ex (Dedekind) | 40 | Compute `M(5)`; describe the pipeline used for `M(8)` and `M(9)`. |
+| 7.1.2–2 | 20 | Find $C(f)$ for the full adder's two outputs; can they share gates? |
+| ▶7.1.2–23 | 30 | Discuss why $C(f)$ for a random `f` is $\approx 2^n/n$ (Shannon/Lupanov). |
+| 7.1.1–ex (Dedekind) | 40 | Compute $M(5)$; describe the pipeline used for $M(8)$ and $M(9)$. |
 
 ## In the real world
 
@@ -400,22 +398,22 @@ Everything here is the daily bread of **electronic design automation (EDA)**.
 Logic-synthesis tools such as Berkeley's **ABC** take a Boolean specification and
 minimize its gate count and depth before it is etched onto silicon — literally
 running smarter versions of the stage-4 search on functions with millions of
-gates, using AND-inverter graphs and cut-based rewriting because exact `C(f)` is
+gates, using AND-inverter graphs and cut-based rewriting because exact $C(f)$ is
 out of reach at scale. **FPGA** toolchains solve a cousin problem — *technology
-mapping* — packing a chain into `k`-input lookup tables (LUTs), where the "cost"
+mapping* — packing a chain into $k$-input lookup tables (LUTs), where the "cost"
 is LUT count rather than raw gates. Cryptographers cost their primitives in
 **gates**, especially XORs: an AES or SHA circuit's area and its resistance to
 side channels are measured in the very units of §3, and lightweight ciphers are
-designed to minimize `C`. When the function is small but the optimum must be
+designed to minimize $C$. When the function is small but the optimum must be
 *exact*, engineers reach for **SAT-based exact synthesis** — encode "is there a
-chain of `r` gates computing `f`?" as a CNF and let a SAT solver decide, deepening
-`r` until it says yes. That is the industrial descendant of your state-BFS, and
+chain of $r$ gates computing `f`?" as a CNF and let a SAT solver decide, deepening
+$r$ until it says yes. That is the industrial descendant of your state-BFS, and
 it is why the CNF of §2 and the search of §6 are the same subject.
 
 ## Why it's done this way
 
 - **Truth-table-as-integer** because a 64-bit register runs Boolean algebra on
-  all `2ⁿ` rows in one instruction; every function operation collapses to a
+  all $2^n$ rows in one instruction; every function operation collapses to a
   bitwise op, which is both faster and simpler than any tree of `Rc<RefCell>`
   nodes.
 - **The nibble gate encoding** because it makes "apply gate to two truth
@@ -429,11 +427,11 @@ it is why the CNF of §2 and the search of §6 are the same subject.
 ## Proof techniques you practiced
 
 - **Proof by exhaustive evaluation** — De Morgan and `chain_computes` verify an
-  identity by checking all `2ⁿ` rows; when the domain is finite, "try everything"
+  identity by checking all $2^n$ rows; when the domain is finite, "try everything"
   is a rigorous proof, and the truth-table word makes it cheap.
 - **Counting / pigeonhole** — Shannon's bound counts circuits against functions;
-  the double exponential `2^(2ⁿ)` forces most functions to be hard. You met the
-  same double exponential concretely in Dedekind's `M(n)`.
+  the double exponential $2^{2^n}$ forces most functions to be hard. You met the
+  same double exponential concretely in Dedekind's $M(n)$.
 - **Invariant of a search** — the state-BFS is correct because each state is
   *exactly* the set of functions realizable by some chain of the given cost;
   keeping that invariant true is what distinguishes it from the broken shortcut.
@@ -452,5 +450,5 @@ it is why the CNF of §2 and the search of §6 are the same subject.
 - **The counting bound** reappears whenever a resource is scarcer than the
   demands on it — a theme from Kolmogorov complexity to lower bounds in
   complexity theory.
-- **Dedekind's problem** remains open past `n = 9`: a standing invitation to the
+- **Dedekind's problem** remains open past $n = 9$: a standing invitation to the
   intersection of combinatorics, hardware, and heroic computation.
