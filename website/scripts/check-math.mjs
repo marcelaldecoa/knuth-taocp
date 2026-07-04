@@ -21,9 +21,11 @@ import {dirname, resolve, relative} from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '../..');
 
+const strict = process.argv.includes('--strict');
+const fileArgs = process.argv.slice(2).filter((a) => a !== '--strict');
 const targets =
-  process.argv.length > 2
-    ? process.argv.slice(2)
+  fileArgs.length > 0
+    ? fileArgs
     : [
         ...globSync('course/*/README.md', {cwd: repoRoot}),
         ...globSync('course/*/{WALKTHROUGH,exercises,hints}.md', {cwd: repoRoot}),
@@ -63,9 +65,29 @@ function lineOf(src, index) {
   return src.slice(0, index).split('\n').length;
 }
 
+// --strict: flag math symbols left as raw Unicode in *prose* (outside code and
+// outside `$…$`). These render unhighlighted and break the notation standard.
+// Excludes genuinely ambiguous/typographic marks (· § ∎ → ← ↔ ✓ ✗ ⬜ ▶ ❦ ∞ …)
+// which are often decorative; Greek letters and relations/operators are not.
+const STRICT_SYMBOLS = '≤≥≠≈≡∑∏⌊⌋⌈⌉√∈∉⊆⊇∪∩∧∨¬⊕ΘαβγδεζηθλμνξπρσςτφχψωΛΣΠΩ';
+function strictScan(src) {
+  // Blank code and existing math so we only see prose.
+  let s = stripLiterals(src)
+    .replace(/\$\$[\s\S]+?\$\$/g, blank)
+    .replace(/(^|[^\\$])\$[^$\n]+?\$/g, blank);
+  const hits = [];
+  for (let i = 0; i < s.length; i++) {
+    if (STRICT_SYMBOLS.includes(s[i])) {
+      hits.push({ch: s[i], line: lineOf(src, i)});
+    }
+  }
+  return hits;
+}
+
 let filesChecked = 0;
 let exprChecked = 0;
 const problems = [];
+const unconverted = [];
 
 for (const file of targets) {
   if (!existsSync(file)) {
@@ -87,17 +109,42 @@ for (const file of targets) {
       });
     }
   }
+  if (strict) {
+    for (const {ch, line} of strictScan(src)) {
+      unconverted.push({file: relative(repoRoot, file), line, ch});
+    }
+  }
 }
 
-if (problems.length === 0) {
-  console.log(
-    `check:math — ${exprChecked} KaTeX expressions across ${filesChecked} files all render ✓`,
+const unconvertedByFile = new Map();
+for (const u of unconverted) {
+  if (!unconvertedByFile.has(u.file)) unconvertedByFile.set(u.file, []);
+  unconvertedByFile.get(u.file).push(u);
+}
+
+let failed = false;
+if (problems.length > 0) {
+  failed = true;
+  console.error(`check:math — ${problems.length} broken KaTeX expression(s):`);
+  for (const p of problems) {
+    console.error(`  ${p.file}:${p.line}  $${p.tex}$\n      ${p.msg}`);
+  }
+}
+if (strict && unconverted.length > 0) {
+  failed = true;
+  console.error(
+    `\ncheck:math --strict — ${unconverted.length} math symbol(s) left as raw Unicode in prose:`,
   );
-  process.exit(0);
+  for (const [file, hits] of unconvertedByFile) {
+    const lines = [...new Set(hits.map((h) => h.line))].sort((a, b) => a - b);
+    const chars = [...new Set(hits.map((h) => h.ch))].join(' ');
+    console.error(`  ${file}  (${hits.length}: ${chars})  lines ${lines.join(', ')}`);
+  }
 }
+if (failed) process.exit(1);
 
-console.error(`check:math — ${problems.length} broken KaTeX expression(s):`);
-for (const p of problems) {
-  console.error(`  ${p.file}:${p.line}  $${p.tex}$\n      ${p.msg}`);
-}
-process.exit(1);
+console.log(
+  `check:math — ${exprChecked} KaTeX expressions across ${filesChecked} files all render ✓` +
+    (strict ? ' · no raw-Unicode math in prose ✓' : ''),
+);
+process.exit(0);
