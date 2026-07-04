@@ -17,6 +17,17 @@ van der Waerden numbers, the pigeonhole principle, n-queens, and graph
 colouring. Knuth calls SAT "the *queen* of combinatorial problems," and the
 reason is the next paragraph.
 
+> **Companion exhibit — _The Boolean Maze_.** Before you build the solver, watch
+> one run in the Museum's
+> [Logic Gate Panel](https://marcelaldecoa.github.io/knuth-taocp/museum/exhibit-4.3-boolean-maze.html):
+> flip switches to satisfy every clause and light the exit (and feel a hard
+> instance defeat you), then press Solve and watch DPLL's unit-propagation wave
+> cascade — green for forced, gold for a guess, red for a conflict and backtrack
+> — until the exit blazes, or, on the impossible maze, until it *proves* UNSAT.
+> The same unit-propagation + DPLL engine you write here, verified against a
+> brute-force oracle. It is the finale of the museum, closing the P-vs-NP arc
+> where SAT began (Cook–Levin) — and it points ahead to the CDCL of Module 14.
+
 ---
 
 ## 1. SAT, the queen of combinatorial problems
