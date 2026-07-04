@@ -53,6 +53,49 @@ fn tiny_slices_are_left_alone() {
 }
 
 #[test]
+fn two_element_slices_are_actually_shuffled() {
+    // A length-2 slice is NOT too small to shuffle: Algorithm P draws rng(2)
+    // once — value 1 leaves the pair, value 0 swaps it. Both orders must be
+    // reachable. (Guards the `t < 2` boundary against an off-by-one like
+    // `t <= 2`, which would freeze every 2-element slice into the identity.)
+    let mut seen = BTreeSet::new();
+    for draw in 0..2u64 {
+        let mut used = false;
+        let mut rng = |b: u64| {
+            assert!(!used, "a 2-element shuffle draws rng exactly once");
+            used = true;
+            assert!(draw < b);
+            draw
+        };
+        let mut arr = [10u8, 20];
+        shuffle(&mut arr, &mut rng);
+        seen.insert(arr);
+    }
+    assert_eq!(seen.len(), 2, "both orders of a 2-element slice must be reachable");
+}
+
+#[test]
+fn naive_shuffle_touches_two_element_slices() {
+    // Same boundary for the biased shuffle: n = 2 must still move (its bias is
+    // the point of the exhibit), so both orders are reachable across rng draws.
+    let mut seen = BTreeSet::new();
+    for (d0, d1) in [(0u64, 0u64), (0, 1), (1, 0), (1, 1)] {
+        let tape = [d0, d1];
+        let mut i = 0;
+        let mut rng = |b: u64| {
+            let v = tape[i];
+            i += 1;
+            assert!(v < b);
+            v
+        };
+        let mut arr = [10u8, 20];
+        naive_shuffle(&mut arr, &mut rng);
+        seen.insert(arr);
+    }
+    assert_eq!(seen.len(), 2, "a 2-element naive shuffle must reach both orders");
+}
+
+#[test]
 fn algorithm_p_is_exactly_uniform_for_n_3() {
     // On 3 items Algorithm P consumes rng(3) then rng(2): exactly 6 tapes,
     // and each yields a DISTINCT permutation — perfect uniformity.
