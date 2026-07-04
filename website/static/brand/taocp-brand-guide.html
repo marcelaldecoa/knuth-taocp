@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand Guide · The Art of Computer Programming — Interactive Edition</title>
+<meta name="description" content="The TAOCP brand system — colours, type, devices, and the contrast law — sampled from the printed covers. Self-contained; fonts vendored from the museum.">
+<style>
+  /* Fonts vendored from the museum (../museum/fonts/*.woff2) — no network. */
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:normal; font-display:swap; src:url('../museum/fonts/spectral-400.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:600; font-style:normal; font-display:swap; src:url('../museum/fonts/spectral-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Spectral'; font-weight:400; font-style:italic; font-display:swap; src:url('../museum/fonts/spectral-400i.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:600; font-style:normal; font-display:swap; src:url('../museum/fonts/cormorant-600.woff2') format('woff2'); }
+  @font-face{ font-family:'Cormorant Garamond'; font-weight:700; font-style:normal; font-display:swap; src:url('../museum/fonts/cormorant-700.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:400; font-style:normal; font-display:swap; src:url('../museum/fonts/plexmono-400.woff2') format('woff2'); }
+  @font-face{ font-family:'IBM Plex Mono'; font-weight:500; font-style:normal; font-display:swap; src:url('../museum/fonts/plexmono-500.woff2') format('woff2'); }
+
+  :root{
+    --parchment:#F4EDDD; --ivory:#FBF7EA; --ink:#1F1B16; --muted:#6B5D4F;
+    --hair:rgba(31,27,22,.18); --hair-soft:rgba(31,27,22,.10);
+    --plum:#5C1D2A; --gold:#C6A664;
+    --v1:#0F3642;    /* Vol 1 · petrol */
+    --v2:#7C024C;    /* Vol 2 · magenta-wine */
+    --v3:#E36D1B;    /* Vol 3 · orange (display only) */
+    --v3ink:#A34A08; /* Vol 3 · text-safe */
+    --v4:#00634E;    /* Vol 4A · green */
+    --v4c:#5AA8A4;   /* Vol 4C · teal (display only) */
+    --v4cink:#245C58;/* Vol 4C · text-safe */
+    --display:'Cormorant Garamond',Georgia,serif;
+    --serif:'Spectral',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+    --measure:70ch;
+  }
+  *{ box-sizing:border-box }
+  html{ scroll-behavior:smooth }
+  body{ margin:0; background:var(--parchment); color:var(--ink); font-family:var(--serif); font-size:17px; line-height:1.62; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:940px; margin:0 auto; padding:0 28px }
+  .rule{ border:0; border-top:1px solid var(--hair); margin:0 }
+  .rule--soft{ border-top-color:var(--hair-soft) }
+
+  /* classic-work banner device */
+  .banner{ text-align:center; margin:0 auto; max-width:640px }
+  .banner hr{ border:0; border-top:1.5px solid var(--accent,var(--plum)); margin:0 auto; width:100% }
+  .banner .cw{ font-family:var(--mono); font-size:12px; letter-spacing:.26em; text-transform:uppercase; color:var(--accent,var(--plum)); margin:11px 0; line-height:1.5; font-weight:500; }
+
+  /* masthead */
+  .mast{ padding:76px 0 40px; text-align:center }
+  .mast .colophon{ font-family:var(--display); font-size:26px; color:var(--muted); opacity:.75; margin-bottom:30px }
+  .mast h1{ font-family:var(--display); font-weight:700; font-size:clamp(46px,9vw,88px); line-height:.98; letter-spacing:-.015em; margin:22px 0 6px; }
+  .mast h1 em{ font-style:italic; color:var(--plum) }
+  .mast .vol{ font-family:var(--mono); font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-top:20px }
+  .mast .edition{ font-family:var(--display); font-style:italic; font-weight:700; font-size:22px; color:var(--plum); margin-top:6px }
+  .mast .lede{ font-family:var(--serif); font-style:italic; font-size:19px; color:var(--muted); max-width:52ch; margin:26px auto 0 }
+
+  section{ padding:64px 0 }
+  .sec-head{ text-align:center; margin-bottom:46px }
+  .sec-head .n{ font-family:var(--mono); font-size:12px; letter-spacing:.24em; color:var(--muted); text-transform:uppercase }
+  .sec-head h2{ font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,44px); letter-spacing:-.01em; margin:14px 0 0 }
+  .sec-head p{ max-width:60ch; margin:14px auto 0; color:var(--muted); font-size:16px }
+  h3{ font-family:var(--display); font-weight:700; font-size:26px; letter-spacing:-.005em; margin:40px 0 14px }
+  p{ max-width:var(--measure) }
+  .lead{ font-size:19px }
+  code,.mono{ font-family:var(--mono); font-size:.86em }
+  a{ color:var(--plum); text-underline-offset:3px; text-decoration-thickness:1px }
+  a:hover{ color:#4a1525 }
+
+  /* swatches */
+  .swatch-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px; margin-top:8px }
+  .sw{ border:1px solid var(--hair); border-radius:10px; overflow:hidden; background:var(--ivory); cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; }
+  .sw:hover{ transform:translateY(-2px); box-shadow:0 6px 20px rgba(31,27,22,.10) }
+  .sw:focus-visible{ outline:2px solid var(--plum); outline-offset:2px }
+  .sw .chip{ height:96px; display:flex; align-items:flex-end; justify-content:space-between; padding:12px 14px }
+  .sw .chip .num{ font-family:var(--display); font-weight:700; font-size:34px; line-height:.8 }
+  .sw .chip .cr{ font-family:var(--mono); font-size:11px; padding:3px 7px; border-radius:20px; background:rgba(244,237,221,.9); color:var(--ink) }
+  .sw .meta{ padding:12px 14px }
+  .sw .meta .nm{ font-family:var(--display); font-weight:700; font-size:19px; line-height:1.05 }
+  .sw .meta .rl{ font-size:13px; color:var(--muted); margin-top:2px }
+  .sw .meta .hx{ font-family:var(--mono); font-size:13px; margin-top:8px; display:flex; justify-content:space-between; align-items:center }
+  .sw .meta .hx .copy{ font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em }
+  .tag{ display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:2px 7px; border-radius:4px; vertical-align:middle }
+  .tag--ok{ background:#E1F0E8; color:#0F5138 }
+  .tag--display{ background:#F6E2CF; color:#8A3D07 }
+
+  .specimen{ background:var(--ivory); border:1px solid var(--hair); border-radius:12px; padding:30px 32px; margin-top:8px }
+  .specimen .row{ display:flex; align-items:baseline; gap:18px; padding:14px 0; border-bottom:1px solid var(--hair-soft); flex-wrap:wrap }
+  .specimen .row:last-child{ border-bottom:0 }
+  .specimen .lbl{ font-family:var(--mono); font-size:11px; color:var(--muted); width:120px; flex:0 0 auto; text-transform:uppercase; letter-spacing:.08em }
+  .drop::first-letter{ font-family:var(--display); font-weight:700; font-size:3.4em; line-height:.72; float:left; margin:.05em .09em 0 0; color:var(--plum) }
+  .smallcaps{ font-variant:small-caps; letter-spacing:.06em; text-transform:lowercase }
+
+  .wing-demo{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:8px }
+  .wing{ position:relative; background:var(--ivory); border:1px solid var(--hair); border-radius:12px; padding:22px 24px; border-top:4px solid var(--accent) }
+  .wing .wt{ display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.1em; color:#fff; background:var(--accent); padding:4px 11px; border-radius:4px; margin-bottom:14px }
+  .wing h4{ font-family:var(--display); font-weight:700; font-size:23px; margin:0; line-height:1.02 }
+  .wing .vl{ font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:8px }
+  .wing .ed{ font-family:var(--display); font-style:italic; font-weight:700; font-size:15px; color:var(--accent); margin-top:2px }
+
+  .law{ width:100%; border-collapse:collapse; margin-top:10px; font-size:15px }
+  .law th,.law td{ text-align:left; padding:11px 12px; border-bottom:1px solid var(--hair-soft); vertical-align:top }
+  .law th{ font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:500 }
+  .law td .mono{ white-space:nowrap }
+  .pass{ color:#0F5138; font-weight:700 }
+  .fail{ color:#A32D2D; font-weight:700 }
+
+  .dd{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px }
+  .dd .col{ background:var(--ivory); border:1px solid var(--hair); border-radius:12px; padding:22px 24px }
+  .dd .col h4{ margin:0 0 12px; font-family:var(--mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase }
+  .dd .do h4{ color:#0F5138 }
+  .dd .dont h4{ color:#A32D2D }
+  .dd ul{ margin:0; padding-left:18px }
+  .dd li{ margin:9px 0; font-size:15px }
+
+  .callout{ background:var(--ivory); border:1px solid var(--hair); border-left:4px solid var(--plum); border-radius:0 10px 10px 0; padding:18px 22px; margin:22px 0; font-size:15.5px }
+  .callout strong{ font-variant:small-caps; letter-spacing:.04em }
+
+  footer{ padding:56px 0 70px; text-align:center; color:var(--muted) }
+  footer .auth{ font-family:var(--display); font-weight:700; font-size:20px; letter-spacing:.24em; color:var(--ink); text-transform:uppercase }
+  footer .fine{ font-family:var(--mono); font-size:12px; margin-top:12px }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--parchment); font-family:var(--mono); font-size:13px; padding:9px 16px; border-radius:8px; opacity:0; transition:.2s; pointer-events:none; z-index:9 }
+  .toast.on{ opacity:1; transform:translateX(-50%) translateY(0) }
+
+  @media(max-width:620px){ .dd{ grid-template-columns:1fr } .specimen .lbl{ width:100% } }
+  @media(prefers-reduced-motion:reduce){ *{ transition:none!important; scroll-behavior:auto } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <div class="colophon" aria-hidden="true">❦</div>
+    <div class="banner" style="--accent:var(--plum)"><hr><p class="cw">The classic work · rendered interactive</p><hr></div>
+    <h1>The Art of<br>Computer <em>Programming</em></h1>
+    <p class="vol">Brand System — Digital Editions</p>
+    <p class="edition">First Edition</p>
+    <p class="lede">One coherent identity across the museum, the course map, and everything descended from Knuth's masterwork — drawn directly from the covers themselves.</p>
+  </header>
+
+  <hr class="rule">
+
+  <!-- 1 ESSENCE -->
+  <section id="essence">
+    <div class="sec-head"><div class="n">§ 1</div><h2>Brand essence</h2></div>
+    <p class="lead">The identity has one job: make a screen feel like an object you'd find on a shelf. Every choice should read as <em>bibliographic</em> — a scholarly press setting a canonical text — not as a web app dressed in serifs.</p>
+    <p>Three principles hold it together. <strong>Restraint:</strong> the page is quiet parchment and ink; colour appears only where it means something. <strong>Provenance:</strong> the colour, the banner, the volume block, and the tracked author line are lifted from the physical covers, so the digital work inherits the authority of the print. <strong>Precision:</strong> like the mathematics it presents, the typography is measured — a fixed scale, hairline rules, and contrast that never drops below legibility.</p>
+    <div class="callout"><strong>The through-line.</strong> Plum is the master brand. Each volume then carries its own cover ink, so a reader always knows which of the four wings — which of the four books — they are standing in.</div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 2 FOUNDATIONS -->
+  <section id="foundations">
+    <div class="sec-head"><div class="n">§ 2</div><h2>Foundation colours</h2>
+      <p>The neutral ground everything sits on: one warm parchment, one warm ink, everywhere — replacing the several creams and cool slate greys that used to be scattered across the properties.</p></div>
+    <div class="swatch-grid">
+      <div class="sw" data-hex="#F4EDDD" tabindex="0" role="button" aria-label="Copy Parchment hex">
+        <div class="chip" style="background:#F4EDDD;color:#1F1B16"><span class="num">Aa</span></div>
+        <div class="meta"><div class="nm">Parchment</div><div class="rl">Page ground</div><div class="hx"><span>#F4EDDD</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#FBF7EA" tabindex="0" role="button" aria-label="Copy Ivory hex">
+        <div class="chip" style="background:#FBF7EA;color:#1F1B16"><span class="num">Aa</span></div>
+        <div class="meta"><div class="nm">Ivory</div><div class="rl">Raised surface · cards</div><div class="hx"><span>#FBF7EA</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#1F1B16" tabindex="0" role="button" aria-label="Copy Ink hex">
+        <div class="chip" style="background:#1F1B16;color:#F4EDDD"><span class="num" style="color:#F4EDDD">Aa</span><span class="cr">14.7:1</span></div>
+        <div class="meta"><div class="nm">Ink</div><div class="rl">Primary text · titles</div><div class="hx"><span>#1F1B16</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#6B5D4F" tabindex="0" role="button" aria-label="Copy Muted hex">
+        <div class="chip" style="background:#6B5D4F;color:#F4EDDD"><span class="num" style="color:#F4EDDD">Aa</span><span class="cr">5.5:1</span></div>
+        <div class="meta"><div class="nm">Muted</div><div class="rl">Captions · metadata</div><div class="hx"><span>#6B5D4F</span><span class="copy">click to copy</span></div></div></div>
+    </div>
+    <div class="callout"><strong>Why warm.</strong> Cool slate text (<span class="mono">#1D2A33</span>) and Docusaurus's cool grey (<span class="mono">#606770</span>) read faintly digital against parchment. Warming the ink to <span class="mono">#1F1B16</span> and the muted tone to <span class="mono">#6B5D4F</span> matches the covers and still clears AA at 14.7:1 and 5.5:1.</div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 3 VOLUME SYSTEM -->
+  <section id="volumes">
+    <div class="sec-head"><div class="n">§ 3 · the signature system</div><h2>The volume inks</h2>
+      <p>Sampled from the cover scans. Plum stays the master accent (navbars, chrome, global links); each wing then takes the true ink of its book. Two — orange and teal — are <em>display only</em>: too light to carry text, they switch to their darker sibling for anything a reader must read.</p></div>
+    <div class="swatch-grid">
+      <div class="sw" data-hex="#5C1D2A" tabindex="0" role="button" aria-label="Copy Plum hex">
+        <div class="chip" style="background:#5C1D2A;color:#F4EDDD"><span class="num" style="color:#F4EDDD">M</span><span class="cr">10.8:1</span></div>
+        <div class="meta"><div class="nm">Plum <span class="tag tag--ok">master</span></div><div class="rl">Brand accent · chrome · links</div><div class="hx"><span>#5C1D2A</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#0F3642" tabindex="0" role="button" aria-label="Copy Vol 1 hex">
+        <div class="chip" style="background:#0F3642;color:#F4EDDD"><span class="num" style="color:#F4EDDD">I</span><span class="cr">11.1:1</span></div>
+        <div class="meta"><div class="nm">Petrol <span class="tag tag--ok">text-safe</span></div><div class="rl">Wing I · Vol. 1 Fundamental</div><div class="hx"><span>#0F3642</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#7C024C" tabindex="0" role="button" aria-label="Copy Vol 2 hex">
+        <div class="chip" style="background:#7C024C;color:#F4EDDD"><span class="num" style="color:#F4EDDD">II</span><span class="cr">9.1:1</span></div>
+        <div class="meta"><div class="nm">Magenta <span class="tag tag--ok">text-safe</span></div><div class="rl">Wing II · Vol. 2 Seminumerical</div><div class="hx"><span>#7C024C</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#E36D1B" tabindex="0" role="button" aria-label="Copy Vol 3 display hex">
+        <div class="chip" style="background:#E36D1B;color:#1F1B16"><span class="num">III</span><span class="cr">2.8:1</span></div>
+        <div class="meta"><div class="nm">Orange <span class="tag tag--display">display</span></div><div class="rl">Wing III · Vol. 3 Sorting/Searching</div><div class="hx"><span>#E36D1B</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#A34A08" tabindex="0" role="button" aria-label="Copy Vol 3 text hex">
+        <div class="chip" style="background:#A34A08;color:#F4EDDD"><span class="num" style="color:#F4EDDD">III</span><span class="cr">5.1:1</span></div>
+        <div class="meta"><div class="nm">Amber-ink <span class="tag tag--ok">text-safe</span></div><div class="rl">Wing III · text on parchment</div><div class="hx"><span>#A34A08</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#00634E" tabindex="0" role="button" aria-label="Copy Vol 4A hex">
+        <div class="chip" style="background:#00634E;color:#F4EDDD"><span class="num" style="color:#F4EDDD">IV</span><span class="cr">6.2:1</span></div>
+        <div class="meta"><div class="nm">Green <span class="tag tag--ok">text-safe</span></div><div class="rl">Wing IV · Vol. 4A Combinatorial</div><div class="hx"><span>#00634E</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#5AA8A4" tabindex="0" role="button" aria-label="Copy Vol 4C display hex">
+        <div class="chip" style="background:#5AA8A4;color:#1F1B16"><span class="num">4C</span><span class="cr">2.4:1</span></div>
+        <div class="meta"><div class="nm">Teal <span class="tag tag--display">display</span></div><div class="rl">Vol. 4C · secondary shade</div><div class="hx"><span>#5AA8A4</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#245C58" tabindex="0" role="button" aria-label="Copy Vol 4C text hex">
+        <div class="chip" style="background:#245C58;color:#F4EDDD"><span class="num" style="color:#F4EDDD">4C</span><span class="cr">6.6:1</span></div>
+        <div class="meta"><div class="nm">Deep-teal <span class="tag tag--ok">text-safe</span></div><div class="rl">Vol. 4C · text on parchment</div><div class="hx"><span>#245C58</span><span class="copy">click to copy</span></div></div></div>
+      <div class="sw" data-hex="#C6A664" tabindex="0" role="button" aria-label="Copy Gold hex">
+        <div class="chip" style="background:#C6A664;color:#1F1B16"><span class="num">Au</span><span class="cr">1.99:1</span></div>
+        <div class="meta"><div class="nm">Gold <span class="tag tag--display">décor</span></div><div class="rl">Rules · tags on plum only</div><div class="hx"><span>#C6A664</span><span class="copy">click to copy</span></div></div></div>
+    </div>
+
+    <h3>Wings, mapped to their books</h3>
+    <p>Each wing header takes its volume ink as a top edge and tag; the reader is oriented by colour before reading a word.</p>
+    <div class="wing-demo">
+      <div class="wing" style="--accent:#0F3642"><span class="wt">Wing I</span><h4>Fundamental Algorithms</h4><div class="vl">Vol. 1 · petrol #0F3642</div><div class="ed">Third Edition</div></div>
+      <div class="wing" style="--accent:#7C024C"><span class="wt">Wing II</span><h4>Seminumerical Algorithms</h4><div class="vl">Vol. 2 · magenta #7C024C</div><div class="ed">Third Edition</div></div>
+      <div class="wing" style="--accent:#A34A08"><span class="wt">Wing III</span><h4>Sorting and Searching</h4><div class="vl">Vol. 3 · amber-ink #A34A08</div><div class="ed">Second Edition</div></div>
+      <div class="wing" style="--accent:#00634E"><span class="wt">Wing IV</span><h4>Combinatorial Algorithms</h4><div class="vl">Vol. 4 · green #00634E</div><div class="ed">Parts 1–4C</div></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 4 TYPOGRAPHY -->
+  <section id="type">
+    <div class="sec-head"><div class="n">§ 4</div><h2>Typography</h2>
+      <p>Three faces, three jobs. A characterful display serif used large and sparingly, a readable body serif, and a mono for the machinery — captions, metadata, code.</p></div>
+    <div class="specimen">
+      <div class="row"><span class="lbl">Display</span><span style="font-family:var(--display);font-weight:700;font-size:40px;line-height:1">Cormorant Garamond</span></div>
+      <div class="row"><span class="lbl">Body</span><span style="font-family:var(--serif);font-size:24px">Spectral — the reading voice</span></div>
+      <div class="row"><span class="lbl">Utility</span><span style="font-family:var(--mono);font-size:19px">IBM Plex Mono · labels &amp; data</span></div>
+    </div>
+    <h3>The type scale</h3>
+    <div class="specimen">
+      <div class="row"><span class="lbl">Hero</span><span style="font-family:var(--display);font-weight:700;font-size:52px;line-height:1;letter-spacing:-.015em">The Art of Programming</span></div>
+      <div class="row"><span class="lbl">Section</span><span style="font-family:var(--display);font-weight:700;font-size:34px">Seminumerical Algorithms</span></div>
+      <div class="row"><span class="lbl">Body 17px</span><span>Where mathematical precision attempts to tame chaos, randomness becomes an instrument you can tune.</span></div>
+      <div class="row"><span class="lbl">Caption 13px</span><span style="font-family:var(--mono);font-size:13px;color:var(--muted)">After Donald E. Knuth · The Art of Computer Programming</span></div>
+    </div>
+    <div class="callout"><strong>On fidelity.</strong> The printed covers are set in a Modern serif (high stroke contrast, vertical stress). Cormorant is a warmer old-style face and a perfectly good stand-in; if you ever want the display to exactly echo the print, that's the single lever to pull. Body and mono are already right.</div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 5 DEVICES -->
+  <section id="devices">
+    <div class="sec-head"><div class="n">§ 5</div><h2>Signature devices</h2>
+      <p>The recognizable furniture of the covers. Use them consistently and any page instantly reads as part of the work.</p></div>
+
+    <h3>The "classic work" banner</h3>
+    <p>The most identifiable mark on every cover: a small tracked line between two hairline rules. Reuse it for the hero and as a section opener, tinted with the volume ink.</p>
+    <div class="specimen"><div class="banner" style="--accent:var(--v2)"><hr><p class="cw">The classic work · newly rendered</p><hr></div></div>
+
+    <h3>The volume block</h3>
+    <p>A three-part stack: tracked volume label, subtitle, then the edition line — the bibliographic detail worth setting on every cover.</p>
+    <div class="specimen" style="text-align:left">
+      <div style="font-family:var(--mono);font-size:13px;letter-spacing:.2em;color:var(--v4)">VOLUME 4A</div>
+      <hr class="rule rule--soft" style="width:64px;margin:8px 0">
+      <div style="font-family:var(--display);font-weight:700;font-size:30px;color:var(--v4)">Combinatorial Algorithms</div>
+      <div style="font-family:var(--display);font-weight:700;font-style:italic;font-size:18px;color:var(--v4);margin-top:2px">Part 1</div>
+    </div>
+
+    <h3>The drop cap &amp; small-caps eyebrow</h3>
+    <div class="specimen">
+      <p class="smallcaps" style="font-family:var(--mono);font-size:13px;letter-spacing:.14em;color:var(--v2);margin:0 0 8px">the engine of chance</p>
+      <p class="drop" style="margin:0">Randomness, in Knuth's telling, is not the absence of order but a discipline of its own — a set of procedures precise enough that even chance obeys them.</p>
+    </div>
+
+    <h3>The author line &amp; colophon</h3>
+    <p>Wide-tracked caps for attribution, echoing the base of every cover; a small colophon mark anchors the top corner — use your own, never the publisher's trademark.</p>
+    <div class="specimen" style="text-align:center"><div style="font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.24em">DONALD E. KNUTH</div></div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 6 CONTRAST LAW -->
+  <section id="contrast">
+    <div class="sec-head"><div class="n">§ 6</div><h2>The contrast law</h2>
+      <p>Non-negotiable rules that keep the antique look legible. All ratios are against parchment <span class="mono">#F4EDDD</span> and meet WCAG AA.</p></div>
+    <table class="law">
+      <thead><tr><th>Rule</th><th>Value</th><th>Ratio</th></tr></thead>
+      <tbody>
+        <tr><td>Body &amp; titles</td><td>Ink <span class="mono">#1F1B16</span></td><td class="pass">14.7:1 ✓</td></tr>
+        <tr><td>Captions / metadata — never lighter than muted</td><td>Muted <span class="mono">#6B5D4F</span></td><td class="pass">5.5:1 ✓</td></tr>
+        <tr><td>Petrol, magenta, green — safe as text</td><td class="mono">#0F3642 #7C024C #00634E</td><td class="pass">≥ 6.2:1 ✓</td></tr>
+        <tr><td>Orange as text — <strong>forbidden</strong>, use amber-ink</td><td class="mono">#E36D1B → #A34A08</td><td><span class="fail">2.8</span> → <span class="pass">5.1 ✓</span></td></tr>
+        <tr><td>Teal as text — <strong>forbidden</strong>, use deep-teal</td><td class="mono">#5AA8A4 → #245C58</td><td><span class="fail">2.4</span> → <span class="pass">6.6 ✓</span></td></tr>
+        <tr><td>Gold — decorative only, never text on parchment</td><td>Gold <span class="mono">#C6A664</span></td><td class="fail">1.99 ✗ text</td></tr>
+        <tr><td>Gold on plum is fine (the wing tags)</td><td class="mono">#C6A664 on #5C1D2A</td><td class="pass">5.4:1 ✓</td></tr>
+        <tr><td>Links must be underlined <em>or</em> a non-body colour</td><td>plum vs ink = 1.36:1</td><td class="fail">colour alone ✗</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 7 APPLICATION -->
+  <section id="apply">
+    <div class="sec-head"><div class="n">§ 7</div><h2>Applying it to the properties</h2></div>
+    <h3>The museum</h3>
+    <p>Each exhibit carries its wing's volume ink on the cover and prose accents (drop cap, section numbers, pull quotes, links); neutrals are warmed to ink <span class="mono">#1F1B16</span> and muted <span class="mono">#6B5D4F</span>. The atrium keeps plum as master while tinting each wing section with its ink, and opens with the classic-work banner.</p>
+    <h3>The course map <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">(Docusaurus / Infima)</span></h3>
+    <div class="specimen" style="text-align:left">
+      <div class="row"><span class="lbl">Unify cream</span><span>One parchment everywhere: <span class="mono">--ifm-background-color:#F4EDDD</span>; cards on ivory <span class="mono">#FBF7EA</span>.</span></div>
+      <div class="row"><span class="lbl">Warm the greys</span><span>Override <span class="mono">--ifm-menu-color</span> from Infima's cool <span class="mono">#606770</span> to <span class="mono">#6B5D4F</span>.</span></div>
+      <div class="row"><span class="lbl">Fix links</span><span>Plum links sit at 1.36:1 against body text — underline <span class="mono">.markdown a</span>, always.</span></div>
+      <div class="row"><span class="lbl">Accent</span><span>Add the volume inks as <span class="mono">--v1 … --v4c</span> so shelves, cards, and doc formulas can be colour-keyed to their book.</span></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 8 DO / DON'T -->
+  <section id="dodont">
+    <div class="sec-head"><div class="n">§ 8</div><h2>Do &amp; don't</h2></div>
+    <div class="dd">
+      <div class="col do"><h4>Do</h4><ul>
+        <li>Let plum lead and volume inks orient — one accent per view.</li>
+        <li>Reach for the darkened amber-ink and deep-teal wherever text is involved.</li>
+        <li>Keep parchment and ink warm; hairline rules over boxes.</li>
+        <li>Set edition lines and the tracked author line — the bibliographic tells.</li>
+        <li>Underline links, always.</li>
+      </ul></div>
+      <div class="col dont"><h4>Don't</h4><ul>
+        <li>Never set orange, teal, or gold as body text on parchment.</li>
+        <li>Don't run several different creams across the properties.</li>
+        <li>Don't leave cool Docusaurus greys against a warm page.</li>
+        <li>Don't reproduce the publisher's trademark — use your own colophon.</li>
+        <li>Don't let colour be the only signal for a link or state.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <footer>
+    <div class="banner" style="--accent:var(--plum)"><hr><p class="cw">end of the guide</p><hr></div>
+    <p class="auth" style="margin-top:26px">The Art of Computer Programming</p>
+    <p class="fine">Brand system · digital editions · colours sampled from the printed covers</p>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">copied</div>
+<script>
+  const toast=document.getElementById('toast');
+  function copy(hex){
+    if(navigator.clipboard) navigator.clipboard.writeText(hex).catch(function(){});
+    toast.textContent=hex+' copied'; toast.classList.add('on');
+    clearTimeout(window.__t); window.__t=setTimeout(function(){ toast.classList.remove('on'); },1200);
+  }
+  document.querySelectorAll('.sw').forEach(function(el){
+    const hex=el.getAttribute('data-hex');
+    el.addEventListener('click',function(){ copy(hex); });
+    el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); copy(hex); } });
+  });
+</script>
+</body>
+</html>
