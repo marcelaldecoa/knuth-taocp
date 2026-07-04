@@ -71,6 +71,7 @@
   --v3: #A34A08;  /* Vol. 3 · amber-ink */
   --v4: #00634E;  /* Vol. 4 · green */
   --v4c: #245C58; /* Vol. 4C · deep-teal (text-safe form of teal) */
+  --taocp-code-tint: rgba(92, 29, 42, 0.06); /* faint plum wash behind inline code */
 
   --taocp-serif: 'Spectral', 'Palatino Linotype', Palatino, 'Book Antiqua',
     'URW Palladio L', Georgia, serif;
@@ -137,6 +138,7 @@
   --v3: #d98a4a;  /* amber */
   --v4: #57a98d;  /* green */
   --v4c: #6fb7b2; /* teal */
+  --taocp-code-tint: rgba(217, 138, 151, 0.13); /* faint pink wash on the cloth-dark ground */
 
   --ifm-color-primary: #d98a97;
   --ifm-color-primary-dark: #cf7382;
@@ -188,6 +190,21 @@ body {
 /* Links: plum vs body is only 1.36:1, so colour alone is not a signal —
    underline every in-prose link (the brand law). */
 .markdown a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Technical terms stand out in the narrative, the way the museum's `.mono`
+   chips do: inline code and inline math render in the accent ink on a faint
+   tint, mid-sentence. Code blocks (pre code) and display equations keep their
+   normal colours so long listings and centred math stay readable. */
+.markdown :not(pre) > code {
+  color: var(--taocp-accent);
+  background: var(--taocp-code-tint);
+  border: none;
+  border-radius: 3px;
+  padding: 0.06em 0.36em;
+  font-size: 0.9em;
+}
+.markdown .katex { color: var(--taocp-accent); }
+.markdown .katex-display .katex { color: var(--taocp-ink); }
 
 /* Footer: a quiet parchment band with a gold foil rule — the museum's calm
    surface, not another plum block. Element selectors beat Infima's footer--dark
