@@ -54,6 +54,19 @@ The Drive `read_file_content` API only returns roughly the first ~90–100 book
 pages, so deep sections are read from a local full-text cache
 (`.knuth-cache/<volume_key>.txt`, gitignored) — see the navigator `SKILL.md`.
 
+Everything up to the Drive network hop is deterministic and lives in `map.json`.
+`tools/navigator_selftest.py` validates that part offline — map integrity plus
+the full resolution path (query → volume → section → book page → expert handoff
+→ the Drive title to search) — without a connector:
+
+```
+python3 docs/knuth-agents/tools/navigator_selftest.py            # checks + demo
+python3 docs/knuth-agents/tools/navigator_selftest.py "3.3.4"    # resolve one query
+```
+
+The live fetch (resolve title → Drive file ID, read the section) then runs from
+an interactive session where the connector can be authorized.
+
 ## Activate (three steps — the files are already here)
 
 1. `cp config.local.example.json config.local.json` and paste your Drive folder ID.
@@ -83,7 +96,9 @@ and stage tests:
   differs from `book_page` by the volume's front-matter offset).
 - Skill/subagent frontmatter and `.mcp.json` schema drift over time — verify
   against current Claude Code docs if something doesn't load.
-- `map.json` carries book-page hints for every volume except a few page-less
-  entries in Vol 4B (the `MPR` preliminaries) and Fascicle 7 (the 7.2.2.3
-  constraint-satisfaction sub-sections), where `book_page` is `null` — the
-  navigator anchors on the heading anyway, so the hint is optional.
+- `map.json` carries a book-page hint for every Knuth-numbered section. The two
+  draft volumes restart pagination at 1 (Vol 4B's `MPR` preliminaries; Fascicle
+  7, slated for Vol 4C), so their hints are relative to that sequence and carry
+  a `page_note`. The only page-less entries are Fascicle 7's `7.2.2.3a`–`e`,
+  flagged `"editorial": true` — navigation tags inside §7.2.2.3, not Knuth's own
+  numbering; cite the parent §7.2.2.3 and anchor on the heading.

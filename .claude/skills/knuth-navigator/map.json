@@ -688,7 +688,8 @@
         {
           "id": "MPR",
           "title": "Mathematical Preliminaries Redux (inequalities, martingales, tail inequalities)",
-          "book_page": null
+          "book_page": 1,
+          "page_note": "Vol 4B preliminaries pagination (restarts at 1; separate from main body where 7.2.2 starts at p.30)"
         },
         {
           "id": "7.2.2",
@@ -714,34 +715,46 @@
         {
           "id": "7.2.2.3",
           "title": "Constraint Satisfaction",
-          "book_page": null
+          "book_page": 1,
+          "page_note": "Fascicle 7 pagination (restarts at 1; fascicle content is slated for Volume 4C)"
         },
         {
           "id": "7.2.2.3a",
           "title": "Related models / statistical mechanics",
-          "book_page": null
+          "book_page": null,
+          "editorial": true,
+          "page_note": "editorial topic tag within 7.2.2.3 (not a Knuth-numbered section); cite parent 7.2.2.3"
         },
         {
           "id": "7.2.2.3b",
           "title": "Line labeling in computer vision; graph labeling & embedding",
-          "book_page": null
+          "book_page": null,
+          "editorial": true,
+          "page_note": "editorial topic tag within 7.2.2.3 (not a Knuth-numbered section); cite parent 7.2.2.3"
         },
         {
           "id": "7.2.2.3c",
           "title": "Subgraph isomorphism; solving a CSP; translating CSP to SAT",
-          "book_page": null
+          "book_page": null,
+          "editorial": true,
+          "page_note": "editorial topic tag within 7.2.2.3 (not a Knuth-numbered section); cite parent 7.2.2.3"
         },
         {
           "id": "7.2.2.3d",
           "title": "Consistency, efficiency, dancing cells, variable-ordering heuristics",
-          "book_page": null
+          "book_page": null,
+          "editorial": true,
+          "page_note": "editorial topic tag within 7.2.2.3 (not a Knuth-numbered section); cite parent 7.2.2.3"
         },
         {
           "id": "7.2.2.3e",
           "title": "Tractable vs NP-complete families; polymorphisms; dichotomy theorem",
-          "book_page": null
+          "book_page": null,
+          "editorial": true,
+          "page_note": "editorial topic tag within 7.2.2.3 (not a Knuth-numbered section); cite parent 7.2.2.3"
         }
-      ]
+      ],
+      "note": "Draft pre-fascicle; pagination restarts at 1. Sub-entries a-e are editorial navigation tags within section 7.2.2.3, not Knuth's own numbering. Eventual home: Volume 4C."
     },
     "cm": {
       "title": "Concrete Mathematics (Graham, Knuth, Patashnik, 2nd ed.)",
@@ -1113,5 +1126,6 @@
       ],
       "desc": "Concrete Mathematics — sums, recurrences, number theory, binomial coeffs, special numbers, generating functions, asymptotics."
     }
-  }
+  },
+  "notes_pages": "book_page is a hint only; the system anchors on headings. Entries in the two draft volumes (v4b MPR, f7) use their own restart-at-1 sequences; entries marked editorial:true have no page and should be cited via their parent section heading."
 }
