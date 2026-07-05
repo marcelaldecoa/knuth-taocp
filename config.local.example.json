@@ -1,0 +1,4 @@
+{
+  "//": "Copy to config.local.json (which is gitignored) and fill in your folder ID. This is the ONLY Drive identifier the system needs, and it stays out of git.",
+  "KNUTH_DRIVE_FOLDER": "PUT-YOUR-FOLDER-ID-HERE"
+}

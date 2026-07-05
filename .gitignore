@@ -30,3 +30,15 @@ website/build/
 website/.docusaurus/
 # Generated from src/data/manifest.json by scripts/gen-sidebar.mjs (prebuild).
 website/sidebars.ts
+
+# Knuth expert agents (docs/knuth-agents/) — keep Drive handles and creds OUT of git.
+# Local Drive folder ID (copy config.local.example.json -> config.local.json):
+config.local.json
+# Active MCP wiring for the self-hosted Drive server (copy from .mcp.json.example):
+.mcp.json
+# Session cache of resolved Drive file IDs and extracted volume text:
+.knuth-cache/
+# Google OAuth credentials — never commit:
+gdrive-creds.json
+**/gdrive-creds.json
+client_secret_*.json

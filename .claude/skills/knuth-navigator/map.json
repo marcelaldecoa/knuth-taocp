@@ -1,0 +1,1066 @@
+{
+  "_note": "Committed navigation map for the knuth-navigator skill. Contains NO Drive file IDs — resolve title->fileId at runtime (see SKILL.md). Anchor fetches on the section HEADING; book_page is only a hint (the PDF page differs by the volume's front-matter offset). Page hints for Vols 1-3 come from the library index; deeper Vol 4A/4B/F7 and Concrete Mathematics pages are left null and can be reconciled against your source map.json.",
+  "agents": {
+    "v1": "knuth-fundamentals",
+    "v2": "knuth-seminumerical",
+    "v3": "knuth-sorting",
+    "v4a": "knuth-combinatorial",
+    "v4b": "knuth-combinatorial",
+    "f7": "knuth-combinatorial",
+    "cm": "knuth-concrete-math"
+  },
+  "volumes": {
+    "v1": {
+      "match_title": "TAOCP Vol 1",
+      "title": "The Art of Computer Programming, Volume 1: Fundamental Algorithms (3rd ed.)",
+      "sections": [
+        {
+          "section_id": "1",
+          "heading": "Basic Concepts",
+          "book_page": 1
+        },
+        {
+          "section_id": "1.1",
+          "heading": "Algorithms",
+          "book_page": 1
+        },
+        {
+          "section_id": "1.2",
+          "heading": "Mathematical Preliminaries",
+          "book_page": 10
+        },
+        {
+          "section_id": "1.2.1",
+          "heading": "Mathematical Induction",
+          "book_page": 11
+        },
+        {
+          "section_id": "1.2.2",
+          "heading": "Numbers, Powers, and Logarithms",
+          "book_page": 21
+        },
+        {
+          "section_id": "1.2.3",
+          "heading": "Sums and Products",
+          "book_page": 27
+        },
+        {
+          "section_id": "1.2.4",
+          "heading": "Integer Functions and Elementary Number Theory",
+          "book_page": 39
+        },
+        {
+          "section_id": "1.2.5",
+          "heading": "Permutations and Factorials",
+          "book_page": 45
+        },
+        {
+          "section_id": "1.2.6",
+          "heading": "Binomial Coefficients",
+          "book_page": 52
+        },
+        {
+          "section_id": "1.2.7",
+          "heading": "Harmonic Numbers",
+          "book_page": 75
+        },
+        {
+          "section_id": "1.2.8",
+          "heading": "Fibonacci Numbers",
+          "book_page": 79
+        },
+        {
+          "section_id": "1.2.9",
+          "heading": "Generating Functions",
+          "book_page": 87
+        },
+        {
+          "section_id": "1.2.10",
+          "heading": "Analysis of an Algorithm",
+          "book_page": 96
+        },
+        {
+          "section_id": "1.2.11",
+          "heading": "Asymptotic Representations",
+          "book_page": 107
+        },
+        {
+          "section_id": "1.3",
+          "heading": "MIX",
+          "book_page": 124
+        },
+        {
+          "section_id": "1.3.1",
+          "heading": "Description of MIX",
+          "book_page": 124
+        },
+        {
+          "section_id": "1.3.2",
+          "heading": "The MIX Assembly Language",
+          "book_page": 144
+        },
+        {
+          "section_id": "1.3.3",
+          "heading": "Applications to Permutations",
+          "book_page": 164
+        },
+        {
+          "section_id": "1.4",
+          "heading": "Some Fundamental Programming Techniques",
+          "book_page": 186
+        },
+        {
+          "section_id": "1.4.1",
+          "heading": "Subroutines",
+          "book_page": 186
+        },
+        {
+          "section_id": "1.4.2",
+          "heading": "Coroutines",
+          "book_page": 193
+        },
+        {
+          "section_id": "1.4.3",
+          "heading": "Interpretive Routines",
+          "book_page": 200
+        },
+        {
+          "section_id": "1.4.4",
+          "heading": "Input and Output",
+          "book_page": 215
+        },
+        {
+          "section_id": "1.4.5",
+          "heading": "History and Bibliography",
+          "book_page": 229
+        },
+        {
+          "section_id": "2",
+          "heading": "Information Structures",
+          "book_page": 232
+        },
+        {
+          "section_id": "2.1",
+          "heading": "Introduction",
+          "book_page": 232
+        },
+        {
+          "section_id": "2.2",
+          "heading": "Linear Lists",
+          "book_page": 238
+        },
+        {
+          "section_id": "2.2.1",
+          "heading": "Stacks, Queues, and Deques",
+          "book_page": 238
+        },
+        {
+          "section_id": "2.2.2",
+          "heading": "Sequential Allocation",
+          "book_page": 244
+        },
+        {
+          "section_id": "2.2.3",
+          "heading": "Linked Allocation",
+          "book_page": 254
+        },
+        {
+          "section_id": "2.2.4",
+          "heading": "Circular Lists",
+          "book_page": 273
+        },
+        {
+          "section_id": "2.2.5",
+          "heading": "Doubly Linked Lists",
+          "book_page": 280
+        },
+        {
+          "section_id": "2.2.6",
+          "heading": "Arrays and Orthogonal Lists",
+          "book_page": 298
+        },
+        {
+          "section_id": "2.3",
+          "heading": "Trees",
+          "book_page": 308
+        },
+        {
+          "section_id": "2.3.1",
+          "heading": "Traversing Binary Trees",
+          "book_page": 318
+        },
+        {
+          "section_id": "2.3.2",
+          "heading": "Binary Tree Representation of Trees",
+          "book_page": 334
+        },
+        {
+          "section_id": "2.3.3",
+          "heading": "Other Representations of Trees",
+          "book_page": 348
+        },
+        {
+          "section_id": "2.3.4",
+          "heading": "Basic Mathematical Properties of Trees",
+          "book_page": 362
+        },
+        {
+          "section_id": "2.3.5",
+          "heading": "Lists and Garbage Collection",
+          "book_page": 408
+        },
+        {
+          "section_id": "2.4",
+          "heading": "Multilinked Structures",
+          "book_page": 424
+        },
+        {
+          "section_id": "2.5",
+          "heading": "Dynamic Storage Allocation",
+          "book_page": 435
+        },
+        {
+          "section_id": "2.6",
+          "heading": "History and Bibliography",
+          "book_page": 457
+        }
+      ]
+    },
+    "v2": {
+      "match_title": "TAOCP Vol 2",
+      "title": "The Art of Computer Programming, Volume 2: Seminumerical Algorithms (3rd ed.)",
+      "sections": [
+        {
+          "section_id": "3",
+          "heading": "Random Numbers",
+          "book_page": 1
+        },
+        {
+          "section_id": "3.1",
+          "heading": "Introduction",
+          "book_page": 1
+        },
+        {
+          "section_id": "3.2",
+          "heading": "Generating Uniform Random Numbers",
+          "book_page": 10
+        },
+        {
+          "section_id": "3.2.1",
+          "heading": "The Linear Congruential Method",
+          "book_page": 10
+        },
+        {
+          "section_id": "3.2.2",
+          "heading": "Other Methods",
+          "book_page": 26
+        },
+        {
+          "section_id": "3.3",
+          "heading": "Statistical Tests",
+          "book_page": 41
+        },
+        {
+          "section_id": "3.3.1",
+          "heading": "General Test Procedures for Studying Random Data",
+          "book_page": 42
+        },
+        {
+          "section_id": "3.3.2",
+          "heading": "Empirical Tests",
+          "book_page": 61
+        },
+        {
+          "section_id": "3.3.3",
+          "heading": "Theoretical Tests",
+          "book_page": 80
+        },
+        {
+          "section_id": "3.3.4",
+          "heading": "The Spectral Test",
+          "book_page": 93
+        },
+        {
+          "section_id": "3.4",
+          "heading": "Other Types of Random Quantities",
+          "book_page": 119
+        },
+        {
+          "section_id": "3.5",
+          "heading": "What Is a Random Sequence?",
+          "book_page": 149
+        },
+        {
+          "section_id": "3.6",
+          "heading": "Summary",
+          "book_page": 184
+        },
+        {
+          "section_id": "4",
+          "heading": "Arithmetic",
+          "book_page": 194
+        },
+        {
+          "section_id": "4.1",
+          "heading": "Positional Number Systems",
+          "book_page": 195
+        },
+        {
+          "section_id": "4.2",
+          "heading": "Floating Point Arithmetic",
+          "book_page": 214
+        },
+        {
+          "section_id": "4.2.1",
+          "heading": "Single-Precision Calculations",
+          "book_page": 214
+        },
+        {
+          "section_id": "4.2.2",
+          "heading": "Accuracy of Floating Point Arithmetic",
+          "book_page": 229
+        },
+        {
+          "section_id": "4.2.3",
+          "heading": "Double-Precision Calculations",
+          "book_page": 246
+        },
+        {
+          "section_id": "4.2.4",
+          "heading": "Distribution of Floating Point Numbers",
+          "book_page": 253
+        },
+        {
+          "section_id": "4.3",
+          "heading": "Multiple-Precision Arithmetic",
+          "book_page": 265
+        },
+        {
+          "section_id": "4.3.1",
+          "heading": "The Classical Algorithms",
+          "book_page": 265
+        },
+        {
+          "section_id": "4.3.2",
+          "heading": "Modular Arithmetic",
+          "book_page": 284
+        },
+        {
+          "section_id": "4.3.3",
+          "heading": "How Fast Can We Multiply?",
+          "book_page": 294
+        },
+        {
+          "section_id": "4.4",
+          "heading": "Radix Conversion",
+          "book_page": 319
+        },
+        {
+          "section_id": "4.5",
+          "heading": "Rational Arithmetic",
+          "book_page": 330
+        },
+        {
+          "section_id": "4.5.1",
+          "heading": "Fractions",
+          "book_page": 330
+        },
+        {
+          "section_id": "4.5.2",
+          "heading": "The Greatest Common Divisor",
+          "book_page": 333
+        },
+        {
+          "section_id": "4.5.3",
+          "heading": "Analysis of Euclid's Algorithm",
+          "book_page": 356
+        },
+        {
+          "section_id": "4.5.4",
+          "heading": "Factoring into Primes",
+          "book_page": 379
+        },
+        {
+          "section_id": "4.6",
+          "heading": "Polynomial Arithmetic",
+          "book_page": 418
+        },
+        {
+          "section_id": "4.6.1",
+          "heading": "Division of Polynomials",
+          "book_page": 420
+        },
+        {
+          "section_id": "4.6.2",
+          "heading": "Factorization of Polynomials",
+          "book_page": 439
+        },
+        {
+          "section_id": "4.6.3",
+          "heading": "Evaluation of Powers",
+          "book_page": 461
+        },
+        {
+          "section_id": "4.6.4",
+          "heading": "Evaluation of Polynomials",
+          "book_page": 485
+        },
+        {
+          "section_id": "4.7",
+          "heading": "Manipulation of Power Series",
+          "book_page": 525
+        }
+      ]
+    },
+    "v3": {
+      "match_title": "TAOCP Vol 3",
+      "title": "The Art of Computer Programming, Volume 3: Sorting and Searching (2nd ed.)",
+      "sections": [
+        {
+          "section_id": "5",
+          "heading": "Sorting",
+          "book_page": 1
+        },
+        {
+          "section_id": "5.1",
+          "heading": "Combinatorial Properties of Permutations",
+          "book_page": 11
+        },
+        {
+          "section_id": "5.1.1",
+          "heading": "Inversions",
+          "book_page": 11
+        },
+        {
+          "section_id": "5.1.2",
+          "heading": "Permutations of a Multiset",
+          "book_page": 22
+        },
+        {
+          "section_id": "5.1.3",
+          "heading": "Runs",
+          "book_page": 35
+        },
+        {
+          "section_id": "5.1.4",
+          "heading": "Tableaux and Involutions",
+          "book_page": 47
+        },
+        {
+          "section_id": "5.2",
+          "heading": "Internal Sorting",
+          "book_page": 73
+        },
+        {
+          "section_id": "5.2.1",
+          "heading": "Sorting by Insertion",
+          "book_page": 80
+        },
+        {
+          "section_id": "5.2.2",
+          "heading": "Sorting by Exchanging",
+          "book_page": 105
+        },
+        {
+          "section_id": "5.2.3",
+          "heading": "Sorting by Selection",
+          "book_page": 138
+        },
+        {
+          "section_id": "5.2.4",
+          "heading": "Sorting by Merging",
+          "book_page": 158
+        },
+        {
+          "section_id": "5.2.5",
+          "heading": "Sorting by Distribution",
+          "book_page": 168
+        },
+        {
+          "section_id": "5.3",
+          "heading": "Optimum Sorting",
+          "book_page": 180
+        },
+        {
+          "section_id": "5.3.1",
+          "heading": "Minimum-Comparison Sorting",
+          "book_page": 180
+        },
+        {
+          "section_id": "5.3.2",
+          "heading": "Minimum-Comparison Merging",
+          "book_page": 197
+        },
+        {
+          "section_id": "5.3.3",
+          "heading": "Minimum-Comparison Selection",
+          "book_page": 207
+        },
+        {
+          "section_id": "5.3.4",
+          "heading": "Networks for Sorting",
+          "book_page": 219
+        },
+        {
+          "section_id": "5.4",
+          "heading": "External Sorting",
+          "book_page": 248
+        },
+        {
+          "section_id": "5.4.1",
+          "heading": "Multiway Merging and Replacement Selection",
+          "book_page": 252
+        },
+        {
+          "section_id": "5.4.2",
+          "heading": "The Polyphase Merge",
+          "book_page": 267
+        },
+        {
+          "section_id": "5.4.3",
+          "heading": "The Cascade Merge",
+          "book_page": 288
+        },
+        {
+          "section_id": "5.4.4",
+          "heading": "Reading Tape Backwards",
+          "book_page": 299
+        },
+        {
+          "section_id": "5.4.5",
+          "heading": "The Oscillating Sort",
+          "book_page": 311
+        },
+        {
+          "section_id": "5.4.6",
+          "heading": "Practical Considerations for Tape Merging",
+          "book_page": 317
+        },
+        {
+          "section_id": "5.4.7",
+          "heading": "External Radix Sorting",
+          "book_page": 343
+        },
+        {
+          "section_id": "5.4.8",
+          "heading": "Two-Tape Sorting",
+          "book_page": 348
+        },
+        {
+          "section_id": "5.4.9",
+          "heading": "Disks and Drums",
+          "book_page": 356
+        },
+        {
+          "section_id": "5.5",
+          "heading": "Summary, History, and Bibliography",
+          "book_page": 380
+        },
+        {
+          "section_id": "6",
+          "heading": "Searching",
+          "book_page": 392
+        },
+        {
+          "section_id": "6.1",
+          "heading": "Sequential Searching",
+          "book_page": 396
+        },
+        {
+          "section_id": "6.2",
+          "heading": "Searching by Comparison of Keys",
+          "book_page": 409
+        },
+        {
+          "section_id": "6.2.1",
+          "heading": "Searching an Ordered Table",
+          "book_page": 409
+        },
+        {
+          "section_id": "6.2.2",
+          "heading": "Binary Tree Searching",
+          "book_page": 426
+        },
+        {
+          "section_id": "6.2.3",
+          "heading": "Balanced Trees",
+          "book_page": 458
+        },
+        {
+          "section_id": "6.2.4",
+          "heading": "Multiway Trees",
+          "book_page": 481
+        },
+        {
+          "section_id": "6.3",
+          "heading": "Digital Searching",
+          "book_page": 492
+        },
+        {
+          "section_id": "6.4",
+          "heading": "Hashing",
+          "book_page": 513
+        },
+        {
+          "section_id": "6.5",
+          "heading": "Retrieval on Secondary Keys",
+          "book_page": 559
+        }
+      ]
+    },
+    "v4a": {
+      "match_title": "TAOCP Vol 4A",
+      "title": "The Art of Computer Programming, Volume 4A: Combinatorial Algorithms, Part 1",
+      "sections": [
+        {
+          "section_id": "7",
+          "heading": "Combinatorial Searching",
+          "book_page": null
+        },
+        {
+          "section_id": "7.1",
+          "heading": "Zeros and Ones",
+          "book_page": null
+        },
+        {
+          "section_id": "7.1.1",
+          "heading": "Boolean Basics",
+          "book_page": null
+        },
+        {
+          "section_id": "7.1.2",
+          "heading": "Boolean Evaluation",
+          "book_page": null
+        },
+        {
+          "section_id": "7.1.3",
+          "heading": "Bitwise Tricks and Techniques",
+          "book_page": null
+        },
+        {
+          "section_id": "7.1.4",
+          "heading": "Binary Decision Diagrams",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2",
+          "heading": "Generating All Possibilities",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.1",
+          "heading": "Generating Basic Combinatorial Patterns",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.1.1",
+          "heading": "Generating All n-Tuples",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.1.2",
+          "heading": "Generating All Permutations",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.1.3",
+          "heading": "Generating All Combinations",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.1.4",
+          "heading": "Generating All Partitions",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.1.5",
+          "heading": "Generating All Set Partitions",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.1.6",
+          "heading": "Generating All Trees",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.1.7",
+          "heading": "History and Further References",
+          "book_page": null
+        }
+      ]
+    },
+    "v4b": {
+      "match_title": "TAOCP Vol 4B",
+      "title": "The Art of Computer Programming, Volume 4B: Combinatorial Algorithms, Part 2",
+      "sections": [
+        {
+          "section_id": "MPR",
+          "heading": "Mathematical Preliminaries Redux",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.2",
+          "heading": "Backtrack Programming",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.2.1",
+          "heading": "Dancing Links",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2.2.2",
+          "heading": "Satisfiability",
+          "book_page": null
+        }
+      ]
+    },
+    "f7": {
+      "match_title": "Fascicle 7",
+      "title": "The Art of Computer Programming, Volume 4 Fascicle 7: Constraint Satisfaction",
+      "sections": [
+        {
+          "section_id": "7.2.2.3",
+          "heading": "Constraint Satisfaction",
+          "book_page": null
+        }
+      ]
+    },
+    "cm": {
+      "match_title": "Concrete Mathematics",
+      "title": "Concrete Mathematics (Graham, Knuth, Patashnik, 2nd ed.)",
+      "sections": [
+        {
+          "section_id": "1",
+          "heading": "Recurrent Problems",
+          "book_page": null
+        },
+        {
+          "section_id": "1.1",
+          "heading": "The Tower of Hanoi",
+          "book_page": null
+        },
+        {
+          "section_id": "1.2",
+          "heading": "Lines in the Plane",
+          "book_page": null
+        },
+        {
+          "section_id": "1.3",
+          "heading": "The Josephus Problem",
+          "book_page": null
+        },
+        {
+          "section_id": "2",
+          "heading": "Sums",
+          "book_page": null
+        },
+        {
+          "section_id": "2.1",
+          "heading": "Notation",
+          "book_page": null
+        },
+        {
+          "section_id": "2.2",
+          "heading": "Sums and Recurrences",
+          "book_page": null
+        },
+        {
+          "section_id": "2.3",
+          "heading": "Manipulation of Sums",
+          "book_page": null
+        },
+        {
+          "section_id": "2.4",
+          "heading": "Multiple Sums",
+          "book_page": null
+        },
+        {
+          "section_id": "2.5",
+          "heading": "General Methods",
+          "book_page": null
+        },
+        {
+          "section_id": "2.6",
+          "heading": "Finite and Infinite Calculus",
+          "book_page": null
+        },
+        {
+          "section_id": "2.7",
+          "heading": "Infinite Sums",
+          "book_page": null
+        },
+        {
+          "section_id": "3",
+          "heading": "Integer Functions",
+          "book_page": null
+        },
+        {
+          "section_id": "3.1",
+          "heading": "Floors and Ceilings",
+          "book_page": null
+        },
+        {
+          "section_id": "3.2",
+          "heading": "Floor/Ceiling Applications",
+          "book_page": null
+        },
+        {
+          "section_id": "3.3",
+          "heading": "Floor/Ceiling Recurrences",
+          "book_page": null
+        },
+        {
+          "section_id": "3.4",
+          "heading": "'mod': The Binary Operation",
+          "book_page": null
+        },
+        {
+          "section_id": "3.5",
+          "heading": "Floor/Ceiling Sums",
+          "book_page": null
+        },
+        {
+          "section_id": "4",
+          "heading": "Number Theory",
+          "book_page": null
+        },
+        {
+          "section_id": "4.1",
+          "heading": "Divisibility",
+          "book_page": null
+        },
+        {
+          "section_id": "4.2",
+          "heading": "Primes",
+          "book_page": null
+        },
+        {
+          "section_id": "4.3",
+          "heading": "Prime Examples",
+          "book_page": null
+        },
+        {
+          "section_id": "4.4",
+          "heading": "Factorial Factors",
+          "book_page": null
+        },
+        {
+          "section_id": "4.5",
+          "heading": "Relative Primality",
+          "book_page": null
+        },
+        {
+          "section_id": "4.6",
+          "heading": "'mod': The Congruence Relation",
+          "book_page": null
+        },
+        {
+          "section_id": "4.7",
+          "heading": "Independent Residues",
+          "book_page": null
+        },
+        {
+          "section_id": "4.8",
+          "heading": "Additional Applications",
+          "book_page": null
+        },
+        {
+          "section_id": "4.9",
+          "heading": "Phi and Mu",
+          "book_page": null
+        },
+        {
+          "section_id": "5",
+          "heading": "Binomial Coefficients",
+          "book_page": null
+        },
+        {
+          "section_id": "5.1",
+          "heading": "Basic Identities",
+          "book_page": null
+        },
+        {
+          "section_id": "5.2",
+          "heading": "Basic Practice",
+          "book_page": null
+        },
+        {
+          "section_id": "5.3",
+          "heading": "Tricks of the Trade",
+          "book_page": null
+        },
+        {
+          "section_id": "5.4",
+          "heading": "Generating Functions",
+          "book_page": null
+        },
+        {
+          "section_id": "5.5",
+          "heading": "Hypergeometric Functions",
+          "book_page": null
+        },
+        {
+          "section_id": "5.6",
+          "heading": "Hypergeometric Transformations",
+          "book_page": null
+        },
+        {
+          "section_id": "5.7",
+          "heading": "Partial Hypergeometric Sums",
+          "book_page": null
+        },
+        {
+          "section_id": "5.8",
+          "heading": "Mechanical Summation",
+          "book_page": null
+        },
+        {
+          "section_id": "6",
+          "heading": "Special Numbers",
+          "book_page": null
+        },
+        {
+          "section_id": "6.1",
+          "heading": "Stirling Numbers",
+          "book_page": null
+        },
+        {
+          "section_id": "6.2",
+          "heading": "Eulerian Numbers",
+          "book_page": null
+        },
+        {
+          "section_id": "6.3",
+          "heading": "Harmonic Numbers",
+          "book_page": null
+        },
+        {
+          "section_id": "6.4",
+          "heading": "Harmonic Summation",
+          "book_page": null
+        },
+        {
+          "section_id": "6.5",
+          "heading": "Bernoulli Numbers",
+          "book_page": null
+        },
+        {
+          "section_id": "6.6",
+          "heading": "Fibonacci Numbers",
+          "book_page": null
+        },
+        {
+          "section_id": "6.7",
+          "heading": "Continuants",
+          "book_page": null
+        },
+        {
+          "section_id": "7",
+          "heading": "Generating Functions",
+          "book_page": null
+        },
+        {
+          "section_id": "7.1",
+          "heading": "Domino Theory and Change",
+          "book_page": null
+        },
+        {
+          "section_id": "7.2",
+          "heading": "Basic Maneuvers",
+          "book_page": null
+        },
+        {
+          "section_id": "7.3",
+          "heading": "Solving Recurrences",
+          "book_page": null
+        },
+        {
+          "section_id": "7.4",
+          "heading": "Special Generating Functions",
+          "book_page": null
+        },
+        {
+          "section_id": "7.5",
+          "heading": "Convolutions",
+          "book_page": null
+        },
+        {
+          "section_id": "7.6",
+          "heading": "Exponential Generating Functions",
+          "book_page": null
+        },
+        {
+          "section_id": "7.7",
+          "heading": "Dirichlet Generating Functions",
+          "book_page": null
+        },
+        {
+          "section_id": "8",
+          "heading": "Discrete Probability",
+          "book_page": null
+        },
+        {
+          "section_id": "8.1",
+          "heading": "Definitions",
+          "book_page": null
+        },
+        {
+          "section_id": "8.2",
+          "heading": "Mean and Variance",
+          "book_page": null
+        },
+        {
+          "section_id": "8.3",
+          "heading": "Probability Generating Functions",
+          "book_page": null
+        },
+        {
+          "section_id": "8.4",
+          "heading": "Flipping Coins",
+          "book_page": null
+        },
+        {
+          "section_id": "8.5",
+          "heading": "Hashing",
+          "book_page": null
+        },
+        {
+          "section_id": "9",
+          "heading": "Asymptotics",
+          "book_page": null
+        },
+        {
+          "section_id": "9.1",
+          "heading": "A Hierarchy",
+          "book_page": null
+        },
+        {
+          "section_id": "9.2",
+          "heading": "O Notation",
+          "book_page": null
+        },
+        {
+          "section_id": "9.3",
+          "heading": "O Manipulation",
+          "book_page": null
+        },
+        {
+          "section_id": "9.4",
+          "heading": "Two Asymptotic Tricks",
+          "book_page": null
+        },
+        {
+          "section_id": "9.5",
+          "heading": "Euler's Summation Formula",
+          "book_page": null
+        },
+        {
+          "section_id": "9.6",
+          "heading": "Final Summations",
+          "book_page": null
+        }
+      ]
+    }
+  }
+}
