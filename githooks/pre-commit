@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+# Pre-commit guard for the Knuth expert agents (docs/knuth-agents/).
+# Never let a Google Drive handle or credential reach git history.
+# Activate with:  git config core.hooksPath githooks
+set -eu
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+fail=0
+
+# 1) Sensitive local files must never be committed.
+for f in $staged; do
+  case "$f" in
+    config.local.json|.mcp.json|gdrive-creds.json|*/gdrive-creds.json|client_secret_*.json)
+      echo "pre-commit: refusing to commit sensitive Drive file: $f" >&2; fail=1 ;;
+    .knuth-cache/*)
+      echo "pre-commit: refusing to commit the resolved-ID / volume-text cache: $f" >&2; fail=1 ;;
+  esac
+done
+
+# 2) A real folder ID must stay in config.local.json — only the placeholder may be tracked.
+for f in $staged; do
+  [ -f "$f" ] || continue
+  if grep -Eq '"KNUTH_DRIVE_FOLDER"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_-]{20,}"' "$f" \
+     && ! grep -q 'PUT-YOUR-FOLDER-ID-HERE' "$f"; then
+    echo "pre-commit: a real KNUTH_DRIVE_FOLDER id is staged in $f — keep it in config.local.json (gitignored)." >&2
+    fail=1
+  fi
+done
+
+# 3) Drive file IDs (from search_files) must never be hardcoded into the map/skill/agents/docs.
+for f in $staged; do
+  case "$f" in
+    .claude/skills/knuth-navigator/*|.claude/agents/knuth-*|docs/knuth-agents/*)
+      if grep -Eq '"(id|fileId)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_-]{25,}"' "$f"; then
+        echo "pre-commit: a Drive file ID looks hardcoded in $f — resolve IDs at runtime, never commit them." >&2
+        fail=1
+      fi ;;
+  esac
+done
+
+[ "$fail" -eq 0 ] || { echo "pre-commit: blocked. See docs/knuth-agents/README.md." >&2; exit 1; }

@@ -1,0 +1,1117 @@
+{
+  "note": "Volume keys are stable local identifiers. No Drive file IDs are stored here. The navigator resolves title -> current Drive file ID at runtime by searching the configured folder (see config.local.json). Book pages are Knuth's printed pages.",
+  "resolve": "title-match within KNUTH_DRIVE_FOLDER",
+  "volumes": {
+    "v1": {
+      "title": "TAOCP Vol 1 — Fundamental Algorithms (3rd ed.)",
+      "match_title": "TAOCP Vol 1",
+      "sections": [
+        {
+          "id": "1",
+          "title": "Basic Concepts",
+          "book_page": 1
+        },
+        {
+          "id": "1.1",
+          "title": "Algorithms",
+          "book_page": 1
+        },
+        {
+          "id": "1.2",
+          "title": "Mathematical Preliminaries",
+          "book_page": 10
+        },
+        {
+          "id": "1.2.1",
+          "title": "Mathematical Induction",
+          "book_page": 11
+        },
+        {
+          "id": "1.2.2",
+          "title": "Numbers, Powers, and Logarithms",
+          "book_page": 21
+        },
+        {
+          "id": "1.2.3",
+          "title": "Sums and Products",
+          "book_page": 27
+        },
+        {
+          "id": "1.2.4",
+          "title": "Integer Functions and Elementary Number Theory",
+          "book_page": 39
+        },
+        {
+          "id": "1.2.5",
+          "title": "Permutations and Factorials",
+          "book_page": 45
+        },
+        {
+          "id": "1.2.6",
+          "title": "Binomial Coefficients",
+          "book_page": 52
+        },
+        {
+          "id": "1.2.7",
+          "title": "Harmonic Numbers",
+          "book_page": 75
+        },
+        {
+          "id": "1.2.8",
+          "title": "Fibonacci Numbers",
+          "book_page": 79
+        },
+        {
+          "id": "1.2.9",
+          "title": "Generating Functions",
+          "book_page": 87
+        },
+        {
+          "id": "1.2.10",
+          "title": "Analysis of an Algorithm",
+          "book_page": 96
+        },
+        {
+          "id": "1.2.11",
+          "title": "Asymptotic Representations",
+          "book_page": 107
+        },
+        {
+          "id": "1.3",
+          "title": "MIX",
+          "book_page": 124
+        },
+        {
+          "id": "1.3.1",
+          "title": "Description of MIX",
+          "book_page": 124
+        },
+        {
+          "id": "1.3.2",
+          "title": "The MIX Assembly Language",
+          "book_page": 144
+        },
+        {
+          "id": "1.3.3",
+          "title": "Applications to Permutations",
+          "book_page": 164
+        },
+        {
+          "id": "1.4",
+          "title": "Some Fundamental Programming Techniques",
+          "book_page": 186
+        },
+        {
+          "id": "1.4.1",
+          "title": "Subroutines",
+          "book_page": 186
+        },
+        {
+          "id": "1.4.2",
+          "title": "Coroutines",
+          "book_page": 193
+        },
+        {
+          "id": "1.4.3",
+          "title": "Interpretive Routines",
+          "book_page": 200
+        },
+        {
+          "id": "1.4.4",
+          "title": "Input and Output",
+          "book_page": 215
+        },
+        {
+          "id": "1.4.5",
+          "title": "History and Bibliography",
+          "book_page": 229
+        },
+        {
+          "id": "2",
+          "title": "Information Structures",
+          "book_page": 232
+        },
+        {
+          "id": "2.1",
+          "title": "Introduction",
+          "book_page": 232
+        },
+        {
+          "id": "2.2",
+          "title": "Linear Lists",
+          "book_page": 238
+        },
+        {
+          "id": "2.2.1",
+          "title": "Stacks, Queues, and Deques",
+          "book_page": 238
+        },
+        {
+          "id": "2.2.2",
+          "title": "Sequential Allocation",
+          "book_page": 244
+        },
+        {
+          "id": "2.2.3",
+          "title": "Linked Allocation",
+          "book_page": 254
+        },
+        {
+          "id": "2.2.4",
+          "title": "Circular Lists",
+          "book_page": 273
+        },
+        {
+          "id": "2.2.5",
+          "title": "Doubly Linked Lists",
+          "book_page": 280
+        },
+        {
+          "id": "2.2.6",
+          "title": "Arrays and Orthogonal Lists",
+          "book_page": 298
+        },
+        {
+          "id": "2.3",
+          "title": "Trees",
+          "book_page": 308
+        },
+        {
+          "id": "2.3.1",
+          "title": "Traversing Binary Trees",
+          "book_page": 318
+        },
+        {
+          "id": "2.3.2",
+          "title": "Binary Tree Representation of Trees",
+          "book_page": 334
+        },
+        {
+          "id": "2.3.3",
+          "title": "Other Representations of Trees",
+          "book_page": 348
+        },
+        {
+          "id": "2.3.4",
+          "title": "Basic Mathematical Properties of Trees",
+          "book_page": 362
+        },
+        {
+          "id": "2.3.5",
+          "title": "Lists and Garbage Collection",
+          "book_page": 408
+        },
+        {
+          "id": "2.4",
+          "title": "Multilinked Structures",
+          "book_page": 424
+        },
+        {
+          "id": "2.5",
+          "title": "Dynamic Storage Allocation",
+          "book_page": 435
+        },
+        {
+          "id": "2.6",
+          "title": "History and Bibliography",
+          "book_page": 457
+        }
+      ]
+    },
+    "v2": {
+      "title": "TAOCP Vol 2 — Seminumerical Algorithms (3rd ed.)",
+      "match_title": "TAOCP Vol 2",
+      "sections": [
+        {
+          "id": "3",
+          "title": "Random Numbers",
+          "book_page": 1
+        },
+        {
+          "id": "3.1",
+          "title": "Introduction",
+          "book_page": 1
+        },
+        {
+          "id": "3.2",
+          "title": "Generating Uniform Random Numbers",
+          "book_page": 10
+        },
+        {
+          "id": "3.2.1",
+          "title": "The Linear Congruential Method",
+          "book_page": 10
+        },
+        {
+          "id": "3.2.2",
+          "title": "Other Methods",
+          "book_page": 26
+        },
+        {
+          "id": "3.3",
+          "title": "Statistical Tests",
+          "book_page": 41
+        },
+        {
+          "id": "3.3.1",
+          "title": "General Test Procedures for Studying Random Data",
+          "book_page": 42
+        },
+        {
+          "id": "3.3.2",
+          "title": "Empirical Tests",
+          "book_page": 61
+        },
+        {
+          "id": "3.3.3",
+          "title": "Theoretical Tests",
+          "book_page": 80
+        },
+        {
+          "id": "3.3.4",
+          "title": "The Spectral Test",
+          "book_page": 93
+        },
+        {
+          "id": "3.4",
+          "title": "Other Types of Random Quantities",
+          "book_page": 119
+        },
+        {
+          "id": "3.5",
+          "title": "What Is a Random Sequence?",
+          "book_page": 149
+        },
+        {
+          "id": "3.6",
+          "title": "Summary",
+          "book_page": 184
+        },
+        {
+          "id": "4",
+          "title": "Arithmetic",
+          "book_page": 194
+        },
+        {
+          "id": "4.1",
+          "title": "Positional Number Systems",
+          "book_page": 195
+        },
+        {
+          "id": "4.2",
+          "title": "Floating Point Arithmetic",
+          "book_page": 214
+        },
+        {
+          "id": "4.2.1",
+          "title": "Single-Precision Calculations",
+          "book_page": 214
+        },
+        {
+          "id": "4.2.2",
+          "title": "Accuracy of Floating Point Arithmetic",
+          "book_page": 229
+        },
+        {
+          "id": "4.2.3",
+          "title": "Double-Precision Calculations",
+          "book_page": 246
+        },
+        {
+          "id": "4.2.4",
+          "title": "Distribution of Floating Point Numbers",
+          "book_page": 253
+        },
+        {
+          "id": "4.3",
+          "title": "Multiple-Precision Arithmetic",
+          "book_page": 265
+        },
+        {
+          "id": "4.3.1",
+          "title": "The Classical Algorithms",
+          "book_page": 265
+        },
+        {
+          "id": "4.3.2",
+          "title": "Modular Arithmetic",
+          "book_page": 284
+        },
+        {
+          "id": "4.3.3",
+          "title": "How Fast Can We Multiply?",
+          "book_page": 294
+        },
+        {
+          "id": "4.4",
+          "title": "Radix Conversion",
+          "book_page": 319
+        },
+        {
+          "id": "4.5",
+          "title": "Rational Arithmetic",
+          "book_page": 330
+        },
+        {
+          "id": "4.5.1",
+          "title": "Fractions",
+          "book_page": 330
+        },
+        {
+          "id": "4.5.2",
+          "title": "The Greatest Common Divisor",
+          "book_page": 333
+        },
+        {
+          "id": "4.5.3",
+          "title": "Analysis of Euclid's Algorithm",
+          "book_page": 356
+        },
+        {
+          "id": "4.5.4",
+          "title": "Factoring into Primes",
+          "book_page": 379
+        },
+        {
+          "id": "4.6",
+          "title": "Polynomial Arithmetic",
+          "book_page": 418
+        },
+        {
+          "id": "4.6.1",
+          "title": "Division of Polynomials",
+          "book_page": 420
+        },
+        {
+          "id": "4.6.2",
+          "title": "Factorization of Polynomials",
+          "book_page": 439
+        },
+        {
+          "id": "4.6.3",
+          "title": "Evaluation of Powers",
+          "book_page": 461
+        },
+        {
+          "id": "4.6.4",
+          "title": "Evaluation of Polynomials",
+          "book_page": 485
+        },
+        {
+          "id": "4.7",
+          "title": "Manipulation of Power Series",
+          "book_page": 525
+        }
+      ]
+    },
+    "v3": {
+      "title": "TAOCP Vol 3 — Sorting and Searching (2nd ed.)",
+      "match_title": "TAOCP Vol 3",
+      "sections": [
+        {
+          "id": "5",
+          "title": "Sorting",
+          "book_page": 1
+        },
+        {
+          "id": "5.1",
+          "title": "Combinatorial Properties of Permutations",
+          "book_page": 11
+        },
+        {
+          "id": "5.1.1",
+          "title": "Inversions",
+          "book_page": 11
+        },
+        {
+          "id": "5.1.2",
+          "title": "Permutations of a Multiset",
+          "book_page": 22
+        },
+        {
+          "id": "5.1.3",
+          "title": "Runs",
+          "book_page": 35
+        },
+        {
+          "id": "5.1.4",
+          "title": "Tableaux and Involutions",
+          "book_page": 47
+        },
+        {
+          "id": "5.2",
+          "title": "Internal Sorting",
+          "book_page": 73
+        },
+        {
+          "id": "5.2.1",
+          "title": "Sorting by Insertion",
+          "book_page": 80
+        },
+        {
+          "id": "5.2.2",
+          "title": "Sorting by Exchanging",
+          "book_page": 105
+        },
+        {
+          "id": "5.2.3",
+          "title": "Sorting by Selection",
+          "book_page": 138
+        },
+        {
+          "id": "5.2.4",
+          "title": "Sorting by Merging",
+          "book_page": 158
+        },
+        {
+          "id": "5.2.5",
+          "title": "Sorting by Distribution",
+          "book_page": 168
+        },
+        {
+          "id": "5.3",
+          "title": "Optimum Sorting",
+          "book_page": 180
+        },
+        {
+          "id": "5.3.1",
+          "title": "Minimum-Comparison Sorting",
+          "book_page": 180
+        },
+        {
+          "id": "5.3.2",
+          "title": "Minimum-Comparison Merging",
+          "book_page": 197
+        },
+        {
+          "id": "5.3.3",
+          "title": "Minimum-Comparison Selection",
+          "book_page": 207
+        },
+        {
+          "id": "5.3.4",
+          "title": "Networks for Sorting",
+          "book_page": 219
+        },
+        {
+          "id": "5.4",
+          "title": "External Sorting",
+          "book_page": 248
+        },
+        {
+          "id": "5.4.1",
+          "title": "Multiway Merging and Replacement Selection",
+          "book_page": 252
+        },
+        {
+          "id": "5.4.2",
+          "title": "The Polyphase Merge",
+          "book_page": 267
+        },
+        {
+          "id": "5.4.3",
+          "title": "The Cascade Merge",
+          "book_page": 288
+        },
+        {
+          "id": "5.4.4",
+          "title": "Reading Tape Backwards",
+          "book_page": 299
+        },
+        {
+          "id": "5.4.5",
+          "title": "The Oscillating Sort",
+          "book_page": 311
+        },
+        {
+          "id": "5.4.6",
+          "title": "Practical Considerations for Tape Merging",
+          "book_page": 317
+        },
+        {
+          "id": "5.4.7",
+          "title": "External Radix Sorting",
+          "book_page": 343
+        },
+        {
+          "id": "5.4.8",
+          "title": "Two-Tape Sorting",
+          "book_page": 348
+        },
+        {
+          "id": "5.4.9",
+          "title": "Disks and Drums",
+          "book_page": 356
+        },
+        {
+          "id": "5.5",
+          "title": "Summary, History, and Bibliography",
+          "book_page": 380
+        },
+        {
+          "id": "6",
+          "title": "Searching",
+          "book_page": 392
+        },
+        {
+          "id": "6.1",
+          "title": "Sequential Searching",
+          "book_page": 396
+        },
+        {
+          "id": "6.2",
+          "title": "Searching by Comparison of Keys",
+          "book_page": 409
+        },
+        {
+          "id": "6.2.1",
+          "title": "Searching an Ordered Table",
+          "book_page": 409
+        },
+        {
+          "id": "6.2.2",
+          "title": "Binary Tree Searching",
+          "book_page": 426
+        },
+        {
+          "id": "6.2.3",
+          "title": "Balanced Trees",
+          "book_page": 458
+        },
+        {
+          "id": "6.2.4",
+          "title": "Multiway Trees",
+          "book_page": 481
+        },
+        {
+          "id": "6.3",
+          "title": "Digital Searching",
+          "book_page": 492
+        },
+        {
+          "id": "6.4",
+          "title": "Hashing",
+          "book_page": 513
+        },
+        {
+          "id": "6.5",
+          "title": "Retrieval on Secondary Keys",
+          "book_page": 559
+        }
+      ]
+    },
+    "v4a": {
+      "title": "TAOCP Vol 4A — Combinatorial Algorithms, Part 1",
+      "match_title": "TAOCP Vol 4A",
+      "sections": [
+        {
+          "id": "7",
+          "title": "Combinatorial Searching",
+          "book_page": 1
+        },
+        {
+          "id": "7.1",
+          "title": "Zeros and Ones",
+          "book_page": 47
+        },
+        {
+          "id": "7.1.1",
+          "title": "Boolean Basics",
+          "book_page": 47
+        },
+        {
+          "id": "7.1.2",
+          "title": "Boolean Evaluation",
+          "book_page": 96
+        },
+        {
+          "id": "7.1.3",
+          "title": "Bitwise Tricks and Techniques",
+          "book_page": 133
+        },
+        {
+          "id": "7.1.4",
+          "title": "Binary Decision Diagrams",
+          "book_page": 202
+        },
+        {
+          "id": "7.2",
+          "title": "Generating All Possibilities",
+          "book_page": 281
+        },
+        {
+          "id": "7.2.1",
+          "title": "Generating Basic Combinatorial Patterns",
+          "book_page": 281
+        },
+        {
+          "id": "7.2.1.1",
+          "title": "Generating all n-tuples",
+          "book_page": 281
+        },
+        {
+          "id": "7.2.1.2",
+          "title": "Generating all permutations",
+          "book_page": 319
+        },
+        {
+          "id": "7.2.1.3",
+          "title": "Generating all combinations",
+          "book_page": 355
+        },
+        {
+          "id": "7.2.1.4",
+          "title": "Generating all partitions",
+          "book_page": 390
+        },
+        {
+          "id": "7.2.1.5",
+          "title": "Generating all set partitions",
+          "book_page": 415
+        },
+        {
+          "id": "7.2.1.6",
+          "title": "Generating all trees",
+          "book_page": 440
+        },
+        {
+          "id": "7.2.1.7",
+          "title": "History and further references",
+          "book_page": 486
+        }
+      ]
+    },
+    "v4b": {
+      "title": "TAOCP Vol 4B — Combinatorial Algorithms, Part 2",
+      "match_title": "TAOCP Vol 4B",
+      "sections": [
+        {
+          "id": "MPR",
+          "title": "Mathematical Preliminaries Redux (inequalities, martingales, tail inequalities)",
+          "book_page": null
+        },
+        {
+          "id": "7.2.2",
+          "title": "Backtrack Programming",
+          "book_page": 30
+        },
+        {
+          "id": "7.2.2.1",
+          "title": "Dancing Links (exact cover, Sudoku, polyominoes, ZDDs, min-cost)",
+          "book_page": 65
+        },
+        {
+          "id": "7.2.2.2",
+          "title": "Satisfiability (resolution, clause-learning, Local Lemma, message-passing)",
+          "book_page": 185
+        }
+      ]
+    },
+    "f7": {
+      "title": "TAOCP Vol 4 Fascicle 7 — Constraint Satisfaction",
+      "match_title": "TAOCP Vol 4 Fascicle 7",
+      "sections": [
+        {
+          "id": "7.2.2.3",
+          "title": "Constraint Satisfaction",
+          "book_page": null
+        },
+        {
+          "id": "7.2.2.3a",
+          "title": "Related models / statistical mechanics",
+          "book_page": null
+        },
+        {
+          "id": "7.2.2.3b",
+          "title": "Line labeling in computer vision; graph labeling & embedding",
+          "book_page": null
+        },
+        {
+          "id": "7.2.2.3c",
+          "title": "Subgraph isomorphism; solving a CSP; translating CSP to SAT",
+          "book_page": null
+        },
+        {
+          "id": "7.2.2.3d",
+          "title": "Consistency, efficiency, dancing cells, variable-ordering heuristics",
+          "book_page": null
+        },
+        {
+          "id": "7.2.2.3e",
+          "title": "Tractable vs NP-complete families; polymorphisms; dichotomy theorem",
+          "book_page": null
+        }
+      ]
+    },
+    "cm": {
+      "title": "Concrete Mathematics (Graham, Knuth, Patashnik, 2nd ed.)",
+      "match_title": "Concrete Mathematics (Graham, Knuth, Patashnik, 2nd ed.)",
+      "sections": [
+        {
+          "id": "1",
+          "title": "Recurrent Problems",
+          "book_page": 1
+        },
+        {
+          "id": "1.1",
+          "title": "The Tower of Hanoi",
+          "book_page": 1
+        },
+        {
+          "id": "1.2",
+          "title": "Lines in the Plane",
+          "book_page": 4
+        },
+        {
+          "id": "1.3",
+          "title": "The Josephus Problem",
+          "book_page": 8
+        },
+        {
+          "id": "2",
+          "title": "Sums",
+          "book_page": 21
+        },
+        {
+          "id": "2.1",
+          "title": "Notation",
+          "book_page": 21
+        },
+        {
+          "id": "2.2",
+          "title": "Sums and Recurrences",
+          "book_page": 25
+        },
+        {
+          "id": "2.3",
+          "title": "Manipulation of Sums",
+          "book_page": 30
+        },
+        {
+          "id": "2.4",
+          "title": "Multiple Sums",
+          "book_page": 34
+        },
+        {
+          "id": "2.5",
+          "title": "General Methods",
+          "book_page": 41
+        },
+        {
+          "id": "2.6",
+          "title": "Finite and Infinite Calculus",
+          "book_page": 47
+        },
+        {
+          "id": "2.7",
+          "title": "Infinite Sums",
+          "book_page": 56
+        },
+        {
+          "id": "3",
+          "title": "Integer Functions",
+          "book_page": 67
+        },
+        {
+          "id": "3.1",
+          "title": "Floors and Ceilings",
+          "book_page": 67
+        },
+        {
+          "id": "3.2",
+          "title": "Floor/Ceiling Applications",
+          "book_page": 70
+        },
+        {
+          "id": "3.3",
+          "title": "Floor/Ceiling Recurrences",
+          "book_page": 78
+        },
+        {
+          "id": "3.4",
+          "title": "'mod': The Binary Operation",
+          "book_page": 81
+        },
+        {
+          "id": "3.5",
+          "title": "Floor/Ceiling Sums",
+          "book_page": 86
+        },
+        {
+          "id": "4",
+          "title": "Number Theory",
+          "book_page": 102
+        },
+        {
+          "id": "4.1",
+          "title": "Divisibility",
+          "book_page": 102
+        },
+        {
+          "id": "4.2",
+          "title": "Primes",
+          "book_page": 105
+        },
+        {
+          "id": "4.3",
+          "title": "Prime Examples",
+          "book_page": 107
+        },
+        {
+          "id": "4.4",
+          "title": "Factorial Factors",
+          "book_page": 111
+        },
+        {
+          "id": "4.5",
+          "title": "Relative Primality",
+          "book_page": 115
+        },
+        {
+          "id": "4.6",
+          "title": "'mod': The Congruence Relation",
+          "book_page": 123
+        },
+        {
+          "id": "4.7",
+          "title": "Independent Residues",
+          "book_page": 126
+        },
+        {
+          "id": "4.8",
+          "title": "Additional Applications",
+          "book_page": 129
+        },
+        {
+          "id": "4.9",
+          "title": "Phi and Mu",
+          "book_page": 133
+        },
+        {
+          "id": "5",
+          "title": "Binomial Coefficients",
+          "book_page": 153
+        },
+        {
+          "id": "5.1",
+          "title": "Basic Identities",
+          "book_page": 153
+        },
+        {
+          "id": "5.2",
+          "title": "Basic Practice",
+          "book_page": 172
+        },
+        {
+          "id": "5.3",
+          "title": "Tricks of the Trade",
+          "book_page": 186
+        },
+        {
+          "id": "5.4",
+          "title": "Generating Functions",
+          "book_page": 196
+        },
+        {
+          "id": "5.5",
+          "title": "Hypergeometric Functions",
+          "book_page": 204
+        },
+        {
+          "id": "5.6",
+          "title": "Hypergeometric Transformations",
+          "book_page": 216
+        },
+        {
+          "id": "5.7",
+          "title": "Partial Hypergeometric Sums",
+          "book_page": 223
+        },
+        {
+          "id": "5.8",
+          "title": "Mechanical Summation",
+          "book_page": 229
+        },
+        {
+          "id": "6",
+          "title": "Special Numbers",
+          "book_page": 257
+        },
+        {
+          "id": "6.1",
+          "title": "Stirling Numbers",
+          "book_page": 257
+        },
+        {
+          "id": "6.2",
+          "title": "Eulerian Numbers",
+          "book_page": 267
+        },
+        {
+          "id": "6.3",
+          "title": "Harmonic Numbers",
+          "book_page": 272
+        },
+        {
+          "id": "6.4",
+          "title": "Harmonic Summation",
+          "book_page": 279
+        },
+        {
+          "id": "6.5",
+          "title": "Bernoulli Numbers",
+          "book_page": 283
+        },
+        {
+          "id": "6.6",
+          "title": "Fibonacci Numbers",
+          "book_page": 290
+        },
+        {
+          "id": "6.7",
+          "title": "Continuants",
+          "book_page": 301
+        },
+        {
+          "id": "7",
+          "title": "Generating Functions",
+          "book_page": 320
+        },
+        {
+          "id": "7.1",
+          "title": "Domino Theory and Change",
+          "book_page": 320
+        },
+        {
+          "id": "7.2",
+          "title": "Basic Maneuvers",
+          "book_page": 331
+        },
+        {
+          "id": "7.3",
+          "title": "Solving Recurrences",
+          "book_page": 337
+        },
+        {
+          "id": "7.4",
+          "title": "Special Generating Functions",
+          "book_page": 350
+        },
+        {
+          "id": "7.5",
+          "title": "Convolutions",
+          "book_page": 353
+        },
+        {
+          "id": "7.6",
+          "title": "Exponential Generating Functions",
+          "book_page": 364
+        },
+        {
+          "id": "7.7",
+          "title": "Dirichlet Generating Functions",
+          "book_page": 370
+        },
+        {
+          "id": "8",
+          "title": "Discrete Probability",
+          "book_page": 381
+        },
+        {
+          "id": "8.1",
+          "title": "Definitions",
+          "book_page": 381
+        },
+        {
+          "id": "8.2",
+          "title": "Mean and Variance",
+          "book_page": 387
+        },
+        {
+          "id": "8.3",
+          "title": "Probability Generating Functions",
+          "book_page": 394
+        },
+        {
+          "id": "8.4",
+          "title": "Flipping Coins",
+          "book_page": 401
+        },
+        {
+          "id": "8.5",
+          "title": "Hashing",
+          "book_page": 411
+        },
+        {
+          "id": "9",
+          "title": "Asymptotics",
+          "book_page": 439
+        },
+        {
+          "id": "9.1",
+          "title": "A Hierarchy",
+          "book_page": 440
+        },
+        {
+          "id": "9.2",
+          "title": "O Notation",
+          "book_page": 443
+        },
+        {
+          "id": "9.3",
+          "title": "O Manipulation",
+          "book_page": 448
+        },
+        {
+          "id": "9.4",
+          "title": "Two Asymptotic Tricks",
+          "book_page": 462
+        },
+        {
+          "id": "9.5",
+          "title": "Euler's Summation Formula",
+          "book_page": 469
+        },
+        {
+          "id": "9.6",
+          "title": "Final Summations",
+          "book_page": 476
+        }
+      ]
+    }
+  },
+  "agents": {
+    "knuth-fundamentals": {
+      "vols": [
+        "v1"
+      ],
+      "desc": "Vol 1 — algorithms, MIX, data structures, trees, storage allocation, math preliminaries."
+    },
+    "knuth-seminumerical": {
+      "vols": [
+        "v2"
+      ],
+      "desc": "Vol 2 — random number generation, spectral test, arithmetic, GCD/Euclid, polynomials."
+    },
+    "knuth-sorting": {
+      "vols": [
+        "v3"
+      ],
+      "desc": "Vol 3 — internal/external sorting, sorting networks, searching, balanced trees, hashing."
+    },
+    "knuth-combinatorial": {
+      "vols": [
+        "v4a",
+        "v4b",
+        "f7"
+      ],
+      "desc": "Vol 4A/4B/F7 — BDDs, pattern generation, backtracking, dancing links, SAT, constraint satisfaction."
+    },
+    "knuth-concrete-math": {
+      "vols": [
+        "cm"
+      ],
+      "desc": "Concrete Mathematics — sums, recurrences, number theory, binomial coeffs, special numbers, generating functions, asymptotics."
+    }
+  }
+}

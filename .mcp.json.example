@@ -1,0 +1,13 @@
+{
+  "//": "Google Drive MCP wiring. Prefer the managed Drive connector (see docs/knuth-agents/SETUP.md Option A); if managed, you do NOT need this file. This block is for Option B (self-hosted server): copy it to `.mcp.json` to activate. Verify the server package/args against the current Claude Code MCP docs.",
+  "//paths": "macOS/Linux: ${HOME} resolves. Windows: replace the path with %APPDATA%\\knuth-taocp\\gdrive-creds.json (PowerShell: $env:APPDATA).",
+  "mcpServers": {
+    "google_drive": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-gdrive"],
+      "env": {
+        "GDRIVE_CREDENTIALS_PATH": "${HOME}/.config/knuth-taocp/gdrive-creds.json"
+      }
+    }
+  }
+}
