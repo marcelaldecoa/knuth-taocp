@@ -1,13 +1,9 @@
-# Knuth Library — section index
+# Knuth Library — Master Index (the map)
 
-Human-readable mirror of `.claude/skills/knuth-navigator/map.json`: volume, section
-numbers, and book-page hints. **No Drive file IDs** — those resolve at runtime from
-your local folder config. Page hints for Vols 1–3 come from the library index;
-Vol 4A/4B/Fascicle 7 and *Concrete Mathematics* list headings only (the navigator
-anchors on the heading, not the page).
+Lightweight navigation map: volume + section numbers + book pages. **No Drive file IDs** — those are resolved at runtime from your local folder config.
 
-## The Art of Computer Programming, Volume 1: Fundamental Algorithms (3rd ed.)
-volume key: `v1` · expert: `knuth-fundamentals`
+## TAOCP Vol 1 — Fundamental Algorithms (3rd ed.)
+volume key: `v1`
 
 - **1** Basic Concepts — p.1
   - **1.1** Algorithms — p.1
@@ -52,8 +48,8 @@ volume key: `v1` · expert: `knuth-fundamentals`
   - **2.5** Dynamic Storage Allocation — p.435
   - **2.6** History and Bibliography — p.457
 
-## The Art of Computer Programming, Volume 2: Seminumerical Algorithms (3rd ed.)
-volume key: `v2` · expert: `knuth-seminumerical`
+## TAOCP Vol 2 — Seminumerical Algorithms (3rd ed.)
+volume key: `v2`
 
 - **3** Random Numbers — p.1
   - **3.1** Introduction — p.1
@@ -92,8 +88,8 @@ volume key: `v2` · expert: `knuth-seminumerical`
     - **4.6.4** Evaluation of Polynomials — p.485
   - **4.7** Manipulation of Power Series — p.525
 
-## The Art of Computer Programming, Volume 3: Sorting and Searching (2nd ed.)
-volume key: `v3` · expert: `knuth-sorting`
+## TAOCP Vol 3 — Sorting and Searching (2nd ed.)
+volume key: `v3`
 
 - **5** Sorting — p.1
   - **5.1** Combinatorial Properties of Permutations — p.11
@@ -134,104 +130,109 @@ volume key: `v3` · expert: `knuth-sorting`
   - **6.4** Hashing — p.513
   - **6.5** Retrieval on Secondary Keys — p.559
 
-## The Art of Computer Programming, Volume 4A: Combinatorial Algorithms, Part 1
-volume key: `v4a` · expert: `knuth-combinatorial`
+## TAOCP Vol 4A — Combinatorial Algorithms, Part 1
+volume key: `v4a`
 
-- **7** Combinatorial Searching
-  - **7.1** Zeros and Ones
-    - **7.1.1** Boolean Basics
-    - **7.1.2** Boolean Evaluation
-    - **7.1.3** Bitwise Tricks and Techniques
-    - **7.1.4** Binary Decision Diagrams
-  - **7.2** Generating All Possibilities
-    - **7.2.1** Generating Basic Combinatorial Patterns
-      - **7.2.1.1** Generating All n-Tuples
-      - **7.2.1.2** Generating All Permutations
-      - **7.2.1.3** Generating All Combinations
-      - **7.2.1.4** Generating All Partitions
-      - **7.2.1.5** Generating All Set Partitions
-      - **7.2.1.6** Generating All Trees
-      - **7.2.1.7** History and Further References
+- **7** Combinatorial Searching — p.1
+  - **7.1** Zeros and Ones — p.47
+    - **7.1.1** Boolean Basics — p.47
+    - **7.1.2** Boolean Evaluation — p.96
+    - **7.1.3** Bitwise Tricks and Techniques — p.133
+    - **7.1.4** Binary Decision Diagrams — p.202
+  - **7.2** Generating All Possibilities — p.281
+    - **7.2.1** Generating Basic Combinatorial Patterns — p.281
+      - **7.2.1.1** Generating all n-tuples — p.281
+      - **7.2.1.2** Generating all permutations — p.319
+      - **7.2.1.3** Generating all combinations — p.355
+      - **7.2.1.4** Generating all partitions — p.390
+      - **7.2.1.5** Generating all set partitions — p.415
+      - **7.2.1.6** Generating all trees — p.440
+      - **7.2.1.7** History and further references — p.486
 
-## The Art of Computer Programming, Volume 4B: Combinatorial Algorithms, Part 2
-volume key: `v4b` · expert: `knuth-combinatorial`
+## TAOCP Vol 4B — Combinatorial Algorithms, Part 2
+volume key: `v4b`
 
-- **MPR** Mathematical Preliminaries Redux
-    - **7.2.2** Backtrack Programming
-      - **7.2.2.1** Dancing Links
-      - **7.2.2.2** Satisfiability
+- **MPR** Mathematical Preliminaries Redux (inequalities, martingales, tail inequalities)
+    - **7.2.2** Backtrack Programming — p.30
+      - **7.2.2.1** Dancing Links (exact cover, Sudoku, polyominoes, ZDDs, min-cost) — p.65
+      - **7.2.2.2** Satisfiability (resolution, clause-learning, Local Lemma, message-passing) — p.185
 
-## The Art of Computer Programming, Volume 4 Fascicle 7: Constraint Satisfaction
-volume key: `f7` · expert: `knuth-combinatorial`
+## TAOCP Vol 4 Fascicle 7 — Constraint Satisfaction
+volume key: `f7`
 
       - **7.2.2.3** Constraint Satisfaction
+      - **7.2.2.3a** Related models / statistical mechanics
+      - **7.2.2.3b** Line labeling in computer vision; graph labeling & embedding
+      - **7.2.2.3c** Subgraph isomorphism; solving a CSP; translating CSP to SAT
+      - **7.2.2.3d** Consistency, efficiency, dancing cells, variable-ordering heuristics
+      - **7.2.2.3e** Tractable vs NP-complete families; polymorphisms; dichotomy theorem
 
 ## Concrete Mathematics (Graham, Knuth, Patashnik, 2nd ed.)
-volume key: `cm` · expert: `knuth-concrete-math`
+volume key: `cm`
 
-- **1** Recurrent Problems
-  - **1.1** The Tower of Hanoi
-  - **1.2** Lines in the Plane
-  - **1.3** The Josephus Problem
-- **2** Sums
-  - **2.1** Notation
-  - **2.2** Sums and Recurrences
-  - **2.3** Manipulation of Sums
-  - **2.4** Multiple Sums
-  - **2.5** General Methods
-  - **2.6** Finite and Infinite Calculus
-  - **2.7** Infinite Sums
-- **3** Integer Functions
-  - **3.1** Floors and Ceilings
-  - **3.2** Floor/Ceiling Applications
-  - **3.3** Floor/Ceiling Recurrences
-  - **3.4** 'mod': The Binary Operation
-  - **3.5** Floor/Ceiling Sums
-- **4** Number Theory
-  - **4.1** Divisibility
-  - **4.2** Primes
-  - **4.3** Prime Examples
-  - **4.4** Factorial Factors
-  - **4.5** Relative Primality
-  - **4.6** 'mod': The Congruence Relation
-  - **4.7** Independent Residues
-  - **4.8** Additional Applications
-  - **4.9** Phi and Mu
-- **5** Binomial Coefficients
-  - **5.1** Basic Identities
-  - **5.2** Basic Practice
-  - **5.3** Tricks of the Trade
-  - **5.4** Generating Functions
-  - **5.5** Hypergeometric Functions
-  - **5.6** Hypergeometric Transformations
-  - **5.7** Partial Hypergeometric Sums
-  - **5.8** Mechanical Summation
-- **6** Special Numbers
-  - **6.1** Stirling Numbers
-  - **6.2** Eulerian Numbers
-  - **6.3** Harmonic Numbers
-  - **6.4** Harmonic Summation
-  - **6.5** Bernoulli Numbers
-  - **6.6** Fibonacci Numbers
-  - **6.7** Continuants
-- **7** Generating Functions
-  - **7.1** Domino Theory and Change
-  - **7.2** Basic Maneuvers
-  - **7.3** Solving Recurrences
-  - **7.4** Special Generating Functions
-  - **7.5** Convolutions
-  - **7.6** Exponential Generating Functions
-  - **7.7** Dirichlet Generating Functions
-- **8** Discrete Probability
-  - **8.1** Definitions
-  - **8.2** Mean and Variance
-  - **8.3** Probability Generating Functions
-  - **8.4** Flipping Coins
-  - **8.5** Hashing
-- **9** Asymptotics
-  - **9.1** A Hierarchy
-  - **9.2** O Notation
-  - **9.3** O Manipulation
-  - **9.4** Two Asymptotic Tricks
-  - **9.5** Euler's Summation Formula
-  - **9.6** Final Summations
+- **1** Recurrent Problems — p.1
+  - **1.1** The Tower of Hanoi — p.1
+  - **1.2** Lines in the Plane — p.4
+  - **1.3** The Josephus Problem — p.8
+- **2** Sums — p.21
+  - **2.1** Notation — p.21
+  - **2.2** Sums and Recurrences — p.25
+  - **2.3** Manipulation of Sums — p.30
+  - **2.4** Multiple Sums — p.34
+  - **2.5** General Methods — p.41
+  - **2.6** Finite and Infinite Calculus — p.47
+  - **2.7** Infinite Sums — p.56
+- **3** Integer Functions — p.67
+  - **3.1** Floors and Ceilings — p.67
+  - **3.2** Floor/Ceiling Applications — p.70
+  - **3.3** Floor/Ceiling Recurrences — p.78
+  - **3.4** 'mod': The Binary Operation — p.81
+  - **3.5** Floor/Ceiling Sums — p.86
+- **4** Number Theory — p.102
+  - **4.1** Divisibility — p.102
+  - **4.2** Primes — p.105
+  - **4.3** Prime Examples — p.107
+  - **4.4** Factorial Factors — p.111
+  - **4.5** Relative Primality — p.115
+  - **4.6** 'mod': The Congruence Relation — p.123
+  - **4.7** Independent Residues — p.126
+  - **4.8** Additional Applications — p.129
+  - **4.9** Phi and Mu — p.133
+- **5** Binomial Coefficients — p.153
+  - **5.1** Basic Identities — p.153
+  - **5.2** Basic Practice — p.172
+  - **5.3** Tricks of the Trade — p.186
+  - **5.4** Generating Functions — p.196
+  - **5.5** Hypergeometric Functions — p.204
+  - **5.6** Hypergeometric Transformations — p.216
+  - **5.7** Partial Hypergeometric Sums — p.223
+  - **5.8** Mechanical Summation — p.229
+- **6** Special Numbers — p.257
+  - **6.1** Stirling Numbers — p.257
+  - **6.2** Eulerian Numbers — p.267
+  - **6.3** Harmonic Numbers — p.272
+  - **6.4** Harmonic Summation — p.279
+  - **6.5** Bernoulli Numbers — p.283
+  - **6.6** Fibonacci Numbers — p.290
+  - **6.7** Continuants — p.301
+- **7** Generating Functions — p.320
+  - **7.1** Domino Theory and Change — p.320
+  - **7.2** Basic Maneuvers — p.331
+  - **7.3** Solving Recurrences — p.337
+  - **7.4** Special Generating Functions — p.350
+  - **7.5** Convolutions — p.353
+  - **7.6** Exponential Generating Functions — p.364
+  - **7.7** Dirichlet Generating Functions — p.370
+- **8** Discrete Probability — p.381
+  - **8.1** Definitions — p.381
+  - **8.2** Mean and Variance — p.387
+  - **8.3** Probability Generating Functions — p.394
+  - **8.4** Flipping Coins — p.401
+  - **8.5** Hashing — p.411
+- **9** Asymptotics — p.439
+  - **9.1** A Hierarchy — p.440
+  - **9.2** O Notation — p.443
+  - **9.3** O Manipulation — p.448
+  - **9.4** Two Asymptotic Tricks — p.462
+  - **9.5** Euler's Summation Formula — p.469
+  - **9.6** Final Summations — p.476

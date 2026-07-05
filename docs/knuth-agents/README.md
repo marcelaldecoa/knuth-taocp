@@ -83,7 +83,7 @@ and stage tests:
   differs from `book_page` by the volume's front-matter offset).
 - Skill/subagent frontmatter and `.mcp.json` schema drift over time — verify
   against current Claude Code docs if something doesn't load.
-- `map.json`'s page hints for Vols 1–3 come from the library index; the Vol 4A/4B/
-  Fascicle 7 and Concrete Mathematics entries carry headings + section numbers
-  with `book_page: null`, which is all the navigator needs (it anchors on the
-  heading). Fill those pages in from your own `map.json` if you want the hints.
+- `map.json` carries book-page hints for every volume except a few page-less
+  entries in Vol 4B (the `MPR` preliminaries) and Fascicle 7 (the 7.2.2.3
+  constraint-satisfaction sub-sections), where `book_page` is `null` — the
+  navigator anchors on the heading anyway, so the hint is optional.
