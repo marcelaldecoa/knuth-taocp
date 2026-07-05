@@ -54,6 +54,19 @@ The Drive `read_file_content` API only returns roughly the first ~90–100 book
 pages, so deep sections are read from a local full-text cache
 (`.knuth-cache/<volume_key>.txt`, gitignored) — see the navigator `SKILL.md`.
 
+Everything up to the Drive network hop is deterministic and lives in `map.json`.
+`tools/navigator_selftest.py` validates that part offline — map integrity plus
+the full resolution path (query → volume → section → book page → expert handoff
+→ the Drive title to search) — without a connector:
+
+```
+python3 docs/knuth-agents/tools/navigator_selftest.py            # checks + demo
+python3 docs/knuth-agents/tools/navigator_selftest.py "3.3.4"    # resolve one query
+```
+
+The live fetch (resolve title → Drive file ID, read the section) then runs from
+an interactive session where the connector can be authorized.
+
 ## Activate (three steps — the files are already here)
 
 1. `cp config.local.example.json config.local.json` and paste your Drive folder ID.
