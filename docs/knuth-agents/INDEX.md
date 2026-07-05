@@ -1,6 +1,7 @@
 # Knuth Library — Master Index (the map)
 
-Lightweight navigation map: volume + section numbers + book pages. **No Drive file IDs** — those are resolved at runtime from your local folder config.
+Volume + section numbers + book pages. **No Drive file IDs** — resolved at runtime.
+Two draft volumes (Vol 4B MPR, Fascicle 7) restart pagination at 1; `editorial` tags have no page.
 
 ## TAOCP Vol 1 — Fundamental Algorithms (3rd ed.)
 volume key: `v1`
@@ -152,20 +153,21 @@ volume key: `v4a`
 ## TAOCP Vol 4B — Combinatorial Algorithms, Part 2
 volume key: `v4b`
 
-- **MPR** Mathematical Preliminaries Redux (inequalities, martingales, tail inequalities)
+- **MPR** Mathematical Preliminaries Redux (inequalities, martingales, tail inequalities) — p.1 *(Vol 4B preliminaries pagination)*
     - **7.2.2** Backtrack Programming — p.30
       - **7.2.2.1** Dancing Links (exact cover, Sudoku, polyominoes, ZDDs, min-cost) — p.65
       - **7.2.2.2** Satisfiability (resolution, clause-learning, Local Lemma, message-passing) — p.185
 
 ## TAOCP Vol 4 Fascicle 7 — Constraint Satisfaction
 volume key: `f7`
+> Draft pre-fascicle; pagination restarts at 1. Sub-entries a-e are editorial navigation tags within section 7.2.2.3, not Knuth's own numbering. Eventual home: Volume 4C.
 
-      - **7.2.2.3** Constraint Satisfaction
-      - **7.2.2.3a** Related models / statistical mechanics
-      - **7.2.2.3b** Line labeling in computer vision; graph labeling & embedding
-      - **7.2.2.3c** Subgraph isomorphism; solving a CSP; translating CSP to SAT
-      - **7.2.2.3d** Consistency, efficiency, dancing cells, variable-ordering heuristics
-      - **7.2.2.3e** Tractable vs NP-complete families; polymorphisms; dichotomy theorem
+      - **7.2.2.3** Constraint Satisfaction — p.1 *(Fascicle 7 pagination)*
+      - **7.2.2.3a** Related models / statistical mechanics — *(editorial tag, cite §7.2.2.3)*
+      - **7.2.2.3b** Line labeling in computer vision; graph labeling & embedding — *(editorial tag, cite §7.2.2.3)*
+      - **7.2.2.3c** Subgraph isomorphism; solving a CSP; translating CSP to SAT — *(editorial tag, cite §7.2.2.3)*
+      - **7.2.2.3d** Consistency, efficiency, dancing cells, variable-ordering heuristics — *(editorial tag, cite §7.2.2.3)*
+      - **7.2.2.3e** Tractable vs NP-complete families; polymorphisms; dichotomy theorem — *(editorial tag, cite §7.2.2.3)*
 
 ## Concrete Mathematics (Graham, Knuth, Patashnik, 2nd ed.)
 volume key: `cm`

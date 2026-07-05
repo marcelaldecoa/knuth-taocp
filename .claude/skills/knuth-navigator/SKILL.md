@@ -52,6 +52,15 @@ Anchor on the heading string, not the page number; `book_page` is only a hint,
 and the PDF page differs from it by the volume's front-matter offset. Cite
 `Vol N §x.y.z, p.<book_page>`.
 
+**Draft-volume citations.** In the two draft volumes the page sequences restart
+at 1, so a `book_page` there is relative to that sequence — an entry may carry a
+`page_note` spelling this out (e.g. Vol 4B's MPR is p.1 of the *preliminaries*,
+distinct from the main body where 7.2.2 starts at p.30; Fascicle 7 restarts at 1
+and is slated for Vol 4C). Include the qualifier when citing these. Entries
+marked `"editorial": true` (the f7 `7.2.2.3a`–`e` tags) are navigation topics
+inside their parent section, not Knuth-numbered sections — never cite a page for
+them; anchor on the heading and cite the parent (`§7.2.2.3`).
+
 ## Rules
 
 - One section at a time. Multi-section spans -> fetch in sequence.

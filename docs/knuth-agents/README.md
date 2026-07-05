@@ -96,7 +96,9 @@ and stage tests:
   differs from `book_page` by the volume's front-matter offset).
 - Skill/subagent frontmatter and `.mcp.json` schema drift over time — verify
   against current Claude Code docs if something doesn't load.
-- `map.json` carries book-page hints for every volume except a few page-less
-  entries in Vol 4B (the `MPR` preliminaries) and Fascicle 7 (the 7.2.2.3
-  constraint-satisfaction sub-sections), where `book_page` is `null` — the
-  navigator anchors on the heading anyway, so the hint is optional.
+- `map.json` carries a book-page hint for every Knuth-numbered section. The two
+  draft volumes restart pagination at 1 (Vol 4B's `MPR` preliminaries; Fascicle
+  7, slated for Vol 4C), so their hints are relative to that sequence and carry
+  a `page_note`. The only page-less entries are Fascicle 7's `7.2.2.3a`–`e`,
+  flagged `"editorial": true` — navigation tags inside §7.2.2.3, not Knuth's own
+  numbering; cite the parent §7.2.2.3 and anchor on the heading.
