@@ -127,9 +127,11 @@ queens, graph coloring (Petersen graph).
 
 ---
 
-Modules 11–14 are the advanced tier: each returns to a volume you already
+Modules 11–22 are the advanced tier: each returns to a volume you already
 know and takes its flagship idea further. Do them in any order after their
-prerequisite core module (11 after 07, 12 after 04, 13 after 08, 14 after 10).
+prerequisites (11 after 07, 12 after 04, 13 after 08, 14 after 10, 15 after
+06, 16 after 12 and 05, 17 after 13 and 09, 18 after 01 and 03, 19 after 05,
+20 after 06, 21 after 13, 22 after 09 and 13).
 
 ## Module 11 — Multiway Trees and Digital Searching (Vol. 3, §6.2.4 & §6.3)
 

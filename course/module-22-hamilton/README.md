@@ -344,10 +344,11 @@ $n = 3$, weights $d(0,1)=1, d(1,2)=2, d(0,2)=3$.
 | {2} | 2 | 0 | base |
 | {0,1} | 1 | 1 | C({0},0)+d(0,1) |
 | {0,1} | 0 | 1 | C({1},1)+d(1,0) |
+| {1,2} | 1 | 2 | C({2},2)+d(2,1) |
 | {1,2} | 2 | 2 | C({1},1)+d(1,2) |
 | {0,2} | 2 | 3 | C({0},0)+d(0,2) |
 | {0,1,2} | 2 | 3 | C({0,1},1)+d(1,2) = 1+2 |
-| {0,1,2} | 0 | 4 | C({1,2},2)+d(2,0) = 2+... |
+| {0,1,2} | 0 | 3 | C({1,2},1)+d(1,0) = 2+1 |
 
 Shortest **path** = $\min_j C(\{0,1,2\}, j) = 3$ (the route 0–1–2, skipping the
 expensive edge 0–2). Shortest **cycle** = $C(\{0,1,2\},2) + d(2,0) = 3 + 3 = 6$
@@ -546,8 +547,10 @@ something, and prove it correct.
 - **Approximation algorithms** (Christofides' $3/2$-approximation for metric TSP)
   and **local search** (2-opt, Lin–Kernighan) are the practical sequel to
   Held–Karp when $2^n$ is too much.
-- **Parameterized complexity** studies exactly *how* exponential these problems
-  must be — Held–Karp's $2^n$ is conjectured optimal under the Strong
-  Exponential Time Hypothesis.
+- **Exact exponential algorithms** study exactly *how* exponential these
+  problems must be — for general weighted TSP no algorithm beating Held–Karp's
+  $2^n \cdot \mathrm{poly}(n)$ is known, and improving it is a long-standing
+  open problem (though special cases, such as unweighted Hamiltonicity, can be
+  solved faster).
 - **The whole course** now lives in [`docs/toolkit.md`](../../docs/toolkit.md):
   read it, and see how far you've come.

@@ -10,7 +10,8 @@ against. Numeric answers here are reproduced by the `Float` you build in the lab
 (or a few lines at a REPL), and they agree with hardware `f64` bit for bit.
 
 Ratings follow Knuth's scale (00–50; `M` = needs mathematics, `▶` = especially
-instructive). Exercise numbers follow Vol. 2, §4.2.1 / §4.2.2. Throughout,
+instructive). Each problem cites the section of Vol. 2 (§4.2.1 / §4.2.2) whose
+material it exercises. Throughout,
 $p = 53$ is the binary precision, $u = 2^{-52} = \operatorname{ulp}(1)$ is the
 machine epsilon (the gap $1 \to 1^{+}$), and the unit roundoff is
 $u/2 = 2^{-53}$.
@@ -28,7 +29,7 @@ $u/2 = 2^{-53}$.
 
 ## Problems
 
-### 1. Which decimal fractions are exact in binary? (rating 10 · §4.2.1-1)
+### 1. Which decimal fractions are exact in binary? (rating 10 · cf. §4.2.1)
 
 **Problem.** Give the normalized binary form $(-1)^s \cdot f \cdot 2^e$ (leading
 significand bit $= 1$) of $0.5$, $0.75$, $0.375$, and $0.1$. Which of these — and
@@ -51,7 +52,7 @@ exact, while $0.1, 0.2, 0.3, 0.6$ (denominators $10, 5, 10, 5$) are not. This is
 why `from_f64(0.1)` stores the *nearest* 53-bit number to $1/10$, within half a
 ulp — the root of every "floating point is broken" bug report.
 
-### 2. ▶ Why the sticky bit is necessary for correct rounding (rating 20 · §4.2.1-3)
+### 2. ▶ Why the sticky bit is necessary for correct rounding (rating 20 · cf. §4.2.1)
 
 **Problem.** Round-to-nearest-ties-to-even needs, beyond the kept bits, a
 **round bit** $r$ (first discarded bit) *and* a **sticky bit** $t$ (OR of all
@@ -87,7 +88,7 @@ collapsing every one of them into $t$ loses nothing rounding cares about, which
 is why the implementation keeps a fixed guard window and ORs the rest into
 sticky.
 
-### 3. Overflow from the exponent sum in multiplication (rating 22 · §4.2.1-6)
+### 3. Overflow from the exponent sum in multiplication (rating 22 · cf. §4.2.1)
 
 **Problem.** In Algorithm M the exponents simply add: $e = e_u + e_v$. Show that
 $x \cdot y$ can **overflow** (exceed the largest finite float) even when both $x$
@@ -113,7 +114,7 @@ when $e_u + e_v$ drops below $-1022$; both are why robust code scales operands o
 uses $\log$-domain products. The significand rounding at M3 is exact-then-round
 and never itself causes overflow beyond that one carry bit.)
 
-### 4. ▶ Sterbenz's lemma: $x - y$ exact when $y/2 \le x \le 2y$ (rating M25 · §4.2.2-9)
+### 4. ▶ Sterbenz's lemma: $x - y$ exact when $y/2 \le x \le 2y$ (rating M25 · cf. §4.2.2)
 
 **Problem.** Prove **Sterbenz's lemma**: if $x$ and $y$ are floating-point
 numbers of the same sign with $y/2 \le x \le 2y$ (equivalently, within a factor
@@ -140,7 +141,7 @@ with $y/2 \le x \le 2y$, $\mathrm{fl}(x - y)$ matches the exact rational
 difference every time.) This benign-cancellation fact is exactly what makes the
 $t - s$ step in Kahan summation (Exercise 5) recover the lost bits precisely.
 
-### 5. Error bounds for naive vs. Kahan summation (rating M28 · §4.2.2-15)
+### 5. Error bounds for naive vs. Kahan summation (rating M28 · cf. §4.2.2)
 
 **Problem.** Let $x_1, \ldots, x_n$ be floats summed left to right. Using the
 $(1+\delta)$ model — each addition returns the exact sum times $(1 + \delta)$
@@ -185,7 +186,7 @@ naive returns `0` — every `1` was swamped and rounded away, but Kahan's $c$ he
 each lost `1` and fed it back. Cost: about $4\times$ the flops, hence a choice,
 not a default.
 
-### 6. ▶ When does $(a{+}b){+}c$ differ from $a{+}(b{+}c)$? (rating M30 · §4.2.2-21)
+### 6. ▶ When does $(a{+}b){+}c$ differ from $a{+}(b{+}c)$? (rating M30 · cf. §4.2.2)
 
 **Problem.** Floating-point addition is commutative but **not** associative.
 Characterize when $(a + b) + c$ and $a + (b + c)$ give different results,

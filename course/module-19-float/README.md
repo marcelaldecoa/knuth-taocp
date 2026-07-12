@@ -90,7 +90,7 @@ The exponent `e` can be negative, but hardware likes to compare and sort
 numbers by looking at their raw bits as unsigned integers. IEEE stores a
 **biased** exponent: an 11-bit field `E` holding `E = e_ieee + 1023`, where
 `e_ieee` is the exponent of the value written as `1.fff… · 2^{e_ieee}`. The
-bias `1023 = 2¹⁰ − 1` is the "excess" that makes every stored exponent
+bias $1023 = 2^{10} - 1$ is the "excess" that makes every stored exponent
 non-negative, so that (for numbers of the same sign) larger magnitude means a
 larger bit pattern — integer comparison sorts floats.
 
@@ -251,7 +251,7 @@ result is correctly rounded, matching hardware `/` to the last bit.
 
 ### Hand-trace: `3.0 / 7.0` in binary64
 
-$3 = 1.1_2 \cdot 2^1$ (`frac = 3·2^51`, `exp = −50`), $7 = 1.11_2 \cdot 2^2$. The exact
+$3 = 1.1_2 \cdot 2^1$ (`frac = 3·2^51`, `exp = −51`), $7 = 1.11_2 \cdot 2^2$. The exact
 quotient $3/7 = 0.011011011\ldots_2$ repeats forever. Long division produces
 $0.01101101101101\ldots$; normalized that's $1.1011011\ldots \cdot 2^{-2}$. Keep 53 bits, look at
 bit 54 (the round bit) and the infinite tail (sticky = 1, since the pattern
@@ -267,7 +267,11 @@ Here is the theorem that makes numerical analysis possible.
 **Definition.** The **unit roundoff** is $u = 2^{-p} = 2^{-53}$ in the "distance
 to the tie" convention, or (as we and much C use it) $u = 2^{-(p-1)} = 2^{-52}$,
 the gap $\operatorname{ulp}(1)$ between $1$ and its successor. We take `machine_epsilon()` $=
-2^{-52}$: the smallest $\varepsilon$ with $1 + \varepsilon \ne 1$, while $1 + \varepsilon/2 = 1$.
+2^{-52}$: the gap between $1$ and the next representable double, with
+$\mathrm{fl}(1 + \varepsilon/2) = 1$ (the tie rounds to even). Note it is *not* the smallest
+$x$ with $\mathrm{fl}(1 + x) \ne 1$ — under round-to-nearest that threshold is $2^{-53}$
+(exclusive): any $x > 2^{-53}$, e.g. $x = 3 \cdot 2^{-54} < \varepsilon$, already gives
+$\mathrm{fl}(1 + x) = 1 + \varepsilon \ne 1$.
 
 **Theorem (fundamental bound of floating-point arithmetic).** Let $\circ$ be one of
 $+ - \times \div$, let $x, y$ be representable, and suppose $x \circ y$ is in the normal
@@ -330,7 +334,7 @@ low-order bits dropped by the previous addition and feeds them back:
     for each x:
         y ← x − c            # add back what we lost last time
         t ← s + y            # rounds; loses the low part of y
-        c ← (t − s) − y      # exactly the low part just lost (TwoSum!)
+        c ← (t − s) − y      # exactly MINUS the low part just lost (TwoSum!)
         s ← t
     return s
 ```
@@ -342,7 +346,7 @@ true $s + y$. When $|s| \ge |y|$ (the usual case — you're adding small terms t
 large running total), $t - s$ is computed *exactly* (Sterbenz's lemma: the
 difference of two floats within a factor of two of each other is exact, and
 more generally the leading cancellation here is benign), so $(t - s) - y$
-evaluates to the exact difference $(s + y) - t = -(\text{the part of } s+y \text{ that } t \text{ threw away})$. Thus $c$ holds, to first order in $u$, exactly the rounding error of the
+evaluates to the exact difference $t - (s + y) = -(\text{the part of } s+y \text{ that } t \text{ threw away})$. Thus $c$ holds, to first order in $u$, exactly the rounding error of the
 step — and subtracting it next iteration cancels that error. The upshot is a
 total error bound of $O(u) \cdot \sum|x_i|$ **independent of n**, versus $O(nu) \cdot \sum|x_i|$
 for naive. The lab makes this vivid: sum `0.1` a hundred thousand times and
@@ -427,18 +431,19 @@ inputs. This is where representation turns into *numerical analysis*.
 
 ## 11. Exercises from the text
 
-Ratings are Knuth's: 00 immediate · 10 a minute · 20 up to an hour · 30 hours ·
-40 term project · 50 research. ▶ marks especially instructive ones. Log your
-work in `course/module-19-float/exercises.md`.
+Ratings use Knuth's scale: 00 immediate · 10 a minute · 20 up to an hour · 30
+hours · 40 term project · 50 research. ▶ marks especially instructive ones.
+Each problem is on the material of the cited section. Log your work in
+`course/module-19-float/exercises.md`.
 
-| Ex. | Rating | Statement (paraphrased) |
+| Source | Rating | Statement |
 |---|---|---|
-| 4.2.1-1 | 10 | Give the normalized binary form of a few decimal fractions; which are exact? |
-| ▶4.2.1-3 | 20 | Show why the sticky bit (not just guard+round) is needed for correct rounding of addition. |
-| 4.2.1-6 | 22 | When can $x \cdot y$ overflow even though $x$ and $y$ are well inside range? Analyze the exponent sum. |
-| ▶4.2.2-9 | 25 | Prove Sterbenz's lemma: if $y/2 \le x \le 2y$ then $x - y$ is computed exactly. |
-| 4.2.2-15 | 28 | Bound the error of naive summation of $n$ terms; then Kahan's, showing the $n$-independence. |
-| ▶4.2.2-21 | 30 | Analyze $(a+b)+c$ vs $a+(b+c)$: characterize when they differ and by how much. |
+| cf. §4.2.1 | 10 | Give the normalized binary form of a few decimal fractions; which are exact? |
+| ▶ cf. §4.2.1 | 20 | Show why the sticky bit (not just guard+round) is needed for correct rounding of addition. |
+| cf. §4.2.1 | 22 | When can $x \cdot y$ overflow even though $x$ and $y$ are well inside range? Analyze the exponent sum. |
+| ▶ cf. §4.2.2 | 25 | Prove Sterbenz's lemma: if $y/2 \le x \le 2y$ then $x - y$ is computed exactly. |
+| cf. §4.2.2 | 28 | Bound the error of naive summation of $n$ terms; then Kahan's, showing the $n$-independence. |
+| ▶ cf. §4.2.2 | 30 | Analyze $(a+b)+c$ vs $a+(b+c)$: characterize when they differ and by how much. |
 
 ## Why it's done this way
 

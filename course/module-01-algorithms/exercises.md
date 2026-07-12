@@ -23,7 +23,7 @@ readers who own Volume 1.
 
 ## Problems
 
-### 1. Compute $\gcd(2166, 6099)$ by hand with Algorithm E (rating 10 · cf. 1.1–1)
+### 1. Compute $\gcd(2166, 6099)$ by hand with Algorithm E (rating 10 · cf. 1.1–4)
 
 **Problem.** Apply Algorithm E (steps E1–E3: divide, test remainder, reduce) to
 $m = 2166$, $n = 6099$ and find $\gcd(2166, 6099)$. Show every division.
@@ -47,7 +47,7 @@ The last nonzero remainder / final $n$ is $\boxed{57}$, reached in six divisions
 Check: $2166 = 57 \cdot 38$ and $6099 = 57 \cdot 107$, and $\gcd(38, 107) = 1$, so
 $57$ is indeed the greatest common divisor.
 
-### 2. Trace the variables of Algorithm E on $(m, n) = (119, 544)$ (rating 15 · cf. 1.1–2)
+### 2. Trace the variables of Algorithm E on $(m, n) = (119, 544)$ (rating 15 · course exercise, after §1.1)
 
 **Problem.** List the values held by the variables $m$, $n$, $r$ at each execution
 of step E1 when Algorithm E runs on $m = 119$, $n = 544$. How many divisions does
@@ -103,7 +103,7 @@ identical function $\gcd$; that they are *different methods* for the *same
 function* is the whole point (Problem 5 makes "same function" precise). The Stage-2
 tests confirm F agrees with E on the full $120 \times 120$ grid.
 
-### 4. Grade a cookbook recipe against the five properties (rating 12 · cf. 1.1–5)
+### 4. Grade a cookbook recipe against the five properties (rating 12 · course exercise, after §1.1)
 
 **Problem.** Take a typical cookbook recipe ("season to taste; bake until golden;
 add a pinch of salt") and decide, property by property, whether it qualifies as
@@ -133,7 +133,7 @@ distinction: a procedure that is not rigorously and unambiguously specified is
 not an algorithm, which is why our implementations reject under-specified inputs
 loudly rather than guess.
 
-### 5. ▶ Define equivalence of computational methods; prove E $\equiv$ F (rating 30 · cf. 1.1–9)
+### 5. ▶ Define equivalence of computational methods; prove E $\equiv$ F (rating 30 · course variant of 1.1–9)
 
 **Problem.** Give a formal definition of what it means for two computational
 methods to be *equivalent*, then prove that your Algorithm E and Algorithm F
