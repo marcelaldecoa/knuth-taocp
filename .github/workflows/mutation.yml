@@ -32,6 +32,11 @@ concurrency:
   group: mutation-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Pinned so the cached binary and a fresh install are always the same
+  # version; bump this (and the cache key rotates with it) to upgrade.
+  CARGO_MUTANTS_VERSION: "27.1.0"
+
 jobs:
   setup:
     name: select modules to mutate
@@ -43,15 +48,19 @@ jobs:
       - uses: actions/checkout@v5
       - id: list
         name: list reference files (honoring the optional filter)
+        # The dispatch input reaches the shell via an env var, never by
+        # template interpolation into the script — a quote in the regex must
+        # not be able to break out of (or into) the shell.
+        env:
+          FILTER: ${{ github.event.inputs.package }}
         run: |
           cd reference/src
           files=$(ls m[0-9]*.rs | sort)
-          filter='${{ github.event.inputs.package }}'
-          if [ -n "$filter" ]; then
-            files=$(printf '%s\n' $files | grep -E "$filter" || true)
+          if [ -n "$FILTER" ]; then
+            files=$(printf '%s\n' $files | grep -E -- "$FILTER" || true)
           fi
           if [ -z "$files" ]; then
-            echo "::error::no reference files matched filter '$filter'"; exit 1
+            echo "::error::no reference files matched filter '$FILTER'"; exit 1
           fi
           json=$(printf '%s\n' $files | jq -R . | jq -s -c .)
           count=$(printf '%s\n' $files | grep -c .)
@@ -76,20 +85,48 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-mutants
-          key: cargo-mutants-bin
+          # Versioned key: bumping CARGO_MUTANTS_VERSION below invalidates the
+          # cache, so the sweep can never pin silently to a stale binary.
+          key: cargo-mutants-bin-${{ env.CARGO_MUTANTS_VERSION }}
       - name: Install cargo-mutants
-        run: cargo install cargo-mutants --locked || true
+        # Only install when the cache didn't restore a binary; a genuine
+        # install failure fails the job instead of being masked.
+        run: command -v cargo-mutants || cargo install cargo-mutants --version "$CARGO_MUTANTS_VERSION" --locked
       - name: Mutate this reference file; run lab suites (with solutions) against it
         # Mutate only this shard's file inside taocp-reference. Forwarded args
         # run the whole workspace's tests with --features solutions, so the lab
         # suites exercise the mutated reference. --timeout caps any single
-        # mutant (e.g. one that turns a loop condition into an infinite loop);
-        # it is per-mutant, generous enough not to kill the baseline build.
-        run: >
-          cargo mutants --no-shuffle -j 2 --timeout 120
-          --package taocp-reference
-          --file ${{ matrix.module }}
-          -- --workspace --features solutions
+        # mutant (e.g. one that turns a loop condition into an infinite loop).
+        #
+        # A shard FAILS only when a viable mutant SURVIVED (mutants.out/
+        # missed.txt non-empty) — the real "a stage suite didn't bite" signal.
+        # cargo-mutants also exits non-zero on TIMEOUT, but a timeout means the
+        # mutant made a test hang (e.g. %→/ inside a gcd loop = infinite loop)
+        # and is effectively caught — surfaced as a warning, not a failure.
+        # Baseline/build failures (no outcomes.json) still fail loudly.
+        run: |
+          set +e
+          cargo mutants --no-shuffle -j 2 --timeout 120 \
+            --package taocp-reference \
+            --file ${{ matrix.module }} \
+            -- --workspace --features solutions
+          code=$?
+          echo "cargo-mutants exit code: $code"
+          if [ ! -f mutants.out/outcomes.json ]; then
+            echo "::error::${{ matrix.module }}: no outcomes.json — baseline/build failure (exit $code)"
+            exit 1
+          fi
+          if [ -s mutants.out/timeout.txt ]; then
+            echo "::warning::${{ matrix.module }}: timeouts (infinite-loop mutants, treated as caught):"
+            sed 's/^/  timeout: /' mutants.out/timeout.txt
+          fi
+          if [ -s mutants.out/missed.txt ]; then
+            echo "::error::${{ matrix.module }}: viable mutant(s) SURVIVED — a stage suite has a gap:"
+            sed 's/^/  survived: /' mutants.out/missed.txt
+            exit 1
+          fi
+          echo "${{ matrix.module }}: no survivors — every viable mutant was caught."
+          exit 0
       - name: Upload this shard's mutants report
         if: always()
         uses: actions/upload-artifact@v4

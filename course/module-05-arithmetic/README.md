@@ -2,7 +2,8 @@
 
 > **Source:** *The Art of Computer Programming*, Vol. 2, 3rd ed., Chapter 4 —
 > §4.3.1 (classical algorithms), §4.3.3 (faster multiplication), §4.5.2
-> (analysis of Euclid / binary gcd), §4.5.4 (primality testing).
+> (the greatest common divisor / binary gcd — the analysis of Euclid's
+> algorithm is §4.5.3), §4.5.4 (primality testing).
 > **Lab:** `labs/module-05-arithmetic` · **Grade it:** `./grade 5`
 > **Concrete Mathematics companion:** Chapter 4 (Number Theory) — gcd, modular
 > arithmetic, and primality, in depth — see [../../docs/concrete-mathematics.md](../../docs/concrete-mathematics.md).
@@ -221,15 +222,16 @@ Run `./grade 5`; stages unlock in order.
 ## 7. Exercises from the text
 
 Ratings: 00 immediate · 20 an hour · 30 hours · 40 term project · 50 open.
-▶ = instructive. Log attempts in `exercises.md`.
+▶ = instructive. Exercise numbers are content tags citing the section (match
+by content in your printing). Log attempts in `exercises.md`.
 
 | Ex. | Rating | Statement (paraphrased) |
 |---|---|---|
-| 4.3.1–? | 15 | Prove the carry in Algorithm A never exceeds 1. |
-| ▶4.3.1–? | 25 | Analyze Algorithm M's exact number of digit multiplications. |
-| 4.3.3–? | 30 | Work out the constant in Karatsuba's recurrence; find the crossover with classical multiply empirically. |
-| ▶4.5.2–? | 28 | Compare the number of steps of binary gcd vs Euclid on Fibonacci pairs. |
-| 4.5.4–? | 35 | Implement Pollard's rho factoring and factor a 60-bit semiprime. |
+| 4.3.1-(carry-bound) | 15 | Prove the carry in Algorithm A never exceeds 1. |
+| ▶4.3.1-(mul-count) | 25 | Analyze Algorithm M's exact number of digit multiplications. |
+| 4.3.3-(karatsuba-crossover) | 30 | Work out the constant in Karatsuba's recurrence; find the crossover with classical multiply empirically. |
+| ▶4.5.2-(fib-pairs) | 28 | Compare the number of steps of binary gcd vs Euclid on Fibonacci pairs. |
+| 4.5.4-(pollard-rho) | 35 | Implement Pollard's rho factoring and factor a 60-bit semiprime. |
 
 ## Why it's done this way
 

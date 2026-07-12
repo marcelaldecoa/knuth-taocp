@@ -1,41 +1,62 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # Pre-commit guard for the Knuth expert agents (docs/knuth-agents/).
 # Never let a Google Drive handle or credential reach git history.
 # Activate with:  git config core.hooksPath githooks
-set -eu
+#
+# Two properties this hook maintains deliberately:
+#   - filenames are iterated NUL-delimited, so spaces (or any byte git allows)
+#     in a name cannot split the list or skip a check;
+#   - content checks read the STAGED blob (`git show :<file>`), not the
+#     working tree — what gets committed is exactly what gets scanned.
+set -u
 
-staged=$(git diff --cached --name-only --diff-filter=ACM)
 fail=0
 
-# 1) Sensitive local files must never be committed.
-for f in $staged; do
-  case "$f" in
-    config.local.json|.mcp.json|gdrive-creds.json|*/gdrive-creds.json|client_secret_*.json)
-      echo "pre-commit: refusing to commit sensitive Drive file: $f" >&2; fail=1 ;;
-    .knuth-cache/*)
-      echo "pre-commit: refusing to commit the resolved-ID / volume-text cache: $f" >&2; fail=1 ;;
+while IFS= read -r -d '' f; do
+  # 1) Sensitive local files must never be committed, at any depth.
+  base=${f##*/}
+  case "$base" in
+    config.local.json|.mcp.json|gdrive-creds.json|client_secret_*.json)
+      echo "pre-commit: refusing to commit sensitive Drive file: $f" >&2
+      fail=1
+      continue ;;
   esac
-done
+  case "$f" in
+    .knuth-cache/*|*/.knuth-cache/*)
+      echo "pre-commit: refusing to commit the resolved-ID / volume-text cache: $f" >&2
+      fail=1
+      continue ;;
+  esac
 
-# 2) A real folder ID must stay in config.local.json — only the placeholder may be tracked.
-for f in $staged; do
-  [ -f "$f" ] || continue
-  if grep -Eq '"KNUTH_DRIVE_FOLDER"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_-]{20,}"' "$f" \
-     && ! grep -q 'PUT-YOUR-FOLDER-ID-HERE' "$f"; then
+  staged=$(git show ":$f" 2>/dev/null) || continue
+
+  # 2) A real folder ID must stay in config.local.json. The placeholder is
+  #    exempt per LINE, not per file — a file that contains the placeholder
+  #    somewhere AND a real ID elsewhere still fails.
+  if printf '%s\n' "$staged" \
+     | grep -E '"KNUTH_DRIVE_FOLDER"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_-]{20,}"' \
+     | grep -qv 'PUT-YOUR-FOLDER-ID-HERE'; then
     echo "pre-commit: a real KNUTH_DRIVE_FOLDER id is staged in $f — keep it in config.local.json (gitignored)." >&2
     fail=1
   fi
-done
 
-# 3) Drive file IDs (from search_files) must never be hardcoded into the map/skill/agents/docs.
-for f in $staged; do
+  # 3) A Drive URL is a handle too — block it repo-wide.
+  if printf '%s\n' "$staged" \
+     | grep -Eq 'drive\.google\.com/(file/d|drive/folders)/[A-Za-z0-9_-]{20,}'; then
+    echo "pre-commit: a Google Drive URL with a file/folder id is staged in $f — resolve IDs at runtime, never commit them." >&2
+    fail=1
+  fi
+
+  # 4) Drive file IDs (from search_files) must never be hardcoded into the
+  #    map/skill/agents/docs.
   case "$f" in
     .claude/skills/knuth-navigator/*|.claude/agents/knuth-*|docs/knuth-agents/*)
-      if grep -Eq '"(id|fileId)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_-]{25,}"' "$f"; then
+      if printf '%s\n' "$staged" \
+         | grep -Eq '"(id|fileId)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_-]{25,}"'; then
         echo "pre-commit: a Drive file ID looks hardcoded in $f — resolve IDs at runtime, never commit them." >&2
         fail=1
       fi ;;
   esac
-done
+done < <(git diff --cached --name-only -z --diff-filter=ACM)
 
 [ "$fail" -eq 0 ] || { echo "pre-commit: blocked. See docs/knuth-agents/README.md." >&2; exit 1; }

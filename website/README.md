@@ -5,13 +5,13 @@ This website is built using [Docusaurus](https://docusaurus.io/), a modern stati
 ## Installation
 
 ```bash
-yarn
+npm ci
 ```
 
 ## Local Development
 
 ```bash
-yarn start
+npm run start
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
@@ -19,7 +19,7 @@ This command starts a local development server and opens up a browser window. Mo
 ## Build
 
 ```bash
-yarn build
+npm run build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
@@ -33,26 +33,20 @@ already fails on any broken link or anchor in a rendered page. The hand-written
 
 ```bash
 npm run check:museum   # validate museum links/assets against build/ (needs a build first)
-npm run verify:site    # build, then run the museum check — the full local gate
+npm run verify:site    # build, then the museum and built-math checks — the full local gate
 ```
 
 `check:museum` resolves every `href`/`src` in the museum and brand-guide HTML
 against the built tree (so cross-links into generated course pages count too),
 and confirms every `museum/exhibit-*.html` link inside a course lesson points at
 a real exhibit. The Pages workflow runs it after the build, before deploying.
+`check:built-math` greps the built pages for KaTeX render errors; CI
+additionally runs `check:math`, a fast pre-build lint of every `$…$`
+expression.
 
 ## Deployment
 
-Using SSH:
-
-```bash
-USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+Deployment is automatic: the Pages workflow
+(`.github/workflows/pages.yml`) builds the site, runs the math and museum
+checks, and publishes to GitHub Pages on every push to `main` (or via
+`workflow_dispatch`). There is no manual deploy step.

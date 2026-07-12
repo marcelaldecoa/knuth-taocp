@@ -133,12 +133,13 @@ are linear in $n$, hence logarithmic in the operands.
 
 **Answer sketch.** (a) Since $0 < F_{n-1} < F_n$ and $F_{n+1} = F_n + F_{n-1}$, we
 have $F_{n+1} \bmod F_n = F_{n-1}$, so one division step sends $(F_{n+1}, F_n) \to
-(F_n, F_{n-1})$. Iterating drives the pair down to $(F_2, F_1) = (1, 1) \to (1, 0)$,
-taking exactly $n-1$ steps and leaving gcd $1$. (Verified: $(F_4, F_3) = (3,2)$
+(F_n, F_{n-1})$. Iterating drives the pair down to $(F_3, F_2) = (2, 1)$, whose
+division leaves remainder $0$ — exactly $n-1$ steps in all, leaving gcd
+$F_2 = 1$. (Verified: $(F_4, F_3) = (3,2)$
 takes $2$; $(F_{11}, F_{10}) = (89, 55)$ takes $9$; $(F_{20}, F_{19}) = (6765,
 4181)$ takes $18$ — always $n-1$, always gcd $1$.) (b) The binary gcd on the same
 pairs makes noticeably *fewer* shift-and-subtract iterations — e.g. $9$ Euclid
-divisions vs. $4$ Stein subtractions on $(89, 55)$ — because it removes factors of
+divisions vs. $5$ Stein subtractions on $(89, 55)$ — because it removes factors of
 $2$ in bulk and never divides. The exact count depends on the variant, but both
 are $\Theta(\log uv)$: Euclid's $n-1$ and Stein's iterations are each linear in
 $n$, and $\log_2(F_{n+1} F_n) \approx 1.39\,n$. The instructive point: Fibonacci

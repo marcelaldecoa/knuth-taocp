@@ -264,7 +264,8 @@ $(e_0, e_1)$ (they share vertex 1).
 
 ```text
 G1:  P = {∅,{e0}} ⊔ {∅,{e1}} = {∅, {e0}, {e1}, {e0,e1}}
-     as a ZDD:  p1 = (e0, p2, p2),  p2 = (e1, ⊤, ⊤)          Z(P) = 4
+     as a ZDD:  p1 = (e0, p2, p2),  p2 = (e1, ⊤, ⊤)          Z(P) = 3
+     (node_count is a reachability sweep: p1, p2, ⊤ — ⊥ is unreachable)
 G2:  bad = P ⊔ {{e0,e1}} = {{e0,e1}}   (only one superset exists here)
      F = P \ bad = {∅, {e0}, {e1}}
      as a ZDD:  f = (e0, (e1, ⊤, ⊤), ⊤)

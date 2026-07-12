@@ -38,6 +38,11 @@ const contentPlugins = {
   rehypePlugins: [rehypeKatex],
 };
 
+// Single source of truth for the site's base path: the KaTeX stylesheet href
+// below is derived from it, so changing the base (fork, custom domain) can't
+// silently ship unstyled math.
+const BASE_URL = '/knuth-taocp/';
+
 const config: Config = {
   title: 'The Art of Computer Programming',
   tagline: "Knuth's essence, implemented — a hands-on course in Rust",
@@ -48,7 +53,7 @@ const config: Config = {
   },
 
   url: 'https://marcelaldecoa.github.io',
-  baseUrl: '/knuth-taocp/',
+  baseUrl: BASE_URL,
   organizationName: 'marcelaldecoa',
   projectName: 'knuth-taocp',
 
@@ -133,7 +138,7 @@ const config: Config = {
   // Self-hosted KaTeX stylesheet (no CDN — the course never touches the network).
   stylesheets: [
     {
-      href: '/knuth-taocp/katex/katex.min.css',
+      href: `${BASE_URL}katex/katex.min.css`,
       type: 'text/css',
     },
   ],

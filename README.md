@@ -126,8 +126,10 @@ grader/                        the ./grade tool
 ./grade 3 --stage 2      # re-run one stage
 ./grade 3 -s 2 --hint    # stuck? a graduated hint (add a number for the next)
 ./grade 3 -v             # full test output
+./grade watch 3          # re-grade a module every time you save its lab.rs
 ./grade bench 6          # run a module's growth-curve benchmark
 ./grade doctor           # diagnose your toolchain and workspace
+./grade manifest         # print the course structure as JSON (for the website)
 ./grade all              # everything
 ./grade reset            # forget progress
 ./grade verify           # course self-check (see below)
@@ -185,8 +187,10 @@ Vol. 1, §3–4 → Vol. 2, §5–6 → Vol. 3, §7 → Vol. 4. So §4.5.3 is in
 where a Vol. 1 lesson cites it. Full explanation:
 [docs/for-newcomers.md §8](docs/for-newcomers.md#8-reading-taocps-section-numbers).
 
-MMIX, Knuth's machine, is deliberately out of scope here — this course maps
-his MIX-era memory model onto Rust arenas instead (see CONVENTIONS.md).
+No MIX or MMIX assembly fluency is required: the course maps Knuth's MIX-era
+memory model onto Rust arenas instead (see CONVENTIONS.md), and Module 18
+builds a working MMIX subset — loader, interpreter, cost model — as its own
+capstone.
 
 ## Contributing / authoring
 

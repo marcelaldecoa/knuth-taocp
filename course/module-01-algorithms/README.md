@@ -219,16 +219,17 @@ Answer before moving on (no code needed):
 
 Ratings use Knuth's scale: 00 immediate · 10 a minute · 20 fifteen minutes to
 an hour · 30 hours · 40 term project · 50 open research problem. An arrow ▶
-marks especially instructive exercises. Log your attempts in
-`course/module-01-algorithms/exercises.md`.
+marks especially instructive exercises. Rows tagged *course* are our own
+exercises, drawn from §1.1's prose rather than the book's exercise list. Log
+your attempts in `course/module-01-algorithms/exercises.md`.
 
 | Ex. | Rating | Statement (paraphrased) |
 |---|---|---|
-| 1.1-1 | 10 | Text says $\gcd(2166, 6099)$; compute it by hand with Algorithm E. |
-| 1.1-2 | 15 | What is the value of the variables at each step of E on (m, n) = (119, 544)? |
+| 1.1-4 | 10 | Text says $\gcd(2166, 6099)$; compute it by hand with Algorithm E. |
+| course (§1.1) | 15 | What is the value of the variables at each step of E on (m, n) = (119, 544)? |
 | ▶1.1-3 | 16 | Design Algorithm F (you did — stage 2). |
-| 1.1-5 | 12 | Is a recipe from a cookbook an algorithm? Grade it against the five properties. |
-| ▶1.1-9 | 30 | Define formally what it means for two computational methods to be *equivalent*; prove your E and F equivalent under your definition. |
+| course (§1.1) | 12 | Is a recipe from a cookbook an algorithm? Grade it against the five properties. |
+| ▶1.1-9 | 30 | Formalize what it means for one computational method to *simulate* another; course variant: define *equivalence* and prove your E and F equivalent under your definition. |
 
 ## In the real world
 
@@ -255,7 +256,7 @@ its contract.
 - **Extremal witness** — Lamé's theorem is proved by *constructing* the worst
   input (consecutive Fibonacci numbers), then arguing nothing beats it.
 - **Empirical confirmation of a theorem** — stage 4's exhaustive sweep below
-  F₁₆ is analysis of algorithms as Knuth practices it: derive, then measure.
+  $F_{16}$ is analysis of algorithms as Knuth practices it: derive, then measure.
 
 ## 5. Where this leads
 

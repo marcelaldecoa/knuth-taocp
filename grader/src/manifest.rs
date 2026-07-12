@@ -698,14 +698,23 @@ const MODULE_10: Module = Module {
         ],
 };
 
-/// Find a module by "1", "01", "module-01-...", or a substring of its dir.
+/// Find a module by "1", "01", a "module-…" dir prefix, or a substring of its
+/// slug (the part after the numeric prefix, e.g. "sorting").
 pub fn find_module(query: &str) -> Option<&'static Module> {
     let q = query.trim().to_ascii_lowercase();
+    if q.is_empty() {
+        return None;
+    }
     let as_id = q.trim_start_matches('0');
+    // A purely numeric query must match a module id exactly: the substring
+    // fallback would otherwise let "./grade 0" grade module 01 (via
+    // "module-01-…") and similar junk queries match arbitrary modules.
+    let numeric = q.chars().all(|c| c.is_ascii_digit());
     MODULES.iter().find(|m| {
+        let slug = m.dir.splitn(3, '-').nth(2).unwrap_or("");
         m.id == q
-            || m.id.trim_start_matches('0') == as_id && !as_id.is_empty()
-            || m.dir == q
-            || m.dir.contains(q.as_str())
+            || (numeric && !as_id.is_empty() && m.id.trim_start_matches('0') == as_id)
+            || (!numeric && q.starts_with("module-") && m.dir.starts_with(q.as_str()))
+            || (!numeric && !q.starts_with("module-") && slug.contains(q.as_str()))
     })
 }

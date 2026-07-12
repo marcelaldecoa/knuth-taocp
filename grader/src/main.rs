@@ -110,8 +110,38 @@ fn reference_stem(module: &Module) -> String {
     format!("m{}", module.dir.trim_start_matches("module-").replace('-', "_"))
 }
 
+/// Wall-clock cap for a single stage run, so a student's accidental infinite
+/// loop ends with a diagnosis instead of hanging `./grade` (and `watch`)
+/// forever. Generous by default because `cargo test` includes compilation;
+/// override with `TAOCP_STAGE_TIMEOUT_SECS`.
+fn stage_timeout() -> std::time::Duration {
+    let secs = std::env::var("TAOCP_STAGE_TIMEOUT_SECS")
+        .ok()
+        .and_then(|v| v.parse::<u64>().ok())
+        .unwrap_or(300);
+    std::time::Duration::from_secs(secs)
+}
+
+/// The `N passed` count from a `test result:` summary line, if this is one.
+fn parse_passed_count(line: &str) -> Option<usize> {
+    let t = line.trim_start();
+    if !t.starts_with("test result:") {
+        return None;
+    }
+    let before = t.split(" passed").next()?;
+    before
+        .rsplit(|c: char| !c.is_ascii_digit())
+        .next()?
+        .parse()
+        .ok()
+}
+
 /// Run one stage's test target. Returns (passed, captured output).
 fn run_stage(root: &PathBuf, module: &Module, test_target: &str, solutions: bool) -> (bool, String) {
+    use std::io::Read;
+    use std::process::Stdio;
+    use std::time::{Duration, Instant};
+
     let mut cmd = Command::new("cargo");
     cmd.current_dir(root)
         .arg("test")
@@ -122,16 +152,88 @@ fn run_stage(root: &PathBuf, module: &Module, test_target: &str, solutions: bool
         .arg(test_target);
     if solutions {
         cmd.arg("--features").arg("solutions");
+    } else {
+        // A lab crate must never pull the reference in by default (say, via a
+        // stray `default = ["solutions"]` in its Cargo.toml) — that would make
+        // every stage pass with the stub untouched. Labs define no other
+        // features, so this is safe to pass unconditionally.
+        cmd.arg("--no-default-features");
     }
     cmd.env("CARGO_TERM_COLOR", "never").env("RUST_BACKTRACE", "0");
-    match cmd.output() {
-        Ok(out) => {
-            let mut text = String::from_utf8_lossy(&out.stdout).into_owned();
-            text.push_str(&String::from_utf8_lossy(&out.stderr));
-            (out.status.success(), text)
+    cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
+
+    let mut child = match cmd.spawn() {
+        Ok(c) => c,
+        Err(e) => return (false, format!("failed to invoke cargo: {e}")),
+    };
+    // Drain both pipes on threads so a chatty test can't fill a pipe buffer
+    // and deadlock against the timeout loop below.
+    let mut child_out = child.stdout.take();
+    let mut child_err = child.stderr.take();
+    let out_reader = std::thread::spawn(move || {
+        let mut buf = Vec::new();
+        if let Some(ref mut s) = child_out {
+            let _ = s.read_to_end(&mut buf);
         }
-        Err(e) => (false, format!("failed to invoke cargo: {e}")),
+        buf
+    });
+    let err_reader = std::thread::spawn(move || {
+        let mut buf = Vec::new();
+        if let Some(ref mut s) = child_err {
+            let _ = s.read_to_end(&mut buf);
+        }
+        buf
+    });
+
+    let deadline = Instant::now() + stage_timeout();
+    let mut timed_out = false;
+    let status = loop {
+        match child.try_wait() {
+            Ok(Some(status)) => break Some(status),
+            Ok(None) => {
+                if Instant::now() >= deadline {
+                    // Best effort: killing cargo can orphan the test binary,
+                    // but it unblocks the grader with a clear diagnosis.
+                    timed_out = true;
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    break None;
+                }
+                std::thread::sleep(Duration::from_millis(50));
+            }
+            Err(e) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return (false, format!("failed to wait on cargo: {e}"));
+            }
+        }
+    };
+
+    let mut text = String::from_utf8_lossy(&out_reader.join().unwrap_or_default()).into_owned();
+    text.push_str(&String::from_utf8_lossy(&err_reader.join().unwrap_or_default()));
+
+    if timed_out || status.is_none() {
+        text.push_str(&format!(
+            "\nstage timed out after {}s — look for an infinite loop in your code \
+             (or raise TAOCP_STAGE_TIMEOUT_SECS if this machine is just slow)",
+            stage_timeout().as_secs()
+        ));
+        return (false, text);
     }
+    if !status.map(|s| s.success()).unwrap_or(false) {
+        return (false, text);
+    }
+    // A green run that executed zero tests proves nothing — treat it as a
+    // failure (this catches an emptied stage-test file).
+    let ran: usize = text.lines().filter_map(parse_passed_count).sum();
+    if ran == 0 {
+        text.push_str(
+            "\nstage reported success but ran 0 tests — restore the stage test file \
+             (git checkout -- labs/<module>/tests/)",
+        );
+        return (false, text);
+    }
+    (true, text)
 }
 
 /// Trim cargo/test noise down to the informative tail.
@@ -197,10 +299,14 @@ fn grade_module(
         let (ok, output) = run_stage(root, module, stage.test_target, solutions);
         if ok {
             passed += 1;
-            progress.insert(stage_key(module, stage.test_target));
+            if !solutions {
+                progress.insert(stage_key(module, stage.test_target));
+            }
             println!("    {}", style.green("✓ passed"));
         } else {
-            progress.remove(&stage_key(module, stage.test_target));
+            if !solutions {
+                progress.remove(&stage_key(module, stage.test_target));
+            }
             println!("    {}", style.red("✗ failed"));
             let excerpt = if verbose {
                 output.clone()
@@ -251,7 +357,12 @@ fn grade_module(
             }
         }
     }
-    save_progress(root, progress);
+    // Progress records what the STUDENT's code earned. `--solutions` runs
+    // (and `verify`, which grades with solutions on) exercise the reference,
+    // so they must neither mark stages complete nor overwrite the record.
+    if !solutions {
+        save_progress(root, progress);
+    }
     (passed, total)
 }
 
@@ -651,7 +762,9 @@ fn verify(root: &PathBuf, style: &Style, verbose: bool) -> bool {
             ok = false;
         }
     }
-    // `verify` must not overwrite the student's progress record.
+    // `verify` grades with `solutions: true`, and `grade_module` neither
+    // records nor persists progress on solutions runs — so the student's
+    // `.taocp/progress` is untouched by this self-check.
     println!();
     if ok {
         println!("{}", style.green("verify: every stage passes against the reference solutions."));
@@ -698,10 +811,17 @@ fn parse_hints(text: &str, stage_1based: usize) -> Vec<String> {
         }
         if in_stage {
             let t = line.trim_start();
-            // A new numbered item starts a new hint.
+            // A new numbered item starts a new hint: digits, a dot, then a
+            // space (or end of line). Requiring the space keeps a wrapped
+            // continuation line like "3.14 is the…" or "2.5x speedup…" from
+            // being misread as the start of hint 3 (resp. 2).
             let starts_item = t
                 .split_once('.')
-                .map(|(n, _)| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()))
+                .map(|(n, rest)| {
+                    !n.is_empty()
+                        && n.chars().all(|c| c.is_ascii_digit())
+                        && rest.chars().next().map(|c| c == ' ').unwrap_or(true)
+                })
                 .unwrap_or(false);
             if starts_item {
                 if !current.trim().is_empty() {
@@ -840,6 +960,41 @@ fn doctor(root: &Path, style: &Style) -> ExitCode {
             "src/lib.rs untouched (as intended)".to_string()
         } else {
             format!("edited src/lib.rs in: {} — restore from git", edited_plumbing.join(", "))
+        },
+    );
+
+    // A lab must not smuggle the reference in by default: a `default =
+    // ["solutions"]` line in a lab Cargo.toml would make every stage pass
+    // with the stub untouched. (Grading also passes --no-default-features,
+    // but catch the edit explicitly so the student sees why.)
+    let mut default_features = Vec::new();
+    for m in MODULES {
+        let toml = root.join("labs").join(m.dir).join("Cargo.toml");
+        if let Ok(t) = fs::read_to_string(&toml) {
+            let mut in_features = false;
+            for line in t.lines() {
+                let l = line.trim();
+                if l.starts_with('[') {
+                    in_features = l == "[features]";
+                } else if in_features
+                    && l.starts_with("default")
+                    && l["default".len()..].trim_start().starts_with('=')
+                {
+                    default_features.push(m.dir);
+                }
+            }
+        }
+    }
+    check(
+        "lab features intact",
+        default_features.is_empty(),
+        &if default_features.is_empty() {
+            "no lab enables `solutions` by default".to_string()
+        } else {
+            format!(
+                "`default` feature declared in: {} — remove it (labs must not enable `solutions` by default)",
+                default_features.join(", ")
+            )
         },
     );
 
@@ -1267,6 +1422,37 @@ mod tests {
         let t = "see [a](x.md) and [b](../y.md#h) but not a bare (paren).";
         assert_eq!(markdown_link_targets(t), vec!["x.md", "../y.md#h"]);
         assert!(markdown_link_targets("no links here").is_empty());
+    }
+
+    #[test]
+    fn parse_hints_does_not_split_on_decimal_continuations() {
+        // A wrapped line starting with a decimal number ("3.14 is…") must not
+        // be misread as the start of hint 3.
+        let text = "## Stage 1\n1. First hint about pi:\n3.14159 is the constant you want.\n2. Second hint.\n";
+        let hints = parse_hints(text, 1);
+        assert_eq!(hints.len(), 2, "continuation line split a hint: {hints:?}");
+        assert!(hints[0].contains("3.14159"));
+        assert!(hints[1].starts_with("Second"));
+    }
+
+    #[test]
+    fn parse_passed_count_reads_summary_lines() {
+        assert_eq!(parse_passed_count("test result: ok. 7 passed; 0 failed; 0 ignored"), Some(7));
+        assert_eq!(parse_passed_count("test result: ok. 0 passed; 0 failed"), Some(0));
+        assert_eq!(parse_passed_count("running 7 tests"), None);
+    }
+
+    #[test]
+    fn find_module_rejects_numeric_junk() {
+        // "./grade 0" must not grade module 01 via a dir-substring match, and
+        // "-1" must not pick up module 11.
+        assert!(find_module("0").is_none());
+        assert!(find_module("-1").is_none());
+        assert_eq!(find_module("6").map(|m| m.id), Some("06"));
+        assert_eq!(find_module("06").map(|m| m.id), Some("06"));
+        assert_eq!(find_module("sort").map(|m| m.id), Some("06"));
+        assert_eq!(find_module("module-01-algorithms").map(|m| m.id), Some("01"));
+        assert_eq!(find_module("module-01").map(|m| m.id), Some("01"));
     }
 
     #[test]

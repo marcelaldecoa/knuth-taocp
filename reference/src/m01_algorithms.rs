@@ -105,7 +105,7 @@ mod tests {
     fn knuth_worked_examples() {
         // §1.1 traces gcd(544, 119) = 17.
         assert_eq!(euclid_e(544, 119), 17);
-        // Exercise 1.1-1's numbers: gcd(2166, 6099) = 57.
+        // Exercise 1.1-4's numbers: gcd(2166, 6099) = 57.
         assert_eq!(euclid_e(2166, 6099), 57);
         assert_eq!(euclid_e(6099, 2166), 57);
         assert_eq!(euclid_e(1, 1), 1);
