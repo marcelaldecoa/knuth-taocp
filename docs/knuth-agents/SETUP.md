@@ -80,8 +80,13 @@ OAuth app.
 ```
 git config core.hooksPath githooks
 ```
-`githooks/pre-commit` (and `pre-commit.ps1`) refuse to commit a real folder ID,
-a Drive file ID, credentials, or the local cache.
+`githooks/pre-commit` (and `pre-commit.ps1`) scan the **staged** content and
+refuse to commit the sensitive local files (credentials, `config.local.json`,
+`.mcp.json`, the `.knuth-cache/`), a real `KNUTH_DRIVE_FOLDER` value, a
+`drive.google.com/…` URL carrying an ID, or a hardcoded `"id"`/`"fileId"` in
+the knuth map/skill/agent/doc paths. They guard those recognized forms — they
+are not a general secret scanner, so keep handles in `config.local.json`
+rather than pasting them anywhere as prose.
 
 ## 5. Use it
 
