@@ -1,6 +1,6 @@
 # Syllabus
 
-Twenty-two modules, 94 stages. Each stage is one graded test suite
+Twenty-three modules, 98 stages. Each stage is one graded test suite
 (`labs/<module>/tests/stage_NN_*.rs`); `./grade <n>` runs them in order.
 Theory a stage needs is in its module's lesson, `course/<module>/README.md` —
 self-contained, book optional.
@@ -30,7 +30,7 @@ and from Module 05 on you get the algorithm and the contract.
 |---|---|---|---|
 | Foundations | 01–03 | Definitions, the math toolkit, Knuth's memory model. A gentle ramp. | ~1 week |
 | Core methods | 04–10 | Randomness, arithmetic, sorting, searching, generation, backtracking, SAT. The heart of the course. | 1–2 weeks |
-| Advanced tier | 11–22 | Each revisits a volume and pushes its flagship idea further; take any one after its prerequisite core module. Steeper, and a few (12, 14, 16) are genuinely hard. | 1–2 weeks, some more |
+| Advanced tier | 11–23 | Each revisits a volume and pushes its flagship idea further; take any one after its prerequisite core module. Steeper, and a few (12, 14, 16) are genuinely hard. | 1–2 weeks, some more |
 
 Within a module the stages are ordered easy → hard, so partial progress is
 always real progress. `./grade` remembers exactly where you are.
@@ -127,11 +127,11 @@ queens, graph coloring (Petersen graph).
 
 ---
 
-Modules 11–22 are the advanced tier: each returns to a volume you already
+Modules 11–23 are the advanced tier: each returns to a volume you already
 know and takes its flagship idea further. Do them in any order after their
 prerequisites (11 after 07, 12 after 04, 13 after 08, 14 after 10, 15 after
 06, 16 after 12 and 05, 17 after 13 and 09, 18 after 01 and 03, 19 after 05,
-20 after 06, 21 after 13, 22 after 09 and 13).
+20 after 06, 21 after 13, 22 after 09 and 13, 23 after 09 and 10).
 
 ## Module 11 — Multiway Trees and Digital Searching (Vol. 3, §6.2.4 & §6.3)
 
@@ -233,18 +233,31 @@ Stages: truth tables and normal forms · Boolean chains and combinational
 cost · median, threshold, and symmetric functions (with Dedekind's monotone
 counting) · optimum chains for small functions.
 
-## Module 22 — Hamiltonian Paths and Constraint Satisfaction (toward Vol. 4C, §7.2.2.4)
+## Module 22 — Hamiltonian Paths and Cycles (toward Vol. 4C, §7.2.2.4)
 
-The finale, where NP-hardness meets everything you've built.
+Where NP-hardness meets everything you've built.
 
 Stages: Hamiltonian paths by backtracking (Petersen has none) · Warnsdorff's
 knight's tour, and where the heuristic blinks · hypercube cycles *are* Gray
 codes (Module 08 returns) · Held–Karp shortest path by bitmask DP (Module 13
 returns) — still the best known for general TSP.
 
+## Module 23 — Constraint Satisfaction (Vol. 4 Fascicle 7, §7.2.2.3)
+
+The finale, on the newest material Knuth has published: the draft
+pre-fascicle where backtracking (Module 09), SAT (Module 10), and ordering
+heuristics reunite under one model. Prerequisites: modules 09 and 10.
+
+Stages: the CSP model — queens and coloring as instances — with basic
+backtracking (Algorithm 7.2.2B) · forward checking with save-and-restore
+(the honest cousin of dancing cells) plus the MRV ordering heuristic ·
+arc consistency to the unique AC-3 fixpoint · the direct CSP→SAT encoding,
+its model-for-solution bijection certified by truth-table counting.
+
 ## Where to go next (not yet modules — contributions welcome)
 
 Retrieval on secondary keys (§6.5) · BDD/ZDD variable reordering · optimum
 sorting networks beyond Batcher (the AKS network) · Toom–Cook and FFT
-multiplication (§4.3.3) · the spectral test in dimensions 7–8 · and Vol. 4C
-itself, as its pre-fascicles firm up.
+multiplication (§4.3.3) · the spectral test in dimensions 7–8 · dancing
+cells as a real sparse-set engine (Fascicle 7's implementation track) · and
+Vol. 4C itself, as its pre-fascicles firm up.

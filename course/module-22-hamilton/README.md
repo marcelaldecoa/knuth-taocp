@@ -1,4 +1,4 @@
-# Module 22 — Hamiltonian Paths and Constraint Satisfaction
+# Module 22 — Hamiltonian Paths and Cycles
 
 > **Source:** *The Art of Computer Programming*, toward Vol. 4C, §7.2.2.4
 > (Hamiltonian paths and cycles; pre-fascicle material), with threads back to

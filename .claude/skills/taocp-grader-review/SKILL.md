@@ -25,7 +25,7 @@ failure**; progress lives in gitignored `.taocp/progress`.
 
 ```bash
 rm -rf .taocp                       # reset stale progress first
-./grade verify                      # ACCURACY: all 94 stages pass vs reference (~40s)
+./grade verify                      # ACCURACY: all 98 stages pass vs reference (~40s)
 ./grade N >/dev/null 2>&1; echo $?  # PRECISION: on raw stubs → non-zero exit (CI-usable)
 ./grade N                           # PRECISION: fails at stage 1, staged, "later stages not run"
 ```

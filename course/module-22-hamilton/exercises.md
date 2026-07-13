@@ -1,4 +1,4 @@
-# Exercises — Module 22 (Hamiltonian Paths and Constraint Satisfaction)
+# Exercises — Module 22 (Hamiltonian Paths and Cycles)
 
 Self-contained problems on this module's material — counting Hamiltonian cycles,
 the Euler/Hamilton asymmetry, backtracking prunes, the knight's-tour parity

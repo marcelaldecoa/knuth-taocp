@@ -1,16 +1,111 @@
 {
   "note": "Editorial map of recurring proof techniques. Not part of the grader; ported from the original dashboard. `met` and `recurs` reference module ids.",
   "techniques": [
-    { "technique": "Invariant + termination", "met": "01", "recurs": ["05", "06", "07", "09", "14"] },
-    { "technique": "Mathematical induction", "met": "02", "recurs": ["03", "04", "06", "13"] },
-    { "technique": "Double counting", "met": "02", "recurs": ["06", "08", "13"] },
-    { "technique": "Expectation & harmonic sums", "met": "02", "recurs": ["06", "07"] },
-    { "technique": "Extremal witness", "met": "01", "recurs": ["06", "07", "13", "20"] },
-    { "technique": "Information-theoretic bound", "met": "06", "recurs": ["07", "20"] },
-    { "technique": "Honest probabilistic analysis", "met": "04", "recurs": ["05", "12", "16", "19"] },
-    { "technique": "Lattice / number-theoretic structure", "met": "01", "recurs": ["04", "05", "12", "16"] },
-    { "technique": "Reduction between problems", "met": "09", "recurs": ["10", "14", "17", "22"] },
-    { "technique": "Amortized / potential", "met": "03", "recurs": ["07", "14", "15"] },
-    { "technique": "Certification", "met": "01", "recurs": ["10", "14"] }
+    {
+      "technique": "Invariant + termination",
+      "met": "01",
+      "recurs": [
+        "05",
+        "06",
+        "07",
+        "09",
+        "14",
+        "23"
+      ]
+    },
+    {
+      "technique": "Mathematical induction",
+      "met": "02",
+      "recurs": [
+        "03",
+        "04",
+        "06",
+        "13"
+      ]
+    },
+    {
+      "technique": "Double counting",
+      "met": "02",
+      "recurs": [
+        "06",
+        "08",
+        "13"
+      ]
+    },
+    {
+      "technique": "Expectation & harmonic sums",
+      "met": "02",
+      "recurs": [
+        "06",
+        "07"
+      ]
+    },
+    {
+      "technique": "Extremal witness",
+      "met": "01",
+      "recurs": [
+        "06",
+        "07",
+        "13",
+        "20"
+      ]
+    },
+    {
+      "technique": "Information-theoretic bound",
+      "met": "06",
+      "recurs": [
+        "07",
+        "20"
+      ]
+    },
+    {
+      "technique": "Honest probabilistic analysis",
+      "met": "04",
+      "recurs": [
+        "05",
+        "12",
+        "16",
+        "19"
+      ]
+    },
+    {
+      "technique": "Lattice / number-theoretic structure",
+      "met": "01",
+      "recurs": [
+        "04",
+        "05",
+        "12",
+        "16"
+      ]
+    },
+    {
+      "technique": "Reduction between problems",
+      "met": "09",
+      "recurs": [
+        "10",
+        "14",
+        "17",
+        "22",
+        "23"
+      ]
+    },
+    {
+      "technique": "Amortized / potential",
+      "met": "03",
+      "recurs": [
+        "07",
+        "14",
+        "15"
+      ]
+    },
+    {
+      "technique": "Certification",
+      "met": "01",
+      "recurs": [
+        "10",
+        "14",
+        "23"
+      ]
+    }
   ]
 }

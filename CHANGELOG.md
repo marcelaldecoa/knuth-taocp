@@ -8,6 +8,20 @@ tags yet, so everything lives under **Unreleased** until that changes.
 ## [Unreleased]
 
 ### Added
+- **Module 23 — Constraint Satisfaction** (Vol. 4 Fascicle 7, §7.2.2.3): the
+  CSP model with queens/coloring instances and basic backtracking, forward
+  checking + MRV, arc consistency (AC-3), and the direct CSP→SAT encoding.
+  Four stages; the course is now 23 modules / 98 stages. Module 22 retitled
+  "Hamiltonian Paths and Cycles" (CSP proper now lives in 23).
+- `./grade verify --stubs` — course-CI gate proving every stage FAILS on the
+  pristine stubs (no vacuous suites); wired into the ubuntu CI leg.
+- GitHub Codespaces / Dev Containers setup (`.devcontainer/`): Rust
+  pre-installed, grader pre-built, safety hook wired — first command is
+  `./grade`.
+- Website progress bridge: paste your `.taocp/progress` on the course map and
+  your grader-recorded stages light up (client-side only, stored in
+  localStorage, never leaves the browser).
+- CI runs the knuth-navigator map self-test (`navigator_selftest.py --quiet`).
 - `./grade watch <module>` — re-grades a module on every save to its `lab.rs`
   (std-only mtime poll; Ctrl-C to stop).
 - `rust-toolchain.toml` pinning the stable channel (with `clippy` + `rustfmt`),
