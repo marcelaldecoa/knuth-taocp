@@ -28,6 +28,35 @@
   transition: width 0.5s ease;
 }
 
+/* progress bridge — paste your local `.taocp/progress` record */
+.bridge { display: grid; gap: 0.5rem; }
+.bridgeHead { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.bridgeStat {
+  font-size: 0.8rem; color: var(--taocp-ink-soft); font-variant-numeric: tabular-nums;
+}
+.bridgeBody {
+  display: grid; gap: 0.6rem; padding: 0.9rem 1rem;
+  background: var(--taocp-plate); border: 1px solid var(--taocp-plate-edge);
+  border-left: 3px solid var(--taocp-accent); border-radius: 3px;
+}
+.bridgeLede { margin: 0; font-size: 0.86rem; color: var(--taocp-ink-soft); }
+.bridgeTa {
+  width: 100%; resize: vertical; font-family: var(--ifm-font-family-monospace);
+  font-size: 0.78rem; line-height: 1.5; color: var(--taocp-ink);
+  background: var(--taocp-paper); border: 1px solid var(--taocp-plate-edge);
+  border-radius: 3px; padding: 0.5rem 0.6rem;
+}
+.bridgeTa:focus { outline: 2px solid var(--taocp-accent); outline-offset: 1px; }
+.bridgeActions { display: flex; gap: 1.2rem; align-items: center; }
+.bridgeBtn {
+  font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+  color: #fff; background: var(--taocp-accent); border: 1px solid var(--taocp-accent);
+  border-radius: 3px; padding: 0.32rem 0.9rem; cursor: pointer;
+}
+.bridgeBtn:hover { background: var(--taocp-gold-deep); border-color: var(--taocp-gold-deep); }
+.bridgeBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+.bridgeNote { margin: 0; font-size: 0.74rem; color: var(--taocp-muted); }
+
 /* shelves */
 .shelf { margin: 2.2rem 0; }
 .shelfLabel {
@@ -80,6 +109,9 @@
 .pip[aria-pressed='true'] { background: var(--taocp-done); border-color: var(--taocp-done); color: #fff; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--taocp-muted); flex: none; }
 .pip[aria-pressed='true'] .dot { background: #fff; }
+/* stages recorded by ./grade: shown done, not hand-togglable */
+.pipGraded { cursor: default; }
+.pipGraded:hover { border-color: var(--taocp-done); }
 
 .expand {
   align-self: flex-start; font-size: 0.68rem; letter-spacing: 0.05em;

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useEffect, useState, useCallback, useMemo} from 'react';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import manifest from '@site/src/data/manifest.json';
@@ -23,7 +23,34 @@ const VOL_INK: Record<string, string> = {
 };
 
 const STORAGE_KEY = 'taocp:done:v1';
+const PROGRESS_STORAGE_KEY = 'taocp.progress';
 const stageKey = (id: string, i: number) => `${id}:${i}`;
+
+// The grader records a passed stage in `.taocp/progress` as one line per
+// stage, `<lab_crate>/<test_target>` (e.g. `lab-06-sorting/stage_02_quicksort`).
+// Lab crates are named after their module dir: `module-06-sorting` → `lab-06-sorting`.
+const labCrate = (dir: string) => dir.replace(/^module-/, 'lab-');
+
+// grader progress key → internal stage key ("06:1"). Built once from the manifest.
+const GRADE_KEY_TO_STAGE: Record<string, string> = {};
+for (const v of VOLUMES) {
+  for (const m of v.modules) {
+    m.stages.forEach((s, i) => {
+      GRADE_KEY_TO_STAGE[`${labCrate(m.dir)}/${s.test_target}`] = stageKey(m.id, i);
+    });
+  }
+}
+
+/** Parse pasted `.taocp/progress` text into known grader keys (unknown lines
+ * and blanks are ignored silently; duplicates collapse). */
+function parseProgress(text: string): string[] {
+  const seen = new Set<string>();
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (line && GRADE_KEY_TO_STAGE[line] !== undefined) seen.add(line);
+  }
+  return [...seen].sort();
+}
 
 const ALL_STAGES = VOLUMES.reduce(
   (n, v) => n + v.modules.reduce((m, mod) => m + mod.stages.length, 0),
@@ -52,10 +79,12 @@ function ProgressRing({frac}: {frac: number}) {
 function ModuleCard({
   mod,
   done,
+  graded,
   toggle,
 }: {
   mod: Module;
   done: Record<string, 1>;
+  graded: Record<string, 1>;
   toggle: (id: string, i: number) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -76,15 +105,18 @@ function ModuleCard({
 
       <div className={styles.pips}>
         {mod.stages.map((s, i) => {
-          const pressed = !!done[stageKey(mod.id, i)];
+          const isGraded = !!graded[stageKey(mod.id, i)];
+          const pressed = isGraded || !!done[stageKey(mod.id, i)];
+          const label = s.algorithm ? `${s.title} — ${s.algorithm}` : s.title;
           return (
             <button
               key={i}
               type="button"
-              className={styles.pip}
+              className={`${styles.pip} ${isGraded ? styles.pipGraded : ''}`}
               aria-pressed={pressed}
-              title={s.algorithm ? `${s.title} — ${s.algorithm}` : s.title}
-              onClick={() => toggle(mod.id, i)}
+              aria-disabled={isGraded || undefined}
+              title={isGraded ? `${label} — recorded by ./grade` : label}
+              onClick={isGraded ? undefined : () => toggle(mod.id, i)}
             >
               <span className={styles.dot} />
               {i + 1}
@@ -115,13 +147,93 @@ function ModuleCard({
   );
 }
 
+function ProgressBridge({
+  recorded,
+  onApply,
+  onClear,
+}: {
+  recorded: string[];
+  onApply: (keys: string[]) => void;
+  onClear: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+
+  const apply = () => {
+    onApply(parseProgress(text));
+    setText('');
+  };
+
+  return (
+    <div className={styles.bridge}>
+      <div className={styles.bridgeHead}>
+        <button
+          type="button"
+          className={styles.linkbtn}
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+        >
+          {open ? 'hide ▴' : 'track your progress from ./grade ▾'}
+        </button>
+        {recorded.length > 0 && (
+          <span className={styles.bridgeStat}>
+            {recorded.length} of {ALL_STAGES} stages recorded
+          </span>
+        )}
+      </div>
+      {open && (
+        <div className={styles.bridgeBody}>
+          <p className={styles.bridgeLede}>
+            Paste the contents of <code>.taocp/progress</code> — the file in your repo root that{' '}
+            <code>./grade</code> writes each time a stage passes — and the map lights up your
+            completed stages.
+          </p>
+          <textarea
+            className={styles.bridgeTa}
+            rows={5}
+            spellCheck={false}
+            placeholder={'lab-01-algorithms/stage_01_euclid\nlab-06-sorting/stage_02_quicksort\n…'}
+            aria-label="Contents of your .taocp/progress file"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <div className={styles.bridgeActions}>
+            <button type="button" className={styles.bridgeBtn} onClick={apply} disabled={!text.trim()}>
+              Apply
+            </button>
+            {recorded.length > 0 && (
+              <button type="button" className={styles.linkbtn} onClick={onClear}>
+                clear imported record
+              </button>
+            )}
+          </div>
+          <p className={styles.bridgeNote}>
+            Optional and private: the text is parsed right here in your browser and kept in
+            localStorage — it never leaves this machine. Lines that don't match a course stage
+            are ignored.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CourseMap(): React.ReactElement {
   const [done, setDone] = useState<Record<string, 1>>({});
+  const [recorded, setRecorded] = useState<string[]>([]);
 
   // localStorage is client-only; load after mount to stay SSR-safe.
   useEffect(() => {
     try {
       setDone(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {});
+    } catch {
+      /* ignore corrupt storage */
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) || '[]');
+      if (Array.isArray(saved)) {
+        setRecorded(saved.filter((k): k is string => typeof k === 'string' && k in GRADE_KEY_TO_STAGE));
+      }
     } catch {
       /* ignore corrupt storage */
     }
@@ -152,11 +264,31 @@ export default function CourseMap(): React.ReactElement {
     persist({});
   }, [persist]);
 
-  const doneStages = Object.keys(done).length;
+  const persistRecorded = useCallback((keys: string[]) => {
+    setRecorded(keys);
+    try {
+      if (keys.length) localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(keys));
+      else localStorage.removeItem(PROGRESS_STORAGE_KEY);
+    } catch {
+      /* storage unavailable — session-only */
+    }
+  }, []);
+
+  // Stages recorded by the grader, as internal stage keys.
+  const graded = useMemo(() => {
+    const g: Record<string, 1> = {};
+    for (const k of recorded) g[GRADE_KEY_TO_STAGE[k]] = 1;
+    return g;
+  }, [recorded]);
+
+  // What the map displays: manual check-offs merged with the imported record.
+  const shown = useMemo(() => ({...done, ...graded}), [done, graded]);
+
+  const doneStages = Object.keys(shown).length;
   const doneModules = VOLUMES.reduce(
     (n, v) =>
       n +
-      v.modules.filter((m) => m.stages.every((_, i) => done[stageKey(m.id, i)])).length,
+      v.modules.filter((m) => m.stages.every((_, i) => shown[stageKey(m.id, i)])).length,
     0,
   );
   const pct = ALL_STAGES ? (doneStages / ALL_STAGES) * 100 : 0;
@@ -177,12 +309,13 @@ export default function CourseMap(): React.ReactElement {
         <div className={styles.bar}>
           <span style={{width: `${pct.toFixed(1)}%`}} />
         </div>
+        <ProgressBridge recorded={recorded} onApply={persistRecorded} onClear={() => persistRecorded([])} />
       </div>
 
       {VOLUMES.map((v) => {
         const total = v.modules.reduce((n, m) => n + m.stages.length, 0);
         const d = v.modules.reduce(
-          (n, m) => n + m.stages.filter((_, i) => done[stageKey(m.id, i)]).length,
+          (n, m) => n + m.stages.filter((_, i) => shown[stageKey(m.id, i)]).length,
           0,
         );
         return (
@@ -198,7 +331,7 @@ export default function CourseMap(): React.ReactElement {
             </div>
             <div className={styles.grid}>
               {v.modules.map((m) => (
-                <ModuleCard key={m.id} mod={m} done={done} toggle={toggle} />
+                <ModuleCard key={m.id} mod={m} done={shown} graded={graded} toggle={toggle} />
               ))}
             </div>
           </div>

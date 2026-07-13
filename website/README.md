@@ -44,6 +44,19 @@ a real exhibit. The Pages workflow runs it after the build, before deploying.
 additionally runs `check:math`, a fast pre-build lint of every `$…$`
 expression.
 
+## Progress bridge (course map)
+
+The course map on the landing page can display your real grading record. Open
+**"track your progress from ./grade"** above the map and paste the contents of
+`.taocp/progress` — the plain-text file in the repo root that `./grade` appends
+to each time a stage passes (one `<lab_crate>/<test_target>` line, e.g.
+`lab-06-sorting/stage_02_quicksort`). Recognized lines light up their stage
+pips and module rings and show an "N of 98 stages recorded" count; unknown
+lines are ignored. Everything is parsed client-side in
+`src/components/CourseMap/` and stored in `localStorage` under
+`taocp.progress` — no network requests, nothing leaves the browser. "clear
+imported record" removes it (your on-disk `.taocp/progress` is never touched).
+
 ## Deployment
 
 Deployment is automatic: the Pages workflow
