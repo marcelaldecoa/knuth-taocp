@@ -58,7 +58,7 @@ manager — and points to the module where you build each one.
 ## 2. What this course actually is
 
 A hands-on re-telling of TAOCP where **you write the code**. It is structured
-like [CodeCrafters](https://codecrafters.io): 22 modules, each a track of small
+like [CodeCrafters](https://codecrafters.io): 23 modules, each a track of small
 **stages**, each stage a test suite. You replace a `todo!()` with an
 implementation, run one command, and it tells you pass/fail and what to fix.
 
@@ -142,7 +142,7 @@ road.** The amount of hand-holding *tapers* as you gain footing:
   Rust method — you'll reach for the standard-library docs yourself (a skill
   worth having).
 - **Modules 05 onward** give you the algorithm, the invariant, and the contract,
-  and trust you to translate. By the advanced tier (11–22) the lesson states the
+  and trust you to translate. By the advanced tier (11–23) the lesson states the
   theorem and the reference is a genuine "compare notes," not a crutch.
 
 If you ever feel dropped, that's the design working — but the safety nets never

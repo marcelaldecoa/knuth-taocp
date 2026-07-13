@@ -43,8 +43,12 @@ algorithms and where they run in today's technology.
 
 ## Quick start
 
-You need a Rust toolchain (any recent stable; the course has **zero
-dependencies** and never touches the network). Then:
+**No local setup:** open the repo in GitHub Codespaces (Code → Codespaces →
+Create) — the dev container installs Rust, pre-builds the grader, and wires
+the safety hook, so your first command is just `./grade`.
+
+**Locally:** you need a Rust toolchain (any recent stable; the course has
+**zero dependencies** and never touches the network). Then:
 
 ```bash
 ./grade              # course map + your progress
@@ -62,7 +66,7 @@ Euclid, H_n − 1 expected maxima, the lg(n!) sorting lower bound, AVL's
 
 ## The curriculum
 
-Twenty-two modules, 94 stages, spanning the published volumes. See
+Twenty-three modules, 98 stages, spanning the published volumes and the newest pre-fascicle. See
 [SYLLABUS.md](SYLLABUS.md) for the full map of stages, algorithms, and the
 mathematics each module teaches — and [docs/toolkit.md](docs/toolkit.md) for
 what the journey builds in you: the proof techniques and engineering
@@ -91,15 +95,17 @@ judgments, module by module.
 | 19 Floating-Point Arithmetic | Vol. 2 §4.2 | Round-to-even, why addition isn't associative, Kahan summation |
 | 20 Optimum Sorting & Networks | Vol. 3 §5.3 | The lg n! floor, Ford–Johnson, Batcher's network, the zero-one principle |
 | 21 Boolean Functions & Optimal Evaluation | Vol. 4A §7.1.1–7.1.2 | Truth-tables-as-integers, Boolean chains, Dedekind's monotone counting |
-| 22 Hamiltonian Paths & Constraint Satisfaction | toward Vol. 4C §7.2.2.4 | Backtracking, Warnsdorff, hypercube↔Gray codes, Held–Karp — the finale |
+| 22 Hamiltonian Paths & Cycles | toward Vol. 4C §7.2.2.4 | Backtracking, Warnsdorff, hypercube↔Gray codes, Held–Karp |
+| 23 Constraint Satisfaction | Vol. 4 Fascicle 7 §7.2.2.3 | The CSP model, forward checking & MRV, AC-3, CSP→SAT — the finale |
 
 The order is Knuth's own recommended path for implementers (it fronts Vol. 1
 and Vol. 3's implementation-rich chapters and defers the heaviest
 mathematics), and difficulty is gradual within and across modules. Modules
-01–10 are the core arc; 11–22 are advanced extensions that deepen each
-volume's flagship theme — ending where NP-hardness meets everything you've
-learned, and (in Module 18) where the course's first algorithm runs on the
-machine Knuth built for it.
+01–10 are the core arc; 11–23 are advanced extensions that deepen each
+volume's flagship theme — ending on the newest material Knuth has published
+(Fascicle 7's constraint satisfaction, where backtracking, SAT, and ordering
+heuristics all reunite), and (in Module 18) where the course's first
+algorithm runs on the machine Knuth built for it.
 
 ## How the repository is laid out
 

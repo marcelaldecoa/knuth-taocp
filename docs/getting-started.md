@@ -107,7 +107,7 @@ A few worth knowing early:
 
 ```text
 README.md                        the overview and command cheat-sheet
-SYLLABUS.md                      all 22 modules and 94 stages, in order
+SYLLABUS.md                      all 23 modules and 98 stages, in order
 CONVENTIONS.md                   the contract every module satisfies (for authors)
 docs/for-newcomers.md            ← start here if Knuth is new to you
 docs/getting-started.md          ← this file

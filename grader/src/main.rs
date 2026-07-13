@@ -723,7 +723,7 @@ fn check_structure(root: &Path, style: &Style) -> bool {
 /// Course integrity check: every lab test must pass when the lab crate
 /// re-exports the reference solutions, and the reference crate's own unit
 /// tests (Knuth's worked examples) must pass too.
-fn verify(root: &PathBuf, style: &Style, verbose: bool) -> bool {
+fn verify(root: &PathBuf, style: &Style, verbose: bool, stubs: bool) -> bool {
     println!();
     println!("{}", style.bold("Course self-check: reference solutions vs. lab test suites"));
     let mut ok = true;
@@ -765,6 +765,9 @@ fn verify(root: &PathBuf, style: &Style, verbose: bool) -> bool {
     // `verify` grades with `solutions: true`, and `grade_module` neither
     // records nor persists progress on solutions runs — so the student's
     // `.taocp/progress` is untouched by this self-check.
+    if stubs {
+        ok &= verify_stubs(root, style);
+    }
     println!();
     if ok {
         println!("{}", style.green("verify: every stage passes against the reference solutions."));
@@ -772,6 +775,57 @@ fn verify(root: &PathBuf, style: &Style, verbose: bool) -> bool {
         println!("{}", style.red("verify: FAILURES — the course itself is broken, see above."));
     }
     ok
+}
+
+/// Course-CI complement to `verify`: with the labs PRISTINE (no student code),
+/// every stage must FAIL. A stage that passes against the untouched stubs has
+/// a vacuous test suite — it would grade itself the moment the course ships.
+/// Only meaningful on a clean checkout; a student's implemented stages
+/// legitimately pass, so this is behind the explicit `--stubs` flag.
+fn verify_stubs(root: &PathBuf, style: &Style) -> bool {
+    println!();
+    println!(
+        "{}",
+        style.bold("Stub self-check: every stage must FAIL on the untouched stubs")
+    );
+    println!(
+        "  {}",
+        style.dim("(course CI only — meaningless once you start implementing labs)")
+    );
+    let mut vacuous: Vec<String> = Vec::new();
+    for m in MODULES {
+        print!("  module {} ({} stages) … ", m.id, m.stages.len());
+        let _ = std::io::Write::flush(&mut std::io::stdout());
+        let mut bad_here = 0;
+        for stage in m.stages {
+            let (passes_on_stub, _) = run_stage(root, m, stage.test_target, false);
+            if passes_on_stub {
+                vacuous.push(format!("module {} / {}", m.id, stage.test_target));
+                bad_here += 1;
+            }
+        }
+        if bad_here == 0 {
+            println!("{}", style.green("✓ all fail (good)"));
+        } else {
+            println!("{}", style.red(&format!("✗ {bad_here} stage(s) PASS on stubs")));
+        }
+    }
+    if vacuous.is_empty() {
+        println!(
+            "{}",
+            style.green("stubs: every stage fails until implemented — no vacuous suites.")
+        );
+        true
+    } else {
+        for v in &vacuous {
+            println!("    {} {}", style.red("vacuous:"), v);
+        }
+        println!(
+            "{}",
+            style.red("stubs: the stages above pass with NO student code — their suites don't bite.")
+        );
+        false
+    }
 }
 
 /// Parse the graduated hints for one stage out of a module's `hints.md`.
@@ -1124,6 +1178,7 @@ fn main() -> ExitCode {
     let mut hint_flag = false;
     let mut solutions = false;
     let mut verbose = false;
+    let mut stubs = false;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -1144,6 +1199,7 @@ fn main() -> ExitCode {
                 }
             }
             "--solutions" => solutions = true,
+            "--stubs" => stubs = true,
             "--verbose" | "-v" => verbose = true,
             "--help" | "-h" => {
                 print_help();
@@ -1171,7 +1227,7 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Some("verify") => {
-            if verify(&root, &style, verbose) {
+            if verify(&root, &style, verbose, stubs) {
                 ExitCode::SUCCESS
             } else {
                 ExitCode::FAILURE
@@ -1379,6 +1435,8 @@ FLAGS:
     --stage, -s <n>    run only stage n of the chosen module
     --hint [n]         show hint n for the chosen stage (with -s), gentlest first
     --solutions        run lab tests against the reference solutions
+    --stubs            with verify: also require every stage to FAIL on the
+                       pristine stubs (course CI — needs a clean checkout)
     --verbose, -v      show full cargo output on failure
 
 EXAMPLES:
