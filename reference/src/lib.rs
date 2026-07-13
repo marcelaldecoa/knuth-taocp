@@ -30,3 +30,4 @@ pub mod m19_float;
 pub mod m20_networks;
 pub mod m21_boolean;
 pub mod m22_hamilton;
+pub mod m23_csp;

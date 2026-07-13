@@ -641,7 +641,7 @@ pub const MODULES: &[Module] = &[
         id: "22",
         dir: "module-22-hamilton",
         lab_crate: "lab-22-hamilton",
-        title: "Hamiltonian Paths and Constraint Satisfaction",
+        title: "Hamiltonian Paths and Cycles",
         source: "Toward Vol. 4C, §7.2.2.4 (pre-fascicles)",
         stages: &[
             Stage {
@@ -663,6 +663,35 @@ pub const MODULES: &[Module] = &[
                 test_target: "stage_04_held_karp",
                 title: "Held–Karp: shortest Hamiltonian path by bitmask DP",
                 algorithm: "§7.2.2.4 (dynamic programming)",
+            },
+        ],
+    },
+    Module {
+        id: "23",
+        dir: "module-23-csp",
+        lab_crate: "lab-23-csp",
+        title: "Constraint Satisfaction",
+        source: "Toward Vol. 4C, §7.2.2.3 (Fascicle 7)",
+        stages: &[
+            Stage {
+                test_target: "stage_01_model",
+                title: "The CSP model and basic backtracking",
+                algorithm: "§7.2.2.3 & Algorithm 7.2.2B",
+            },
+            Stage {
+                test_target: "stage_02_lookahead",
+                title: "Forward checking and MRV ordering",
+                algorithm: "§7.2.2.3 lookahead",
+            },
+            Stage {
+                test_target: "stage_03_ac3",
+                title: "Arc consistency (AC-3)",
+                algorithm: "§7.2.2.3 consistency",
+            },
+            Stage {
+                test_target: "stage_04_sat_encoding",
+                title: "Translating CSP to SAT",
+                algorithm: "§7.2.2.3 ↔ §7.2.2.2",
             },
         ],
     },

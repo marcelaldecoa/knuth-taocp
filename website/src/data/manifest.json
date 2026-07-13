@@ -295,13 +295,25 @@
         {
           "id": "22",
           "dir": "module-22-hamilton",
-          "title": "Hamiltonian Paths and Constraint Satisfaction",
+          "title": "Hamiltonian Paths and Cycles",
           "source": "Toward Vol. 4C, §7.2.2.4 (pre-fascicles)",
           "stages": [
             { "title": "Hamiltonian paths by backtracking", "algorithm": "§7.2.2.4", "test_target": "stage_01_backtrack" },
             { "title": "Warnsdorff's heuristic: the knight's tour", "algorithm": "§7.2.2.4", "test_target": "stage_02_warnsdorff" },
             { "title": "Hamiltonian cycles on the hypercube are Gray codes", "algorithm": "§7.2.1.1 ↔ §7.2.2.4", "test_target": "stage_03_gray_cycles" },
             { "title": "Held–Karp: shortest Hamiltonian path by bitmask DP", "algorithm": "§7.2.2.4 (dynamic programming)", "test_target": "stage_04_held_karp" }
+          ]
+        },
+        {
+          "id": "23",
+          "dir": "module-23-csp",
+          "title": "Constraint Satisfaction",
+          "source": "Toward Vol. 4C, §7.2.2.3 (Fascicle 7)",
+          "stages": [
+            { "title": "The CSP model and basic backtracking", "algorithm": "§7.2.2.3 & Algorithm 7.2.2B", "test_target": "stage_01_model" },
+            { "title": "Forward checking and MRV ordering", "algorithm": "§7.2.2.3 lookahead", "test_target": "stage_02_lookahead" },
+            { "title": "Arc consistency (AC-3)", "algorithm": "§7.2.2.3 consistency", "test_target": "stage_03_ac3" },
+            { "title": "Translating CSP to SAT", "algorithm": "§7.2.2.3 ↔ §7.2.2.2", "test_target": "stage_04_sat_encoding" }
           ]
         }
       ]

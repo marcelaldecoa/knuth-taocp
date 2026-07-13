@@ -1,0 +1,11 @@
+[package]
+name = "lab-23-csp"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+taocp-reference = { path = "../../reference", optional = true }
+
+[features]
+# ./grade verify runs the lab test suite against the reference solutions.
+solutions = ["dep:taocp-reference"]
